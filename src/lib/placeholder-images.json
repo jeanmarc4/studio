@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-background",
+      "description": "Abstract background for the hero section.",
+      "imageUrl": "https://images.unsplash.com/photo-1578496779937-3815e442abed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMG1lZGljYWx8ZW58MHx8fHwxNzYyOTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract medical"
+    },
+    {
+      "id": "doctor-1",
+      "description": "Avatar for Dr. Evelyn Reed",
+      "imageUrl": "https://images.unsplash.com/photo-1683348858689-f4e10994804d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkb2N0b3IlMjB3b21hbnxlbnwwfHx8fDE3NjI5NjkxMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "doctor woman"
+    },
+    {
+      "id": "doctor-2",
+      "description": "Avatar for Dr. Marcus Thorne",
+      "imageUrl": "https://images.unsplash.com/photo-1612363584451-cd060fb62018?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkb2N0b3IlMjBtYW58ZW58MHx8fHwxNzYyOTI3ODA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "doctor man"
+    },
+    {
+      "id": "doctor-3",
+      "description": "Avatar for Dr. Lena Petrova",
+      "imageUrl": "https://images.unsplash.com/photo-1612276529731-4b21494e6d71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxkb2N0b3IlMjBwZXJzb258ZW58MHx8fHwxNzYyOTQxODU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "doctor person"
+    },
+    {
+      "id": "doctor-4",
+      "description": "Avatar for Dr. Samuel Chen",
+      "imageUrl": "https://images.unsplash.com/photo-1758691461516-7e716e0ca135?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkb2N0b3IlMjBzbWlsZXxlbnwwfHx8fDE3NjMwMDQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "doctor smile"
+    },
+    {
+      "id": "wellness-1",
+      "description": "Image for mindfulness article",
+      "imageUrl": "https://images.unsplash.com/photo-1526916027372-0c0852cef5d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWVkaXRhdGlvbiUyMG5hdHVyZXxlbnwwfHx8fDE3NjI5Mzc2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "meditation nature"
+    },
+    {
+      "id": "wellness-2",
+      "description": "Image for healthy eating article",
+      "imageUrl": "https://images.unsplash.com/photo-1493770348161-369560ae357d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8aGVhbHRoeSUyMGZvb2R8ZW58MHx8fHwxNzYyOTE5MDA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "healthy food"
+    },
+    {
+      "id": "wellness-3",
+      "description": "Image for yoga article",
+      "imageUrl": "https://images.unsplash.com/photo-1595275325877-cc22b1bd740c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx5b2dhJTIwc3Vuc2V0fGVufDB8fHx8MTc2MzAwNDY0OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "yoga sunset"
+    },
+    {
+      "id": "wellness-4",
+      "description": "Image for sleep hygiene article",
+      "imageUrl": "https://images.unsplash.com/photo-1688382575775-9aaa5025524e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwZWFjZWZ1bCUyMHNsZWVwfGVufDB8fHx8MTc2Mjk1NDM1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "peaceful sleep"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Generic user avatar for navigation",
+      "imageUrl": "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjI5MzU5MTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    }
+  ]
 }
