@@ -22,8 +22,8 @@ const SymptomCheckerOutputSchema = z.object({
 });
 export type SymptomCheckerOutput = z.infer<typeof SymptomCheckerOutputSchema>;
 
-export async function suggestNextSteps(input: SymptomCheckerInput): Promise<SymptomCheckerOutput> {
-  return symptomCheckerFlow(input);
+export async function suggestNextSteps(history: SymptomCheckerInput): Promise<SymptomCheckerOutput> {
+  return symptomCheckerFlow(history);
 }
 
 const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un professionnel de la santé. Les informations que je fournis ne constituent pas un avis médical. Veuillez consulter un médecin qualifié pour tout problème de santé ou avant de prendre toute décision médicale.";

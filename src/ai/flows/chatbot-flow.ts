@@ -11,21 +11,19 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// Le schéma d'entrée attend maintenant directement un tableau d'objets `history`.
 const ChatInputSchema = z.array(z.object({
   role: z.enum(['user', 'model']),
   content: z.string(),
 }));
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
-
 const ChatOutputSchema = z.object({
   response: z.string().describe("La réponse bienveillante et de soutien de l'IA."),
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-export async function mentalCareChat(input: ChatInput): Promise<ChatOutput> {
-  return mentalCareChatFlow(input);
+export async function mentalCareChat(history: ChatInput): Promise<ChatOutput> {
+  return mentalCareChatFlow(history);
 }
 
 const mentalCareChatFlow = ai.defineFlow(
@@ -34,7 +32,7 @@ const mentalCareChatFlow = ai.defineFlow(
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async (history) => { // L'entrée 'history' est maintenant directement le tableau.
+  async (history) => {
     const { text } = await ai.generate({
       system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 

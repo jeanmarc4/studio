@@ -49,17 +49,18 @@ export function MentalCareView() {
         if (!input.trim() || !user) return;
 
         const userMessage: Message = { role: 'user', text: input };
-        setMessages(prev => [...prev, userMessage]);
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
         setInput('');
         setIsLoading(true);
 
-        const historyForApi = [...messages, userMessage].map(msg => ({
+        const historyForApi = newMessages.map(msg => ({
             role: msg.role,
             content: msg.text,
         }));
 
         try {
-            const result = await mentalCareChat(historyForApi); // On envoie directement le tableau
+            const result = await mentalCareChat(historyForApi);
             const modelMessage: Message = { role: 'model', text: result.response };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error) {

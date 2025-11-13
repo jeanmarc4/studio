@@ -41,11 +41,12 @@ export default function SymptomCheckerPage() {
         if (!input.trim()) return;
 
         const userMessage: Message = { role: 'user', text: input };
-        setMessages(prev => [...prev, userMessage]);
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
         setInput('');
         setIsLoading(true);
 
-        const historyForApi = [...messages, userMessage].map(msg => ({
+        const historyForApi = newMessages.map(msg => ({
             role: msg.role,
             content: msg.text,
         }));
