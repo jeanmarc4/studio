@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from 'next/navigation';
-import { collection, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserManagement } from "./components/user-management";
@@ -11,7 +11,7 @@ import { Dashboard } from "./components/dashboard";
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from '@/docs/backend-documentation';
-import { deleteDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { deleteDocumentNonBlocking, updateDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { AddUserDialog } from "./components/add-user-dialog";
 
 export default function AdminPage() {
@@ -50,6 +50,14 @@ export default function AdminPage() {
   }, [firestore]);
 
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
+
+  const handleAddUser = (newUser: Omit<User, "id">) => {
+    if (!firestore) return;
+    const usersCollection = collection(firestore, 'users');
+    // In a real app, you would create an auth user first and get the UID.
+    // For this example, we'll use a placeholder ID and assume auth is handled separately.
+    addDocumentNonBlocking(usersCollection, newUser);
+  };
 
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
@@ -101,6 +109,11 @@ export default function AdminPage() {
                   <TabsTrigger value="users">Gestion des utilisateurs</TabsTrigger>
                   <TabsTrigger value="roles">Configuration des rôles</TabsTrigger>
                 </TabsList>
+                 <div className="ml-auto flex items-center gap-2">
+                  <Button size="sm" onClick={() => setIsAddUserDialogOpen(true)}>
+                    Ajouter un utilisateur
+                  </Button>
+                </div>
               </div>
               <TabsContent value="dashboard">
                 <Dashboard users={users} areUsersLoading={areUsersLoading} />
@@ -120,6 +133,11 @@ export default function AdminPage() {
           </main>
         </div>
       </div>
+      <AddUserDialog 
+        isOpen={isAddUserDialogOpen}
+        onOpenChange={setIsAddUserDialogOpen}
+        onUserAdd={handleAddUser}
+      />
     </>
   );
 }

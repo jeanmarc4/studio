@@ -77,6 +77,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
       title: "Utilisateur ajouté",
       description: `${values.firstName} ${values.lastName} a été ajouté à la plateforme.`,
     });
+    form.reset();
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -92,7 +93,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
         <DialogHeader>
           <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
           <DialogDescription>
-            Remplissez les détails pour ajouter un nouvel utilisateur.
+            Remplissez les détails pour ajouter un nouvel utilisateur. Notez que cela ne crée pas de compte d'authentification pour l'instant.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
