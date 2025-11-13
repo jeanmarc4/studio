@@ -80,8 +80,8 @@ export const wellnessArticles = [
 
 export const mainNav: NavItem[] = [
   {
-    title: "Mes Médecins",
-    href: "/my-health",
+    title: "Mes Rendez-vous",
+    href: "/my-appointments",
   },
     {
     title: "Profil",

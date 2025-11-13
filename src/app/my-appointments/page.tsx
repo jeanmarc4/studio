@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CalendarOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { MyDoctorsList } from '@/app/my-health/components/my-doctors-list';
+import { MyDoctorsList } from './components/my-doctors-list';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
@@ -82,7 +82,7 @@ export default function MyAppointmentsPage() {
   }, [appointments, firestore, areAppointmentsLoading]);
 
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return (
        <div className="container mx-auto px-4 py-8">
          <Skeleton className="h-12 w-1/3 mb-8" />
@@ -131,13 +131,14 @@ export default function MyAppointmentsPage() {
                         <CalendarOff className="mx-auto h-12 w-12 text-muted-foreground" />
                         <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun rendez-vous trouvé</h3>
                         <p className="mt-2 text-sm text-muted-foreground">Vous n'avez pas encore de rendez-vous prévus.</p>
-                        <Button asChild className="mt-6">
+                        <Button asChild className="mt-6" disabled>
                             <Link href="/directory">Prendre un rendez-vous</Link>
                         </Button>
                     </div>
                 )}
             </main>
             <aside className="lg:col-span-1">
+                 <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Mes Médecins</h2>
                 <div className="sticky top-24">
                      <MyDoctorsList />
                 </div>
