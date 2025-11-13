@@ -16,6 +16,7 @@ import { AddDoctorDialog } from './components/add-doctor-dialog';
 import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { v4 as uuidv4 } from 'uuid';
 import { useProfile } from '@/hooks/use-profile';
+import { AddAppointmentDialog } from './components/add-appointment-dialog';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
@@ -31,6 +32,7 @@ export default function MyAppointmentsPage() {
   const [appointmentsWithProf, setAppointmentsWithProf] = useState<AppointmentWithProfessional[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [isAddDoctorDialogOpen, setIsAddDoctorDialogOpen] = useState(false);
+  const [isAddAppointmentDialogOpen, setIsAddAppointmentDialogOpen] = useState(false);
 
 
   // Redirect if user is not logged in
@@ -65,6 +67,21 @@ export default function MyAppointmentsPage() {
     };
     addDocumentNonBlocking(appointmentRef, dummyAppointment);
   };
+
+  const handleAddAppointment = (values: { medicalProfessionalId: string; dateTime: Date; reason: string; }) => {
+    if (!firestore || !user || !activeProfile) return;
+
+    const newAppointment = {
+        ...values,
+        userId: user.uid,
+        profileId: activeProfile.id,
+        dateTime: values.dateTime.toISOString(),
+        status: 'scheduled' as const,
+    };
+
+    const appointmentRef = collection(firestore, 'users', user.uid, 'appointments');
+    addDocumentNonBlocking(appointmentRef, newAppointment);
+  }
 
   // Memoize the query to fetch user's appointments
   const appointmentsQuery = useMemoFirebase(() => {
@@ -139,12 +156,20 @@ export default function MyAppointmentsPage() {
     <>
         <div className="container mx-auto px-4 py-8">
         <header className="mb-8 text-center sm:text-left">
-            <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-              Espace Santé de {activeProfile.name}
-            </h1>
-            <p className="mt-2 text-lg text-muted-foreground font-body">
-            Consultez vos rendez-vous et la liste de vos professionnels de santé.
-            </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
+                Espace Santé de {activeProfile.name}
+              </h1>
+              <p className="mt-2 text-lg text-muted-foreground font-body">
+              Consultez vos rendez-vous et la liste de vos professionnels de santé.
+              </p>
+            </div>
+            <Button onClick={() => setIsAddAppointmentDialogOpen(true)} size="lg" className="shrink-0">
+              <PlusCircle className="mr-2" />
+              Ajouter un RDV
+            </Button>
+          </div>
         </header>
 
             <div className="grid gap-12 lg:grid-cols-3">
@@ -167,8 +192,8 @@ export default function MyAppointmentsPage() {
                             <CalendarOff className="mx-auto h-12 w-12 text-muted-foreground" />
                             <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun rendez-vous trouvé</h3>
                             <p className="mt-2 text-sm text-muted-foreground">Vous n'avez pas encore de rendez-vous prévus.</p>
-                            <Button asChild className="mt-6" disabled>
-                                <Link href="/directory">Prendre un rendez-vous</Link>
+                            <Button onClick={() => setIsAddAppointmentDialogOpen(true)} className="mt-6">
+                                Ajouter un rendez-vous
                             </Button>
                         </div>
                     )}
@@ -199,6 +224,11 @@ export default function MyAppointmentsPage() {
             onOpenChange={setIsAddDoctorDialogOpen}
             onAddDoctor={handleAddDoctor}
       />
+      <AddAppointmentDialog
+        isOpen={isAddAppointmentDialogOpen}
+        onOpenChange={setIsAddAppointmentDialogOpen}
+        onAddAppointment={handleAddAppointment}
+       />
     </>
   );
 }
