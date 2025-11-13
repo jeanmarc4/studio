@@ -4,15 +4,18 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Sparkles, Loader2, AlertTriangle, Lightbulb } from "lucide-react";
+import { Sparkles, Loader2, AlertTriangle, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import { aiSymptomChecker, AISymptomCheckerOutput } from "@/ai/ai-symptom-checker";
+import { useFirebase } from "@/firebase";
+import { useDoc, useMemoFirebase } from "@/firebase/firestore/use-doc";
+import { doc } from "firebase/firestore";
+import type { User } from "@/docs/backend-documentation";
 
 const formSchema = z.object({
   symptoms: z.string().min(10, {
@@ -24,6 +27,14 @@ const formSchema = z.object({
 export function SymptomCheckerForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AISymptomCheckerOutput | null>(null);
+  const { user, isUserLoading, firestore } = useFirebase();
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,6 +51,9 @@ export function SymptomCheckerForm() {
     setIsLoading(false);
   }
 
+  const isPremiumOrAdmin = userProfile?.role === 'Premium' || userProfile?.role === 'Admin';
+  const isFeatureLocked = !isUserLoading && !isProfileLoading && !isPremiumOrAdmin;
+
   return (
     <>
       <Card className="max-w-2xl mx-auto">
@@ -50,37 +64,48 @@ export function SymptomCheckerForm() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="symptoms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Symptômes</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Ex : 'J'ai mal à la gorge, le nez qui coule et une légère fièvre depuis 2 jours.'"
-                        className="min-h-[120px] text-base"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} className="w-full text-lg py-6 bg-accent hover:bg-accent/90 text-accent-foreground">
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Analyse en cours...
-                  </>
-                ) : (
-                  "Analyser les symptômes"
-                )}
-              </Button>
-            </form>
-          </Form>
+          {isFeatureLocked ? (
+             <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-700">
+                <Lock className="h-4 w-4 text-blue-500" />
+                <AlertTitle className="text-blue-800 dark:text-blue-300">Fonctionnalité Premium</AlertTitle>
+                <AlertDescription className="text-blue-700 dark:text-blue-400">
+                    Le vérificateur de symptômes IA est disponible uniquement pour les membres Premium et Admin. Passez à un forfait supérieur pour accéder à cette fonctionnalité.
+                </AlertDescription>
+            </Alert>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="symptoms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Symptômes</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Ex : 'J'ai mal à la gorge, le nez qui coule et une légère fièvre depuis 2 jours.'"
+                          className="min-h-[120px] text-base"
+                          {...field}
+                          disabled={isLoading || isUserLoading || isProfileLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={isLoading || isUserLoading || isProfileLoading} className="w-full text-lg py-6 bg-accent hover:bg-accent/90 text-accent-foreground">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Analyse en cours...
+                    </>
+                  ) : (
+                    "Analyser les symptômes"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
 

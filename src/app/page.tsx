@@ -5,12 +5,14 @@ import {
   Sparkles,
   Leaf,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getImage } from "@/lib/placeholder-images";
 import { SosAlert } from "@/components/sos-alert";
+import { Badge } from "@/components/ui/badge";
 
 
 const featureCards = [
@@ -21,6 +23,7 @@ const featureCards = [
     href: "/directory",
     bgColor: "bg-blue-100 dark:bg-blue-900/50",
     iconColor: "text-blue-500",
+    isPremium: false,
   },
   {
     icon: Sparkles,
@@ -29,6 +32,7 @@ const featureCards = [
     href: "/symptom-checker",
     bgColor: "bg-purple-100 dark:bg-purple-900/50",
     iconColor: "text-purple-500",
+    isPremium: true,
   },
   {
     icon: Leaf,
@@ -37,6 +41,7 @@ const featureCards = [
     href: "/wellness",
     bgColor: "bg-green-100 dark:bg-green-900/50",
     iconColor: "text-green-500",
+    isPremium: false,
   },
 ];
 
@@ -76,11 +81,19 @@ export default function Home() {
           <div className="grid gap-6 md:grid-cols-3">
             {featureCards.map((feature) => (
               <Card key={feature.title} className="flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-xl">
-                  <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                  <CardHeader className="flex flex-row items-start gap-4 pb-4">
                     <div className={`p-3 rounded-full ${feature.bgColor}`}>
                       <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
                     </div>
-                    <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
+                    <div className="flex-1">
+                      <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
+                      {feature.isPremium && (
+                        <Badge variant="secondary" className="mt-2 bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700">
+                          <ShieldCheck className="mr-1 h-3 w-3" />
+                          Premium
+                        </Badge>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className="flex-grow">
                     <CardDescription className="text-base font-body">
