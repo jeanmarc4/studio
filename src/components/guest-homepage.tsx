@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, UserCheck, BotIcon, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { PayPalSubscriptionButton } from "./paypal-subscription-button";
 
 const gratuitFeatures = [
     "Gestion des rendez-vous",
@@ -146,9 +147,7 @@ export function GuestHomepage() {
                     </ul>
                 </CardContent>
                 <CardContent>
-                     <Button asChild className="w-full">
-                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">S'abonner via PayPal</a>
-                    </Button>
+                     <PayPalSubscriptionButton planId="P-4P647554GL1336123NEKZ2HI" />
                 </CardContent>
             </Card>
 
@@ -171,9 +170,8 @@ export function GuestHomepage() {
                     </ul>
                 </CardContent>
                 <CardContent>
-                    <Button asChild className="w-full" variant="outline">
-                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">S'abonner via PayPal</a>
-                    </Button>
+                    {/* Pour le plan premium, nous utilisons un ID de plan différent. Pour la démo, on peut utiliser un ID fictif ou le même */}
+                    <PayPalSubscriptionButton planId="P-PREMIUM-PLAN-ID" />
                 </CardContent>
             </Card>
             </div>
@@ -182,7 +180,5 @@ export function GuestHomepage() {
     </main>
   );
 }
-
-    
 
     
