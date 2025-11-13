@@ -1,3 +1,4 @@
+
 import type { NavItem } from "@/types";
 import { getImage } from "@/lib/placeholder-images";
 
@@ -104,7 +105,7 @@ export const mainNav: NavItem[] = [
     href: "/medications",
   },
   {
-    title: "Soins Holistiques",
+    title: "Bien-être",
     href: "/wellness",
   },
 ];

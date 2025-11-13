@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArticleView } from './components/article-view';
 import { ForumView } from './components/forum-view';
+import { MentalCareView } from './components/mental-care-view';
 
 export default function WellnessPage() {
     const [activeTab, setActiveTab] = useState("articles");
@@ -21,6 +22,7 @@ export default function WellnessPage() {
                 <TabsList>
                     <TabsTrigger value="articles">Articles</TabsTrigger>
                     <TabsTrigger value="forum">Forum</TabsTrigger>
+                    <TabsTrigger value="mental-care">Soutien Moral</TabsTrigger>
                 </TabsList>
             </div>
             <TabsContent value="articles" className="mt-6">
@@ -28,6 +30,9 @@ export default function WellnessPage() {
             </TabsContent>
             <TabsContent value="forum" className="mt-6">
                 <ForumView />
+            </TabsContent>
+            <TabsContent value="mental-care" className="mt-6">
+                <MentalCareView />
             </TabsContent>
         </Tabs>
       </div>

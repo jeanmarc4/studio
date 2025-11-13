@@ -31,7 +31,7 @@
         "role": {
           "type": "string",
           "description": "The role or plan of the user.",
-          "enum": ["Standard", "Premium", "Admin"]
+          "enum": ["Gratuit", "Standard", "Premium", "Admin", "Pro", "Aidant"]
         }
       },
       "required": [
@@ -42,330 +42,61 @@
         "role"
       ]
     },
-    "Admin": {
+    "MedicalRecord": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Admin",
+      "title": "Medical Record",
       "type": "object",
-      "description": "Represents an administrator user of the SanteConnect application.",
+      "description": "Represents a user's comprehensive medical record.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the admin entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:1 Admin)"
-        },
-        "role": {
-          "type": "string",
-          "description": "The role of the administrator (e.g., superadmin, editor)."
-        },
-        "permissions": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "vaccinations": {
           "type": "array",
-          "description": "List of permisions for the admin user.",
+          "items": { "type": "object", "properties": { "name": { "type": "string" }, "date": { "type": "string", "format": "date-time" } } }
+        },
+        "consultationHistory": {
+          "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": { "date": { "type": "string", "format": "date-time" }, "doctor": { "type": "string" }, "summary": { "type": "string" } }
           }
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "role"
-      ]
+      "required": ["id", "userId"]
     },
-    "MedicalProfessional": {
+    "Reminder": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "MedicalProfessional",
+      "title": "Reminder",
       "type": "object",
-      "description": "Represents a doctor, pharmacy, or other healthcare provider.",
+      "description": "Represents a medication or appointment reminder.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the medical professional entity."
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the medical professional or institution."
-        },
-        "type": {
-          "type": "string",
-          "description": "The type of medical professional (e.g., doctor, pharmacy)."
-        },
-        "specialty": {
-          "type": "string",
-          "description": "The medical specialty of the professional (e.g., cardiology, pediatrics)."
-        },
-        "address": {
-          "type": "string",
-          "description": "The address of the medical professional."
-        },
-        "phone": {
-          "type": "string",
-          "description": "The phone number of the medical professional."
-        },
-        "location": {
-          "type": "string",
-          "description": "The GPS coordinates for the medical professional."
-        }
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["medication", "appointment"] },
+        "title": { "type": "string" },
+        "dateTime": { "type": "string", "format": "date-time" },
+        "isSent": { "type": "boolean" }
       },
-      "required": [
-        "id",
-        "name",
-        "type"
-      ]
+      "required": ["id", "userId", "type", "title", "dateTime"]
     },
-    "Appointment": {
+    "ChatMessage": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Appointment",
+      "title": "Chat Message",
       "type": "object",
-      "description": "Represents a scheduled appointment between a user and a medical professional.",
+      "description": "Represents a single message in an AI chat session.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the appointment entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Appointment)"
-        },
-        "medicalProfessionalId": {
-          "type": "string",
-          "description": "Reference to MedicalProfessional. (Relationship: MedicalProfessional 1:N Appointment)"
-        },
-        "dateTime": {
-          "type": "string",
-          "description": "The date and time of the appointment.",
-          "format": "date-time"
-        },
-        "reason": {
-          "type": "string",
-          "description": "The reason for the appointment."
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the appointment (e.g., scheduled, completed, canceled)."
-        }
+        "id": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "id",
-        "userId",
-        "medicalProfessionalId",
-        "dateTime",
-        "status"
-      ]
-    },
-    "HolisticContent": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "HolisticContent",
-      "type": "object",
-      "description": "Represents holistic wellness content.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the holistic content entity."
-        },
-        "title": {
-          "type": "string",
-          "description": "The title of the holistic content."
-        },
-        "type": {
-          "type": "string",
-          "description": "The type of holistic content (e.g., article, video)."
-        },
-        "url": {
-          "type": "string",
-          "description": "The URL of the holistic content.",
-          "format": "uri"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the content"
-        }
-      },
-      "required": [
-        "id",
-        "title",
-        "type",
-        "url",
-        "description"
-      ]
-    },
-    "EmergencyContact": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "EmergencyContact",
-      "type": "object",
-      "description": "Represents an emergency contact for a user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the emergency contact entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N EmergencyContact)"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the emergency contact."
-        },
-        "phone": {
-          "type": "string",
-          "description": "The phone number of the emergency contact."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "name",
-        "phone"
-      ]
-    },
-    "Medication": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Medication",
-      "type": "object",
-      "description": "Represents a medication for a user's schedule.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the medication entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Medication)"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the medication."
-        },
-        "dosage": {
-          "type": "string",
-          "description": "The dosage of the medication (e.g., '1 comprimé', '10mg')."
-        },
-        "intakeTimes": {
-          "type": "array",
-          "description": "List of times to take the medication (e.g., ['08:00', '20:00']).",
-          "items": {
-            "type": "string",
-            "format": "time"
-          }
-        },
-        "quantity": {
-            "type": "number",
-            "description": "Total quantity of the medication remaining."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "name",
-        "dosage",
-        "intakeTimes",
-        "quantity"
-      ]
-    },
-     "ExtractedMedication": {
-      "title": "ExtractedMedication",
-      "type": "object",
-      "description": "Represents a medication extracted from a prescription by the AI.",
-      "properties": {
-        "name": { "type": "string", "description": "The name of the medication." },
-        "dosage": { "type": "string", "description": "The dosage of the medication (e.g., '1 comprimé', '500mg')." },
-        "quantity": { "type": "number", "description": "Total quantity prescribed." },
-        "intakeTimes": {
-          "type": "array",
-          "description": "List of times to take the medication (e.g., ['matin', 'soir']). This is often textual.",
-          "items": { "type": "string" }
-        }
-      },
-      "required": ["name", "dosage"]
-    },
-    "Prescription": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Prescription",
-      "type": "object",
-      "description": "Represents a medical prescription uploaded by a user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the prescription entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Prescription)"
-        },
-        "doctorName": {
-            "type": "string",
-            "description": "The name of the doctor who issued the prescription."
-        },
-        "issueDate": {
-            "type": "string",
-            "description": "The date the prescription was issued.",
-            "format": "date-time"
-        },
-        "imageUrl": {
-            "type": "string",
-            "description": "URL of the uploaded prescription image.",
-            "format": "uri"
-        },
-        "status": {
-            "type": "string",
-            "description": "The processing status of the prescription.",
-            "enum": ["new", "processing", "processed", "error", "archived"]
-        },
-        "extractedMedications": {
-            "type": "array",
-            "description": "List of medications extracted from the prescription by the AI.",
-            "items": {
-                "$ref": "#/backend/entities/ExtractedMedication"
-            }
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "doctorName",
-        "issueDate",
-        "imageUrl",
-        "status"
-      ]
-    },
-    "ForumThread": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Forum Thread",
-      "type": "object",
-      "description": "Represents a discussion thread in the wellness forum.",
-      "properties": {
-        "id": { "type": "string", "description": "Unique identifier for the forum thread." },
-        "title": { "type": "string", "description": "The title of the thread." },
-        "content": { "type": "string", "description": "The initial content of the thread." },
-        "authorId": { "type": "string", "description": "The ID of the user who created the thread." },
-        "authorName": { "type": "string", "description": "The name of the user who created the thread." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the thread was created." },
-        "category": { "type": "string", "description": "The wellness category of the thread (e.g., 'Nutrition', 'Fitness')." }
-      },
-      "required": ["id", "title", "content", "authorId", "authorName", "createdAt", "category"]
-    },
-    "ForumPost": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Forum Post",
-      "type": "object",
-      "description": "Represents a single post or reply within a forum thread.",
-      "properties": {
-        "id": { "type": "string", "description": "Unique identifier for the forum post." },
-        "threadId": { "type": "string", "description": "The ID of the thread this post belongs to." },
-        "content": { "type": "string", "description": "The content of the post." },
-        "authorId": { "type": "string", "description": "The ID of the user who created the post." },
-        "authorName": { "type": "string", "description": "The name of the user who created the post." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the post was created." }
-      },
-      "required": ["id", "threadId", "content", "authorId", "authorName", "createdAt"]
+      "required": ["id", "role", "content", "timestamp"]
     }
   },
   "auth": {
     "providers": [
-      "password"
+      "password",
+      "google.com"
     ]
   },
   "firestore": {
@@ -374,179 +105,41 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles. Path-based ownership enforces that only the authenticated user can access their profile data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user.  Corresponds to the Firebase Auth UID."
-            }
-          ]
+          "schema": { "$ref": "#/backend/entities/User" },
+          "description": "Stores user profiles."
         }
       },
       {
-        "path": "/users/{userId}/appointments/{appointmentId}",
+        "path": "/records/{recordId}",
         "definition": {
-          "entityName": "Appointment",
-          "schema": {
-            "$ref": "#/backend/entities/Appointment"
-          },
-          "description": "Stores appointments for a specific user. Path-based ownership ensures only the user can manage their appointments.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "appointmentId",
-              "description": "The unique identifier of the appointment."
-            }
-          ]
+          "entityName": "MedicalRecord",
+          "schema": { "$ref": "#/backend/entities/MedicalRecord" },
+          "description": "Stores medical records for users. Rules will enforce that a user can only access their own record."
         }
       },
       {
-        "path": "/users/{userId}/emergencyContacts/{contactId}",
+        "path": "/reminders/{reminderId}",
         "definition": {
-          "entityName": "EmergencyContact",
-          "schema": {
-            "$ref": "#/backend/entities/EmergencyContact"
-          },
-          "description": "Stores emergency contacts for a specific user. Path-based ownership guarantees only the user can manage their contacts.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "contactId",
-              "description": "The unique identifier of the emergency contact."
-            }
-          ]
+          "entityName": "Reminder",
+          "schema": { "$ref": "#/backend/entities/Reminder" },
+          "description": "Stores all reminders. Rules will enforce that a user can only access their own reminders."
         }
       },
       {
-        "path": "/users/{userId}/medications/{medicationId}",
+        "path": "/chat_sessions/{userId}/{sessionId}/messages/{messageId}",
         "definition": {
-          "entityName": "Medication",
-          "schema": {
-            "$ref": "#/backend/entities/Medication"
-          },
-          "description": "Stores medications for a specific user. Path-based ownership ensures only the user can manage their medication schedule.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "medicationId",
-              "description": "The unique identifier of the medication."
-            }
-          ]
-        }
-      },
-       {
-        "path": "/users/{userId}/prescriptions/{prescriptionId}",
-        "definition": {
-          "entityName": "Prescription",
-          "schema": {
-            "$ref": "#/backend/entities/Prescription"
-          },
-          "description": "Stores prescriptions for a specific user. Path-based ownership ensures only the user can manage their prescriptions.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "prescriptionId",
-              "description": "The unique identifier of the prescription."
-            }
-          ]
+          "entityName": "ChatMessage",
+          "schema": { "$ref": "#/backend/entities/ChatMessage" },
+          "description": "Stores messages for a specific user's chat session. Path-based ownership."
         }
       },
       {
-        "path": "/medicalProfessionals/{medicalProfessionalId}",
+        "path": "/admin/{docId}",
         "definition": {
-          "entityName": "MedicalProfessional",
-          "schema": {
-            "$ref": "#/backend/entities/MedicalProfessional"
-          },
-          "description": "Stores profiles of medical professionals.  Admin roles control creation/modification.",
-          "params": [
-            {
-              "name": "medicalProfessionalId",
-              "description": "The unique identifier of the medical professional."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/holisticContent/{holisticContentId}",
-        "definition": {
-          "entityName": "HolisticContent",
-          "schema": {
-            "$ref": "#/backend/entities/HolisticContent"
-          },
-          "description": "Stores holistic wellness content. Admin roles control creation/modification.",
-          "params": [
-            {
-              "name": "holisticContentId",
-              "description": "The unique identifier of the holistic content."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/roles_admin/{userId}",
-        "definition": {
-          "entityName": "Admin",
-          "schema": {
-            "$ref": "#/backend/entities/Admin"
-          },
-          "description": "Marks a user as an admin.  The *existence* of a document at this path grants admin privileges.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user who is an admin."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/forumThreads/{threadId}",
-        "definition": {
-          "entityName": "ForumThread",
-          "schema": { "$ref": "#/backend/entities/ForumThread" },
-          "description": "Stores wellness forum discussion threads. Publicly readable, but only authenticated users can create.",
-          "params": [
-            {
-              "name": "threadId",
-              "description": "The unique identifier of the forum thread."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/forumThreads/{threadId}/posts/{postId}",
-        "definition": {
-          "entityName": "ForumPost",
-          "schema": { "$ref": "#/backend/entities/ForumPost" },
-          "description": "Stores replies within a specific forum thread. Publicly readable, but only authenticated users can post replies.",
-          "params": [
-            {
-              "name": "threadId",
-              "description": "The unique identifier of the parent forum thread."
-            },
-            {
-              "name": "postId",
-              "description": "The unique identifier of the post/reply."
-            }
-          ]
+          "description": "General admin collection for platform supervision and statistics."
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the SanteConnect application, emphasizing secure access control, scalability, and maintainability. It leverages path-based ownership and denormalization to ensure Authorization Independence. The structure facilitates simple, robust, and easily debuggable security rules by adhering to the principles outlined in the prompt.\n\n**Authorization Independence and QAPs:**\n\n*   **Users Collection (`/users/{userId}`):**  User data is stored in a dedicated collection, enabling straightforward read/write rules based on `request.auth.uid`. The `userId` parameter in the path directly corresponds to the authenticated user's ID, providing clear ownership.\n*   **Appointments Subcollection (`/users/{userId}/appointments/{appointmentId}`):** Appointments are stored as a subcollection of users. This structure enforces that only the user can access their appointments.  This eliminates the need for complex `get()` calls in security rules.\n*   **Emergency Contacts Subcollection (`/users/{userId}/emergencyContacts/{contactId}`):** Storing emergency contacts as subcollections of users makes ownership explicit and ensures that only the user can manage their contacts.\n*   **Medical Professionals Collection (`/medicalProfessionals/{medicalProfessionalId}`):** Medical professionals are stored in a top-level collection, allowing easy listing and querying.  Security rules can control who can create/modify medical professional data (e.g., only admins).\n*   **Holistic Content Collection (`/holisticContent/{holisticContentId}`):** Holistic content is stored in a top-level collection, enabling listing and querying.  Security rules can control who can create/modify content (e.g., only admins).\n*   **Admin Roles Collection (`/roles_admin/{userId}`):** Administrative privileges are managed through the existence of documents in this collection. This 'existence over content' approach simplifies security rules for admin-only operations. The absence of custom claims reduces complexity and improves security.\n*   **Forum Collections:** The `/forumThreads` collection is top-level to allow all users to browse discussions. Replies are in a subcollection (`/posts/{postId}`) to keep threads organized. Security rules will allow any authenticated user to create content, but only the original author to delete it, promoting community interaction."
+    "reasoning": "This new structure aligns with the modular product vision. It separates data by domain (records, reminders, chat) rather than nesting everything under users. This will make it easier to build out features like Family or Pro accounts, as data access logic in security rules will be more flexible (e.g., an 'aidant' can be granted access to a specific user's records). Path-based ownership is still used where appropriate, like for chat sessions."
   }
 }
