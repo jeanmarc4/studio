@@ -17,6 +17,8 @@
  * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
  * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
  * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
+ * - /forumThreads/{threadId}: Publicly readable forum threads. Authenticated users can create/delete their own.
+ * - /forumThreads/{threadId}/posts/{postId}: Publicly readable replies. Authenticated users can create/delete their own.
  *
  * Key Security Decisions:
  * - User data is strictly private; listing all users is disallowed.
@@ -148,6 +150,35 @@ service cloud.firestore {
       allow update: if false; // Admin roles should not be updated, only created or deleted.
       allow delete: if isAdmin() && resource != null;
     }
+    
+    /**
+     * @description Secure forum threads. Any authenticated user can create a thread.
+     * @path /forumThreads/{threadId}
+     * @allow (read) Anyone can read forum threads.
+     * @allow (create) Any authenticated user can create a thread.
+     * @allow (delete) Only the author of the thread can delete it.
+     */
+    match /forumThreads/{threadId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+        allow update: if false; // Threads should not be updatable, only posts.
+        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    /**
+     * @description Secure forum posts/replies. Any authenticated user can create a post.
+     * @path /forumThreads/{threadId}/posts/{postId}
+     * @allow (read) Anyone can read posts.
+     * @allow (create) Any authenticated user can create a post.
+     * @allow (delete) Only the author of the post can delete it.
+     */
+    match /forumThreads/{threadId}/posts/{postId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+        allow update: if false;
+        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
 
     // Helper functions
 
