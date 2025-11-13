@@ -1,5 +1,5 @@
 
-import type { MedicalProfessional, Medication as MedicationSchema, Prescription as PrescriptionSchema, ForumThread as ForumThreadSchema, ForumPost as ForumPostSchema, User as UserSchema } from "@/docs/backend-documentation";
+import type { MedicalProfessional, Medication as MedicationSchema, Prescription as PrescriptionSchema, ForumThread as ForumThreadSchema, ForumPost as ForumPostSchema, User as UserSchema, Appointment as AppointmentSchema } from "@/docs/backend-documentation";
 import type { ExtractedMedication as ExtractedMedicationSchema } from "@/ai/flows/extract-medications-flow";
 
 export type NavItem = {
@@ -23,6 +23,8 @@ export type User = UserSchema;
 export type Medication = Omit<MedicationSchema, 'userId'> & { id: string };
 
 export type Prescription = Omit<PrescriptionSchema, 'userId'> & { id: string };
+
+export type Appointment = Omit<AppointmentSchema, 'userId'> & { id: string };
 
 export type ExtractedMedication = ExtractedMedicationSchema;
 
