@@ -14,7 +14,7 @@ import { z } from 'genkit';
 const SymptomCheckerInputSchema = z.object({
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
-    content: z.array(z.object({ text: z.string() })),
+    content: z.string(), // Le contenu est maintenant une simple chaîne de caractères
   })).describe("L'historique de la conversation jusqu'à présent."),
 });
 export type SymptomCheckerInput = z.infer<typeof SymptomCheckerInputSchema>;

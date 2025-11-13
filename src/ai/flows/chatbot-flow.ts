@@ -11,13 +11,15 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
+// Schéma d'entrée simplifié pour correspondre à la structure de message de base de Genkit.
 const ChatInputSchema = z.object({
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
-    content: z.array(z.object({ text: z.string() })),
+    content: z.string(), // Le contenu est maintenant une simple chaîne de caractères
   })).describe("L'historique de la conversation jusqu'à présent."),
 });
 export type ChatInput = z.infer<typeof ChatInputSchema>;
+
 
 const ChatOutputSchema = z.object({
   response: z.string().describe("La réponse bienveillante et de soutien de l'IA."),

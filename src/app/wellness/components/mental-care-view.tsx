@@ -55,7 +55,7 @@ export function MentalCareView() {
 
         const historyForApi = [...messages, userMessage].map(msg => ({
             role: msg.role,
-            content: [{ text: msg.text }],
+            content: msg.text, // Modifié pour être une chaîne de caractères simple
         }));
 
         try {
