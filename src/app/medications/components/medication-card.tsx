@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pill, Clock, AlertCircle, Trash2, Edit, Bell, Loader2, Volume2, PlayCircle, PauseCircle } from 'lucide-react';
+import { Pill, Clock, AlertCircle, Trash2, Edit, Bell, Loader2, Volume2, PlayCircle, PauseCircle, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Medication } from '@/types';
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { User } from '@/docs/backend-documentation';
 import { getVocalReminder } from '@/ai/flows/get-vocal-reminder-flow';
+import { explainMedication } from '@/ai/flows/explain-medication-flow';
 
 interface MedicationCardProps {
   medication: Medication;
@@ -35,6 +36,7 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [isExplaining, setIsExplaining] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
@@ -137,6 +139,35 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
         setIsLoadingAudio(false);
     }
   }
+
+  const handleExplainMedication = async () => {
+     if (!isPremiumOrAdmin) {
+        toast({
+            variant: "destructive",
+            title: "Fonctionnalité Premium",
+            description: "Passez à Premium pour obtenir des explications par l'IA."
+        })
+        return;
+    }
+    setIsExplaining(true);
+    try {
+        const result = await explainMedication({ medicationName: medication.name });
+        toast({
+            title: `À propos de ${medication.name}`,
+            description: result.explanation,
+            duration: 10000 // Longer duration for reading
+        })
+    } catch (error) {
+        console.error("Erreur lors de l'explication du médicament:", error);
+        toast({
+            variant: "destructive",
+            title: "Erreur de l'IA",
+            description: "Impossible d'obtenir une explication pour le moment."
+        })
+    } finally {
+        setIsExplaining(false);
+    }
+  }
   
   const getPremiumButtonIcon = () => {
     if (isLoadingAudio) {
@@ -174,8 +205,12 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
             </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between border-t pt-4">
-        <div className="flex gap-2">
+      <CardFooter className="grid grid-cols-2 gap-2 border-t pt-4">
+        <div className="flex flex-col gap-2">
+             <Button size="sm" variant="outline" onClick={handleExplainMedication} disabled={isExplaining || !isPremiumOrAdmin}>
+                {isExplaining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                Expliquer
+            </Button>
             <Button size="sm" variant="outline" onClick={handleStandardReminder}>
                 <Bell className="mr-2 h-4 w-4" /> Test Standard
             </Button>
@@ -184,14 +219,14 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
                 Test Premium
             </Button>
         </div>
-        <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={onEdit}>
-                <Edit className="h-4 w-4" />
+        <div className="flex flex-col justify-end items-end gap-2">
+            <Button variant="outline" onClick={onEdit}>
+                <Edit className="mr-2 h-4 w-4" /> Modifier
             </Button>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" disabled={isDeleting}>
-                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                    <Button variant="destructive" disabled={isDeleting}>
+                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Supprimer
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
