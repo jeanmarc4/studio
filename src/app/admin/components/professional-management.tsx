@@ -39,6 +39,7 @@ import {
 import type { MedicalProfessional } from "@/docs/backend-documentation";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EditProfessionalDialog } from "./edit-professional-dialog";
 
 interface ProfessionalManagementProps {
     professionals: MedicalProfessional[];
@@ -50,6 +51,8 @@ interface ProfessionalManagementProps {
 export function ProfessionalManagement({ professionals, onDeleteProfessional, onUpdateProfessional, isLoading }: ProfessionalManagementProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [professionalToDelete, setProfessionalToDelete] = useState<MedicalProfessional | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [professionalToEdit, setProfessionalToEdit] = useState<MedicalProfessional | null>(null);
   const { toast } = useToast();
 
   const handleDeleteClick = (prof: MedicalProfessional) => {
@@ -68,6 +71,22 @@ export function ProfessionalManagement({ professionals, onDeleteProfessional, on
     }
     setIsDeleteDialogOpen(false);
   };
+  
+  const handleEditClick = (prof: MedicalProfessional) => {
+    setProfessionalToEdit(prof);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleProfessionalUpdate = (data: Partial<MedicalProfessional>) => {
+    if (professionalToEdit?.id) {
+        onUpdateProfessional(professionalToEdit.id, data);
+        toast({
+            title: "Profil mis à jour",
+            description: `Les informations de ${data.name || professionalToEdit.name} ont été mises à jour.`
+        })
+    }
+  }
+
 
   return (
     <>
@@ -119,7 +138,7 @@ export function ProfessionalManagement({ professionals, onDeleteProfessional, on
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => { /* TODO: Implement edit */ }}>
+                          <DropdownMenuItem onClick={() => handleEditClick(prof)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier
                           </DropdownMenuItem>
@@ -154,6 +173,15 @@ export function ProfessionalManagement({ professionals, onDeleteProfessional, on
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {professionalToEdit && (
+        <EditProfessionalDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          professional={professionalToEdit}
+          onProfessionalUpdate={handleProfessionalUpdate}
+        />
+      )}
     </>
   );
 }

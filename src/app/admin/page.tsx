@@ -90,6 +90,12 @@ export default function AdminPage() {
     if (!firestore) return;
     deleteDocumentNonBlocking(doc(firestore, 'medicalProfessionals', professionalId));
   };
+  
+  const handleUpdateProfessional = (professionalId: string, data: Partial<MedicalProfessional>) => {
+    if (!firestore) return;
+    updateDocumentNonBlocking(doc(firestore, 'medicalProfessionals', professionalId), data);
+  };
+
 
   const isLoading = isUserLoading || isAdminRoleLoading;
 
@@ -145,7 +151,7 @@ export default function AdminPage() {
                  <ProfessionalManagement
                   professionals={professionals || []}
                   onDeleteProfessional={handleDeleteProfessional}
-                  onUpdateProfessional={() => {}} // TODO: Implement
+                  onUpdateProfessional={handleUpdateProfessional}
                   isLoading={areProfessionalsLoading}
                 />
               </TabsContent>
