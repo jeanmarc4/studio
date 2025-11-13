@@ -10,10 +10,12 @@
  *
  * Data Structure:
  * - /users/{userId}: User profile data, accessible only to the owning user.
+ * - /users/{userId}/profiles/{profileId}: Family profiles linked to the user, accessible only to that user.
  * - /users/{userId}/appointments/{appointmentId}: Appointments for a specific user, accessible only to that user.
  * - /users/{userId}/emergencyContacts/{contactId}: Emergency contacts for a specific user, accessible only to that user.
  * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
  * - /users/{userId}/prescriptions/{prescriptionId}: Prescriptions for a specific user, accessible only to that user.
+ * - /users/{userId}/vaccines/{vaccineId}: Vaccine records for a specific user, accessible only to that user.
  * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
  * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
  * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
@@ -45,65 +47,79 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      // isOwner check is correct for both create and update
       allow read: if isSignedIn() && isOwner(userId);
       allow list: if false; // Listing users is not permitted.
       allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
       allow update: if isSignedIn() && isOwner(userId) && resource.data.id == request.resource.data.id;
       allow delete: if isSignedIn() && isExistingOwner(userId);
+      
+      /**
+       * @description Secure family profiles. Only the parent user can manage their family profiles.
+       * @path /users/{userId}/profiles/{profileId}
+       * @principle Enforces document ownership for all operations on family profiles.
+       */
+      match /profiles/{profileId} {
+        allow read, write: if isSignedIn() && isOwner(userId);
+      }
+
+      /**
+       * @description Secure appointments for a specific user. Only the user can manage their appointments.
+       * @path /users/{userId}/appointments/{appointmentId}
+       * @allow (read, write) User with UID 'user123' can manage their own appointments.
+       * @deny (read, write) User with UID 'user456' cannot manage 'user123' appointments.
+       * @principle Enforces document ownership for all operations on appointments.
+       */
+      match /appointments/{appointmentId} {
+        allow read: if isSignedIn() && isOwner(userId);
+        allow list: if isSignedIn() && isOwner(userId);
+        allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
+        allow delete: if isSignedIn() && isExistingOwner(userId);
+      }
+
+      /**
+       * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
+       * @path /users/{userId}/emergencyContacts/{contactId}
+       * @allow (read, write) User with UID 'user123' can manage their own emergency contacts.
+       * @deny (read, write) User with UID 'user456' cannot manage 'user123' emergency contacts.
+       * @principle Enforces document ownership for all operations on emergency contacts.
+       */
+      match /emergencyContacts/{contactId} {
+        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+      }
+
+      /**
+       * @description Secure medications for a specific user. Only the user can manage their medication schedule.
+       * @path /users/{userId}/medications/{medicationId}
+       * @allow (read, write) User with UID 'user123' can manage their own medication schedule.
+       * @deny (read, write) User with UID 'user456' cannot manage 'user123' medication schedule.
+       * @principle Enforces document ownership for all operations on medications.
+       */
+      match /medications/{medicationId} {
+        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+      }
+
+       /**
+       * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
+       * @path /users/{userId}/prescriptions/{prescriptionId}
+       * @allow (read, write) User with UID 'user123' can manage their own prescriptions.
+       * @deny (read, write) User with UID 'user456' cannot manage 'user123' prescriptions.
+       * @principle Enforces document ownership for all operations on prescriptions.
+       */
+      match /prescriptions/{prescriptionId} {
+        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      
+      /**
+       * @description Secure vaccine records for a specific user. Only the user can manage their records.
+       * @path /users/{userId}/vaccines/{vaccineId}
+       * @principle Enforces document ownership for all operations on vaccine records.
+       */
+      match /vaccines/{vaccineId} {
+          allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+      }
     }
 
-    /**
-     * @description Secure appointments for a specific user. Only the user can manage their appointments.
-     * @path /users/{userId}/appointments/{appointmentId}
-     * @allow (read, write) User with UID 'user123' can manage their own appointments.
-     * @deny (read, write) User with UID 'user456' cannot manage 'user123' appointments.
-     * @principle Enforces document ownership for all operations on appointments.
-     */
-    match /users/{userId}/appointments/{appointmentId} {
-      allow read: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
-    }
-
-    /**
-     * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
-     * @path /users/{userId}/emergencyContacts/{contactId}
-     * @allow (read, write) User with UID 'user123' can manage their own emergency contacts.
-     * @deny (read, write) User with UID 'user456' cannot manage 'user123' emergency contacts.
-     * @principle Enforces document ownership for all operations on emergency contacts.
-     */
-    match /users/{userId}/emergencyContacts/{contactId} {
-      allow read: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
-    }
-
-    /**
-     * @description Secure medications for a specific user. Only the user can manage their medication schedule.
-     * @path /users/{userId}/medications/{medicationId}
-     * @allow (read, write) User with UID 'user123' can manage their own medication schedule.
-     * @deny (read, write) User with UID 'user456' cannot manage 'user123' medication schedule.
-     * @principle Enforces document ownership for all operations on medications.
-     */
-    match /users/{userId}/medications/{medicationId} {
-      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
-    }
-
-     /**
-     * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
-     * @path /users/{userId}/prescriptions/{prescriptionId}
-     * @allow (read, write) User with UID 'user123' can manage their own prescriptions.
-     * @deny (read, write) User with UID 'user456' cannot manage 'user123' prescriptions.
-     * @principle Enforces document ownership for all operations on prescriptions.
-     */
-    match /users/{userId}/prescriptions/{prescriptionId} {
-      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
-    }
 
     /**
      * @description Secure medical professional profiles. Only admins can create, update, or delete them.
