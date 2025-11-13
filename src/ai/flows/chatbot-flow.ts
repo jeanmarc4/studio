@@ -4,7 +4,7 @@
  * @fileOverview Flux Genkit pour un chatbot de soutien émotionnel.
  *
  * - mentalCareChat - Une fonction qui prend un historique de conversation et renvoie une réponse empathique.
- * - ChatInput - Le type d'entrée pour la fonction.
+ * - ChatHistory - Le type d'entrée pour la fonction.
  * - ChatOutput - Le type de retour pour la fonction.
  */
 
@@ -22,30 +22,31 @@ function ensureApiKey() {
   }
 }
 
-const ChatInputSchema = z.object({
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(),
-  })),
+const MessageSchema = z.object({
+  role: z.enum(['user', 'model']),
+  content: z.string(),
 });
-export type ChatInput = z.infer<typeof ChatInputSchema>;
+
+const ChatHistorySchema = z.array(MessageSchema);
+export type ChatHistory = z.infer<typeof ChatHistorySchema>;
+
 
 const ChatOutputSchema = z.object({
   response: z.string().describe("La réponse bienveillante et de soutien de l'IA."),
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-export async function mentalCareChat(input: ChatInput): Promise<ChatOutput> {
-  return mentalCareChatFlow(input);
+export async function mentalCareChat(history: ChatHistory): Promise<ChatOutput> {
+  return mentalCareChatFlow(history);
 }
 
 const mentalCareChatFlow = ai.defineFlow(
   {
     name: 'mentalCareChatFlow',
-    inputSchema: ChatInputSchema,
+    inputSchema: ChatHistorySchema,
     outputSchema: ChatOutputSchema,
   },
-  async ({ history }) => {
+  async (history) => {
     ensureApiKey(); // Vérifie la présence de la clé API
     
     const { text } = await ai.generate({

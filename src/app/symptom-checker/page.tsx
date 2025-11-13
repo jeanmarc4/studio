@@ -47,7 +47,7 @@ export default function SymptomCheckerPage() {
         setIsLoading(true);
 
         try {
-            const result = await suggestNextSteps({ history: newMessages });
+            const result = await suggestNextSteps(newMessages);
             const modelMessage: Message = { role: 'model', content: result.analysis };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error: any) {

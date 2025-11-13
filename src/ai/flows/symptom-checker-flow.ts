@@ -4,7 +4,7 @@
  * @fileOverview Flux Genkit pour un vérificateur de symptômes intelligent.
  *
  * - suggestNextSteps - Une fonction qui prend une conversation et suggère les prochaines étapes.
- * - SymptomCheckerInput - Le type d'entrée pour la fonction.
+ * - SymptomCheckerHistory - Le type d'entrée pour la fonction.
  * - SymptomCheckerOutput - Le type de retour pour la fonction.
  */
 
@@ -22,21 +22,21 @@ function ensureApiKey() {
   }
 }
 
-const SymptomCheckerInputSchema = z.object({
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(),
-  })),
+const MessageSchema = z.object({
+  role: z.enum(['user', 'model']),
+  content: z.string(),
 });
-export type SymptomCheckerInput = z.infer<typeof SymptomCheckerInputSchema>;
+
+const SymptomCheckerHistorySchema = z.array(MessageSchema);
+export type SymptomCheckerHistory = z.infer<typeof SymptomCheckerHistorySchema>;
 
 const SymptomCheckerOutputSchema = z.object({
   analysis: z.string().describe("L'analyse des symptômes et les prochaines étapes suggérées par l'IA."),
 });
 export type SymptomCheckerOutput = z.infer<typeof SymptomCheckerOutputSchema>;
 
-export async function suggestNextSteps(input: SymptomCheckerInput): Promise<SymptomCheckerOutput> {
-  return symptomCheckerFlow(input);
+export async function suggestNextSteps(history: SymptomCheckerHistory): Promise<SymptomCheckerOutput> {
+  return symptomCheckerFlow(history);
 }
 
 const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un professionnel de la santé. Les informations que je fournis ne constituent pas un avis médical. Veuillez consulter un médecin qualifié pour tout problème de santé ou avant de prendre toute décision médicale.";
@@ -44,10 +44,10 @@ const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un profession
 const symptomCheckerFlow = ai.defineFlow(
   {
     name: 'symptomCheckerFlow',
-    inputSchema: SymptomCheckerInputSchema,
+    inputSchema: SymptomCheckerHistorySchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async ({ history }) => {
+  async (history) => {
     ensureApiKey(); // Vérifie la présence de la clé API
     
     const { text } = await ai.generate({
