@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -6,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { AppLogo } from "@/components/app-logo";
 import { Button } from "@/components/ui/button";
@@ -24,10 +25,16 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
-  const { auth } = useFirebase();
+  const { auth, user, isUserLoading } = useFirebase();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push("/");
+    }
+  }, [user, isUserLoading, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,21 +53,29 @@ export default function LoginPage() {
         description: "Vous allez être redirigé vers la page d'accueil.",
       });
       setIsNavigating(true);
-      router.push("/");
+      // Let the useEffect handle the redirection to avoid race conditions.
     } catch (error: any) {
-      console.error(error);
+      console.error("Login Error:", error.code);
       let description = "Une erreur est survenue lors de la connexion.";
       if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === 'auth/invalid-credential') {
-        description = "Email ou mot de passe incorrect.";
+        description = "L'adresse e-mail ou le mot de passe est incorrect.";
       }
       toast({
         variant: "destructive",
         title: "Erreur de connexion",
         description,
       });
-    } finally {
       setIsLoading(false);
     }
+    // No finally block needed as we handle state separately now
+  }
+  
+  if (isUserLoading || user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-16 w-16 animate-spin" />
+      </div>
+    );
   }
 
   return (
