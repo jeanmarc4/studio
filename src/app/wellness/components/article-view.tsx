@@ -63,7 +63,7 @@ export function ArticleView() {
       ) : (
         <div className="text-center py-16 border-2 border-dashed rounded-lg">
             <Leaf className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun article pour le moment</h3>
+            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun article disponible pour le moment</h3>
             <p className="mt-2 text-sm text-muted-foreground">Revenez bientôt pour des conseils et des guides.</p>
         </div>
       )}
