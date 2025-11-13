@@ -10,6 +10,7 @@
  *
  * Data Structure:
  * - /users/{userId}: User profile data, accessible only to the owning user.
+ * - /users/{userId}/profiles/{profileId}: Family profiles linked to the user, accessible only to that user.
  * - /users/{userId}/appointments/{appointmentId}: Appointments for a specific user, accessible only to that user.
  * - /users/{userId}/emergencyContacts/{contactId}: Emergency contacts for a specific user, accessible only to that user.
  * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
@@ -52,6 +53,15 @@ service cloud.firestore {
       allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
       allow update: if isSignedIn() && isOwner(userId) && resource.data.id == request.resource.data.id;
       allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+    
+    /**
+     * @description Secure family profiles. Only the parent user can manage their family profiles.
+     * @path /users/{userId}/profiles/{profileId}
+     * @principle Enforces document ownership for all operations on family profiles.
+     */
+    match /users/{userId}/profiles/{profileId} {
+      allow read, write: if isSignedIn() && isOwner(userId);
     }
 
     /**
