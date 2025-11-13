@@ -31,7 +31,19 @@
         "role": {
           "type": "string",
           "description": "The role or plan of the user.",
-          "enum": ["Standard", "Premium", "Admin"]
+          "enum": ["Gratuit", "Standard", "Premium", "Admin"]
+        },
+        "bloodType": {
+            "type": "string",
+            "description": "The blood type of the user (e.g., 'A+', 'O-')."
+        },
+        "allergies": {
+            "type": "string",
+            "description": "A list of known allergies for the user."
+        },
+        "medicalConditions": {
+            "type": "string",
+            "description": "A summary of important medical conditions for the user."
         }
       },
       "required": [
@@ -41,6 +53,18 @@
         "email",
         "role"
       ]
+    },
+    "FamilyProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FamilyProfile",
+      "type": "object",
+      "description": "Represents a family member's profile managed by the main user.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the family profile." },
+        "name": { "type": "string", "description": "The full name of the family member." },
+        "relationship": { "type": "string", "description": "The relationship to the main user (e.g., 'Child', 'Spouse')." }
+      },
+      "required": ["id", "name", "relationship"]
     },
     "Admin": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -129,6 +153,7 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Appointment)"
         },
+        "profileId": { "type": "string", "description": "The profile this appointment belongs to (user's self or family member)." },
         "medicalProfessionalId": {
           "type": "string",
           "description": "Reference to MedicalProfessional. (Relationship: MedicalProfessional 1:N Appointment)"
@@ -144,12 +169,13 @@
         },
         "status": {
           "type": "string",
-          "description": "The status of the appointment (e.g., scheduled, completed, canceled)."
+          "description": "The status of the appointment (e.g., scheduled, completed, canceled, archived)."
         }
       },
       "required": [
         "id",
         "userId",
+        "profileId",
         "medicalProfessionalId",
         "dateTime",
         "status"
@@ -221,6 +247,29 @@
         "phone"
       ]
     },
+    "SOSAlert": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SOSAlert",
+      "type": "object",
+      "description": "Represents an SOS alert triggered by a user.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the SOS alert." },
+        "userId": { "type": "string", "description": "The ID of the user who triggered the alert." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the alert was triggered." },
+        "contactsNotified": {
+          "type": "array",
+          "description": "A snapshot of the emergency contacts who were notified.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "phone": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["id", "userId", "createdAt", "contactsNotified"]
+    },
     "Medication": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Medication",
@@ -235,6 +284,7 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Medication)"
         },
+        "profileId": { "type": "string", "description": "The profile this medication belongs to (user's self or family member)." },
         "name": {
           "type": "string",
           "description": "The name of the medication."
@@ -259,6 +309,7 @@
       "required": [
         "id",
         "userId",
+        "profileId",
         "name",
         "dosage",
         "intakeTimes"
@@ -294,6 +345,7 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Prescription)"
         },
+        "profileId": { "type": "string", "description": "The profile this prescription belongs to (user's self or family member)." },
         "doctorName": {
             "type": "string",
             "description": "The name of the doctor who issued the prescription."
@@ -324,6 +376,7 @@
       "required": [
         "id",
         "userId",
+        "profileId",
         "doctorName",
         "issueDate",
         "imageUrl",
@@ -360,6 +413,22 @@
         "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the post was created." }
       },
       "required": ["id", "threadId", "content", "authorId", "authorName", "createdAt"]
+    },
+    "Vaccine": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vaccine",
+      "type": "object",
+      "description": "Represents a vaccine record in the user's vaccination booklet.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the vaccine record." },
+        "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N Vaccine)" },
+        "profileId": { "type": "string", "description": "The profile this vaccine belongs to (user's self or family member)." },
+        "name": { "type": "string", "description": "The name of the vaccine (e.g., 'Tétanos, Diphtérie, Poliomyélite')." },
+        "date": { "type": "string", "format": "date-time", "description": "The date the vaccine was administered." },
+        "lotNumber": { "type": "string", "description": "The lot number of the vaccine administered." },
+        "nextBooster": { "type": "string", "format": "date-time", "description": "The date for the next scheduled booster shot." }
+      },
+      "required": ["id", "userId", "profileId", "name", "date"]
     }
   },
   "auth": {
@@ -383,6 +452,18 @@
               "description": "The unique identifier of the user.  Corresponds to the Firebase Auth UID."
             }
           ]
+        }
+      },
+      {
+        "path": "/users/{userId}/profiles/{profileId}",
+        "definition": {
+            "entityName": "FamilyProfile",
+            "schema": { "$ref": "#/backend/entities/FamilyProfile" },
+            "description": "Stores family member profiles linked to a main user account.",
+            "params": [
+                { "name": "userId", "description": "The unique identifier of the main user." },
+                { "name": "profileId", "description": "The unique identifier of the family profile." }
+            ]
         }
       },
       {
@@ -466,6 +547,18 @@
         }
       },
       {
+        "path": "/users/{userId}/vaccines/{vaccineId}",
+        "definition": {
+          "entityName": "Vaccine",
+          "schema": { "$ref": "#/backend/entities/Vaccine" },
+          "description": "Stores vaccination records for a specific user. Path-based ownership ensures only the user can manage their vaccination booklet.",
+          "params": [
+            { "name": "userId", "description": "The unique identifier of the user." },
+            { "name": "vaccineId", "description": "The unique identifier of the vaccine record." }
+          ]
+        }
+      },
+      {
         "path": "/medicalProfessionals/{medicalProfessionalId}",
         "definition": {
           "entityName": "MedicalProfessional",
@@ -542,6 +635,17 @@
               "name": "postId",
               "description": "The unique identifier of the post/reply."
             }
+          ]
+        }
+      },
+      {
+        "path": "/sosAlerts/{alertId}",
+        "definition": {
+          "entityName": "SOSAlert",
+          "schema": { "$ref": "#/backend/entities/SOSAlert" },
+          "description": "Logs SOS alerts triggered by users. A backend function would then process these alerts.",
+          "params": [
+            { "name": "alertId", "description": "The unique identifier of the SOS alert." }
           ]
         }
       }

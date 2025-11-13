@@ -84,7 +84,7 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
 
     const newMedication = {
       userId: user.uid,
-      profileId: activeProfile.id,
+      profileId: activeProfile.id, // Assurez-vous que profileId est ajouté ici
       ...values,
     };
     
