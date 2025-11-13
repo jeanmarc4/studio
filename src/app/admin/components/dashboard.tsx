@@ -1,4 +1,5 @@
 
+
 import {
     Card,
     CardContent,
@@ -6,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Users, Calendar, Activity, FileText } from "lucide-react";
+import { Users, Shield, Star, Activity, FileText } from "lucide-react";
 import type { User } from '@/docs/backend-documentation';
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -17,39 +18,38 @@ interface DashboardProps {
 
 export function Dashboard({ users, areUsersLoading }: DashboardProps) {
     const totalUsers = users ? users.length : 0;
+    const premiumUsers = users ? users.filter(u => u.role === 'Premium').length : 0;
+    const standardUsers = users ? users.filter(u => u.role === 'Standard').length : 0;
+    const adminUsers = users ? users.filter(u => u.role === 'Admin').length : 0;
     
     const stats = [
         {
             title: "Utilisateurs totaux",
             getValue: () => totalUsers.toLocaleString(),
             icon: Users,
-            change: "+12.5%",
-            description: "par rapport au mois dernier",
+            description: "Tous plans confondus",
             isLoading: areUsersLoading,
         },
         {
-            title: "Rendez-vous pris",
-            getValue: () => "452",
-            icon: Calendar,
-            change: "+8.2%",
-            description: "par rapport au mois dernier",
-            isLoading: false,
+            title: "Abonnés Premium",
+            getValue: () => premiumUsers.toLocaleString(),
+            icon: Star,
+            description: "Utilisateurs avec accès IA",
+            isLoading: areUsersLoading,
         },
         {
-            title: "Utilisations du vérificateur de symptômes",
-            getValue: () => "3,489",
-            icon: Activity,
-            change: "+20.1%",
-            description: "par rapport au mois dernier",
-            isLoading: false,
+            title: "Utilisateurs Standard",
+            getValue: () => standardUsers.toLocaleString(),
+            icon: Users,
+            description: "Utilisateurs du plan gratuit",
+            isLoading: areUsersLoading,
         },
         {
-            title: "Articles sur le bien-être consultés",
-            getValue: () => "10,215",
-            icon: FileText,
-            change: "+5.7%",
-            description: "par rapport au mois dernier",
-            isLoading: false,
+            title: "Administrateurs",
+            getValue: () => adminUsers.toLocaleString(),
+            icon: Shield,
+            description: "Comptes avec accès admin",
+            isLoading: areUsersLoading,
         }
     ];
 
@@ -65,12 +65,15 @@ export function Dashboard({ users, areUsersLoading }: DashboardProps) {
                     </CardHeader>
                     <CardContent>
                       {stat.isLoading ? (
-                        <Skeleton className="h-8 w-24" />
+                        <>
+                            <Skeleton className="h-8 w-16 mb-2" />
+                            <Skeleton className="h-4 w-24" />
+                        </>
                       ) : (
                         <>
                           <div className="text-2xl font-bold">{stat.getValue()}</div>
                           <p className="text-xs text-muted-foreground">
-                            <span className="text-green-500">{stat.change}</span> {stat.description}
+                            {stat.description}
                           </p>
                         </>
                       )}

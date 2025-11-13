@@ -93,7 +93,7 @@ export default function Home() {
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {featureCards.slice(0,3).map((feature) => (
-              <Card key={feature.title} className="bg-muted/30 border-none shadow-none">
+              <Card key={feature.title} className="bg-muted/30 border-accent shadow-none">
                   <CardHeader className="flex flex-row items-start gap-4 pb-4">
                     <div className={`p-3 rounded-full ${feature.bgColor}`}>
                       <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
@@ -112,7 +112,7 @@ export default function Home() {
            {/* Pricing/Subscription Section */}
           <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Standard Plan */}
-            <Card className="flex flex-col h-full border-2">
+            <Card className="flex flex-col h-full border-accent">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Standard</CardTitle>
                     <CardDescription>Pour organiser votre santé au quotidien.</CardDescription>
@@ -157,7 +157,8 @@ export default function Home() {
                 </CardContent>
                 <CardContent>
                     <Button asChild className="w-full">
-                        <Link href="/auth/signup">Choisir Premium</Link>
+                       {/* IMPORTANT: Remplacez ce lien par votre véritable lien de paiement PayPal */}
+                       <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1234567890ABCDEFG" target="_blank" rel="noopener noreferrer">Choisir Premium</a>
                     </Button>
                 </CardContent>
             </Card>
