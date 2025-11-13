@@ -20,14 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,20 +32,23 @@ import {
 import type { User } from "@/docs/backend-documentation";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EditUserRoleDialog } from "./edit-user-role-dialog";
 
 interface UserManagementProps {
     users: User[];
     onDeleteUser: (userId: string) => void;
+    onUpdateUserRole: (userId: string, role: "Admin" | "Standard" | "Premium") => void;
     isLoading: boolean;
 }
 
-export function UserManagement({ users, onDeleteUser, isLoading }: UserManagementProps) {
+export function UserManagement({ users, onDeleteUser, onUpdateUserRole, isLoading }: UserManagementProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const { toast } = useToast();
 
   const handleDeleteClick = (user: User) => {
-    // Logic to prevent deleting super admin can be added here based on role property
     setUserToDelete(user);
     setIsDeleteDialogOpen(true);
   };
@@ -69,6 +64,21 @@ export function UserManagement({ users, onDeleteUser, isLoading }: UserManagemen
     }
     setIsDeleteDialogOpen(false);
   };
+
+  const handleEditClick = (user: User) => {
+    setUserToEdit(user);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleRoleUpdate = (role: "Admin" | "Standard" | "Premium") => {
+    if (userToEdit?.id) {
+        onUpdateUserRole(userToEdit.id, role);
+        toast({
+            title: "Rôle mis à jour",
+            description: `Le rôle de ${userToEdit.firstName} ${userToEdit.lastName} est maintenant ${role}.`
+        })
+    }
+  }
 
   return (
     <>
@@ -121,7 +131,7 @@ export function UserManagement({ users, onDeleteUser, isLoading }: UserManagemen
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditClick(user)}>
                               <Edit className="mr-2 h-4 w-4" />
                               Modifier le rôle
                           </DropdownMenuItem>
@@ -160,6 +170,15 @@ export function UserManagement({ users, onDeleteUser, isLoading }: UserManagemen
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {userToEdit && (
+        <EditUserRoleDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          user={userToEdit}
+          onUpdateRole={handleRoleUpdate}
+        />
+      )}
     </>
   );
 }
