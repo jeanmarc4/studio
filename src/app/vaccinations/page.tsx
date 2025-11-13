@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, where } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { Vaccine } from '@/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Shield } from 'lucide-react';
@@ -31,12 +31,19 @@ export default function VaccinationsPage() {
     if (!firestore || !user || !activeProfile) return null;
     return query(
       collection(firestore, 'users', user.uid, 'vaccines'),
-      where('profileId', '==', activeProfile.id),
-      orderBy('date', 'desc')
+      where('profileId', '==', activeProfile.id)
+      // NOTE: Removed orderBy('date', 'desc') to prevent potential index/permission issues.
+      // Sorting is now handled on the client-side.
     );
   }, [firestore, user, activeProfile]);
 
   const { data: vaccines, isLoading: areVaccinesLoading } = useCollection<Vaccine>(vaccinesQuery);
+  
+  const sortedVaccines = useMemo(() => {
+    if (!vaccines) return [];
+    return [...vaccines].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [vaccines]);
+
 
   const handleAddVaccine = (values: Omit<Vaccine, 'id' | 'userId' | 'profileId'>) => {
     if (!user || !firestore || !activeProfile) return;
@@ -97,9 +104,9 @@ export default function VaccinationsPage() {
             </AlertDescription>
         </Alert>
 
-        {vaccines && vaccines.length > 0 ? (
+        {sortedVaccines && sortedVaccines.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {vaccines.map((v) => (
+            {sortedVaccines.map((v) => (
               <VaccineCard key={v.id} vaccine={v} />
             ))}
           </div>
