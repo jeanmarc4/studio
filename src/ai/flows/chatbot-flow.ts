@@ -51,7 +51,7 @@ Règles de conversation :
 6. Le but n'est pas de "résoudre" les problèmes, mais d'offrir un espace sûr pour que l'utilisateur puisse s'exprimer.
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`,
-      prompt: history.map(m => ({ role: m.role, content: m.content })),
+      prompt: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
     });
 
     if (!text) {
