@@ -46,6 +46,7 @@ export function GlobalReminderProvider({ children }: { children: React.ReactNode
                 if (med.intakeTimes.includes(currentTime)) {
                     // C'est l'heure de prendre ce médicament
                     const isPremiumOrAdmin = userProfile.role === 'Premium' || userProfile.role === 'Admin';
+                    const isStandard = userProfile.role === 'Standard';
                     
                     if (isPremiumOrAdmin) {
                         // Logique Premium : rappel vocal
@@ -67,7 +68,7 @@ export function GlobalReminderProvider({ children }: { children: React.ReactNode
                                 duration: 10000,
                             });
                         }
-                    } else {
+                    } else if (isStandard) {
                         // Logique Standard : notification
                         toast({
                             title: `Rappel : ${med.name}`,
