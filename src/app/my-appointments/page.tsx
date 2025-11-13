@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -35,7 +34,7 @@ export default function MyAppointmentsPage() {
   // Redirect if user is not logged in
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/auth/login?redirect=/my-health');
+      router.push('/auth/login?redirect=/my-appointments');
     }
   }, [user, isUserLoading, router]);
   
@@ -137,7 +136,7 @@ export default function MyAppointmentsPage() {
         <div className="container mx-auto px-4 py-8">
         <header className="mb-8 text-center sm:text-left">
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-            Mes Rendez-vous et Médecins
+            Mon Espace Santé
             </h1>
             <p className="mt-2 text-lg text-muted-foreground font-body">
             Consultez vos rendez-vous et la liste de vos professionnels de santé.
@@ -199,4 +198,3 @@ export default function MyAppointmentsPage() {
     </>
   );
 }
-

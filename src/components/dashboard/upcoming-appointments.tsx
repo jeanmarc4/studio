@@ -104,11 +104,10 @@ export function UpcomingAppointments({ appointments }: UpcomingAppointmentsProps
             Aucun rendez-vous à venir.
           </p>
         )}
-         <Button className="w-full mt-6" variant="outline" onClick={() => router.push('/my-health')}>
+         <Button className="w-full mt-6" variant="outline" onClick={() => router.push('/my-appointments')}>
             Gérer mes rendez-vous
         </Button>
       </CardContent>
     </Card>
   );
 }
-

@@ -19,7 +19,7 @@ const quickLinks = [
   },
   {
     title: 'Mon Espace Santé',
-    href: '/my-health',
+    href: '/my-appointments',
     icon: Calendar,
   },
   {

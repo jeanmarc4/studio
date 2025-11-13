@@ -90,7 +90,7 @@ export const mainNav: NavItem[] = [
   },
   {
     title: "Mon Espace Santé",
-    href: "/my-health",
+    href: "/my-appointments",
   },
   {
     title: "Vérificateur de Symptômes",
