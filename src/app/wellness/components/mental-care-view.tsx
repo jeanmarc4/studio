@@ -13,7 +13,7 @@ import { mentalCareChat } from '@/ai/flows/chatbot-flow';
 
 type Message = {
     role: 'user' | 'model';
-    text: string;
+    content: string;
 };
 
 export function MentalCareView() {
@@ -40,7 +40,7 @@ export function MentalCareView() {
     useEffect(() => {
         if(user && messages.length === 0) {
             setMessages([
-                { role: 'model', text: 'Bonjour ! Comment vous sentez-vous aujourd\'hui ? N\'hésitez pas à partager ce qui vous préoccupe. Je suis là pour vous écouter sans jugement.'}
+                { role: 'model', content: 'Bonjour ! Comment vous sentez-vous aujourd\'hui ? N\'hésitez pas à partager ce qui vous préoccupe. Je suis là pour vous écouter sans jugement.'}
             ])
         }
     }, [user, messages.length])
@@ -48,24 +48,19 @@ export function MentalCareView() {
     const handleSendMessage = async () => {
         if (!input.trim() || !user) return;
 
-        const userMessage: Message = { role: 'user', text: input };
+        const userMessage: Message = { role: 'user', content: input };
         const newMessages = [...messages, userMessage];
         setMessages(newMessages);
         setInput('');
         setIsLoading(true);
 
-        const historyForApi = newMessages.map(msg => ({
-            role: msg.role,
-            content: msg.text,
-        }));
-
         try {
-            const result = await mentalCareChat(historyForApi);
-            const modelMessage: Message = { role: 'model', text: result.response };
+            const result = await mentalCareChat(newMessages);
+            const modelMessage: Message = { role: 'model', content: result.response };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error: any) {
             console.error("Erreur de l'IA:", error);
-            const errorMessage: Message = { role: 'model', text: `Désolé, une erreur est survenue. ${error.message || 'Veuillez réessayer.'}` };
+            const errorMessage: Message = { role: 'model', content: `Désolé, une erreur est survenue. ${error.message || 'Veuillez réessayer.'}` };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
@@ -131,7 +126,7 @@ export function MentalCareView() {
                                     </div>
                                 )}
                                 <div className={`max-w-lg p-3 rounded-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                    <p className="whitespace-pre-wrap">{message.text}</p>
+                                    <p className="whitespace-pre-wrap">{message.content}</p>
                                 </div>
                                 {message.role === 'user' && (
                                     <div className="p-2 bg-muted rounded-full">

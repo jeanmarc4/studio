@@ -48,7 +48,7 @@ Règles importantes :
 5.  Gardez vos réponses concises et faciles à comprendre.
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`,
-      history: history,
+      history: history.map(m => ({role: m.role, content: m.content})),
     });
 
     let analysis = text;

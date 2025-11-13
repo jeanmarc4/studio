@@ -13,7 +13,7 @@ import { suggestNextSteps } from '@/ai/flows/symptom-checker-flow';
 
 type Message = {
     role: 'user' | 'model';
-    text: string;
+    content: string;
 };
 
 export default function SymptomCheckerPage() {
@@ -40,24 +40,19 @@ export default function SymptomCheckerPage() {
     const handleSendMessage = async () => {
         if (!input.trim()) return;
 
-        const userMessage: Message = { role: 'user', text: input };
+        const userMessage: Message = { role: 'user', content: input };
         const newMessages = [...messages, userMessage];
         setMessages(newMessages);
         setInput('');
         setIsLoading(true);
 
-        const historyForApi = newMessages.map(msg => ({
-            role: msg.role,
-            content: msg.text,
-        }));
-
         try {
-            const result = await suggestNextSteps(historyForApi);
-            const modelMessage: Message = { role: 'model', text: result.analysis };
+            const result = await suggestNextSteps(newMessages);
+            const modelMessage: Message = { role: 'model', content: result.analysis };
             setMessages(prev => [...prev, modelMessage]);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erreur de l'IA:", error);
-            const errorMessage: Message = { role: 'model', text: "Désolé, une erreur est survenue. Veuillez réessayer." };
+            const errorMessage: Message = { role: 'model', content: `Désolé, une erreur est survenue. ${error.message || 'Veuillez réessayer.'}` };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
@@ -94,7 +89,7 @@ export default function SymptomCheckerPage() {
                                         </div>
                                     )}
                                     <div className={`max-w-lg p-3 rounded-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                        <p className="whitespace-pre-wrap">{message.text}</p>
+                                        <p className="whitespace-pre-wrap">{message.content}</p>
                                     </div>
                                     {message.role === 'user' && (
                                         <div className="p-2 bg-muted rounded-full">
