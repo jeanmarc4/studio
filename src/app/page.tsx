@@ -1,19 +1,14 @@
-import Image from "next/image";
-import Link from "next/link";
-import {
-  Stethoscope,
-  Sparkles,
-  Leaf,
-  ArrowRight,
-  ShieldCheck,
-} from "lucide-react";
+'use client';
 
+import { Stethoscope, Sparkles, Leaf, ArrowRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { useFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { getImage } from "@/lib/placeholder-images";
 import { SosAlert } from "@/components/sos-alert";
 import { Badge } from "@/components/ui/badge";
-
+import { DashboardView } from "@/components/dashboard/dashboard-view";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const featureCards = [
   {
@@ -28,31 +23,19 @@ const featureCards = [
 ];
 
 export default function Home() {
-  const heroImage = getImage("hero-background");
-  return (
-    <main className="flex flex-col items-center">
-      {/* Hero Section */}
-      <section className="w-full bg-primary/5 py-12 md:py-20 lg:py-28 relative">
-        <div className="container px-4 md:px-6 text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl font-headline text-primary">
-            Votre Santé, Connectée.
-          </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl font-body">
-            SanteConnect est votre partenaire de confiance pour gérer les rendez-vous, vérifier les symptômes et adopter un mode de vie holistique.
-          </p>
-          <div className="mt-8 flex justify-center gap-4">
-            <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/my-appointments">Mes rendez-vous</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/prescriptions">Gérer mes ordonnances</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+  const { user, isUserLoading } = useFirebase();
 
-      {/* Main Content Section */}
-      <section className="container w-full max-w-6xl py-12 md:py-16">
+  const renderLoadingState = () => (
+    <div className="container w-full max-w-6xl py-12 md:py-16">
+      <div className="grid gap-8">
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    </div>
+  );
+
+  const renderGuestHomepage = () => (
+    <section className="container w-full max-w-6xl py-12 md:py-16">
         <div className="grid gap-10 md:gap-16">
           {/* SOS Section */}
           <div id="sos">
@@ -94,6 +77,41 @@ export default function Home() {
           </div>
         </div>
       </section>
+  );
+
+  return (
+    <main className="flex flex-col items-center">
+      {/* Hero Section */}
+      <section className="w-full bg-primary/5 py-12 md:py-20 lg:py-28 relative">
+        <div className="container px-4 md:px-6 text-center">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl font-headline text-primary">
+            {user ? `Bienvenue, ${user.displayName || 'Utilisateur'}` : "Votre Santé, Connectée."}
+          </h1>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl font-body">
+            {user
+              ? "Voici un aperçu de votre journée. Gérez votre santé en toute simplicité."
+              : "SanteConnect est votre partenaire de confiance pour gérer les rendez-vous, vérifier les symptômes et adopter un mode de vie holistique."}
+          </p>
+          {!user && (
+            <div className="mt-8 flex justify-center gap-4">
+              <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Link href="/my-appointments">Mes rendez-vous</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/prescriptions">Gérer mes ordonnances</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Main Content Section */}
+      {isUserLoading 
+        ? renderLoadingState()
+        : user 
+        ? <DashboardView user={user} />
+        : renderGuestHomepage()
+      }
     </main>
   );
 }
