@@ -31,6 +31,7 @@ export default function AdminPage() {
   
   // State to track authorization status: null (checking), true (authorized), false (unauthorized)
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [isAuthorizing, setIsAuthorizing] = useState(false);
 
   // Check for admin role
   const adminRoleRef = useMemoFirebase(() => {
@@ -60,21 +61,28 @@ export default function AdminPage() {
     }
   }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
-  // Data fetching
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
-  const professionalsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'medicalProfessionals') : null, [firestore]);
-  const contentQuery = useMemoFirebase(() => firestore ? collection(firestore, 'holisticContent') : null, [firestore]);
+  // Data fetching - only trigger queries if user is authorized
+  const usersQuery = useMemoFirebase(() => isAuthorized ? collection(firestore, 'users') : null, [firestore, isAuthorized]);
+  const professionalsQuery = useMemoFirebase(() => isAuthorized ? collection(firestore, 'medicalProfessionals') : null, [firestore, isAuthorized]);
+  const contentQuery = useMemoFirebase(() => isAuthorized ? collection(firestore, 'holisticContent') : null, [firestore, isAuthorized]);
 
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
   const { data: professionals, isLoading: areProfessionalsLoading } = useCollection<MedicalProfessional>(professionalsQuery);
   const { data: holisticContent, isLoading: areContentLoading } = useCollection<HolisticContent>(contentQuery);
 
-  const handleBecomeAdmin = () => {
+  const handleBecomeAdmin = async () => {
     if (!firestore || !user) return;
+    setIsAuthorizing(true);
     const adminDocRef = doc(firestore, 'roles_admin', user.uid);
-    // This will succeed due to the relaxed security rule
-    setDocumentNonBlocking(adminDocRef, { userId: user.uid, role: 'admin' }, {});
-    // The useDoc hook will automatically update the UI once the document is created
+    try {
+      await setDoc(adminDocRef, { userId: user.uid, role: 'admin' });
+      // The useDoc hook will automatically update the UI once the document is created
+      // and the useEffect will set isAuthorized to true.
+    } catch (e) {
+       console.error("Failed to become admin", e);
+    } finally {
+       setIsAuthorizing(false);
+    }
   };
 
   // User management handlers
@@ -82,7 +90,7 @@ export default function AdminPage() {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', newUser.id);
     setDocumentNonBlocking(userDocRef, newUser, {});
-    if (newUser.role === 'Admin') {
+    if (newUser.role === 'Admin' && newUser.id) {
       const adminRoleDocRef = doc(firestore, 'roles_admin', newUser.id);
       setDoc(adminRoleDocRef, { userId: newUser.id, role: 'admin' });
     }
@@ -91,6 +99,7 @@ export default function AdminPage() {
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
     deleteDocumentNonBlocking(doc(firestore, 'users', userId));
+    // Also delete the admin role if it exists
     deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userId));
   };
   
@@ -167,7 +176,8 @@ export default function AdminPage() {
              </p>
            </CardContent>
            <CardFooter className="flex flex-col gap-4">
-              <Button onClick={handleBecomeAdmin} className="w-full">
+              <Button onClick={handleBecomeAdmin} className="w-full" disabled={isAuthorizing}>
+                {isAuthorizing ? <Loader2 className="h-4 w-4 animate-spin"/> : null}
                 Devenir Administrateur
               </Button>
                <Button variant="outline" onClick={() => router.push('/')} className="w-full">
