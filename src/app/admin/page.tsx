@@ -7,6 +7,7 @@ import { UserPlus } from "lucide-react";
 import { UserManagement } from "./components/user-management";
 import { AddUserDialog } from "./components/add-user-dialog";
 import { RoleConfiguration } from "./components/role-configuration";
+import { Dashboard } from "./components/dashboard";
 import { adminUsers } from "@/lib/data";
 import type { AdminUser } from "@/lib/data";
 
@@ -34,11 +35,12 @@ export default function AdminPage() {
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <div className="flex flex-col sm:gap-4 sm:py-4">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="all">
+          <Tabs defaultValue="dashboard">
             <div className="flex items-center">
               <TabsList>
-                <TabsTrigger value="all">Gestion des utilisateurs</TabsTrigger>
-                <TabsTrigger value="config">Configuration des rôles</TabsTrigger>
+                <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
+                <TabsTrigger value="users">Gestion des utilisateurs</TabsTrigger>
+                <TabsTrigger value="roles">Configuration des rôles</TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 <Button size="sm" className="h-8 gap-1" onClick={() => setIsAddUserDialogOpen(true)}>
@@ -49,10 +51,13 @@ export default function AdminPage() {
                 </Button>
               </div>
             </div>
-            <TabsContent value="all">
+            <TabsContent value="dashboard">
+              <Dashboard />
+            </TabsContent>
+            <TabsContent value="users">
               <UserManagement users={users} onDeleteUser={handleDeleteUser} />
             </TabsContent>
-            <TabsContent value="config">
+            <TabsContent value="roles">
               <RoleConfiguration />
             </TabsContent>
           </Tabs>
