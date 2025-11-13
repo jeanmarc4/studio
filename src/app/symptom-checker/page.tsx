@@ -47,11 +47,11 @@ export default function SymptomCheckerPage() {
 
         const historyForApi = [...messages, userMessage].map(msg => ({
             role: msg.role,
-            content: msg.text, // Modifié pour être une chaîne de caractères simple
+            content: msg.text,
         }));
 
         try {
-            const result = await suggestNextSteps({ history: historyForApi });
+            const result = await suggestNextSteps(historyForApi);
             const modelMessage: Message = { role: 'model', text: result.analysis };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error) {

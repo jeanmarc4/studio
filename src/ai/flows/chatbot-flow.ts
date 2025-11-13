@@ -11,13 +11,11 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// Schéma d'entrée simplifié pour correspondre à la structure de message de base de Genkit.
-const ChatInputSchema = z.object({
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(), // Le contenu est maintenant une simple chaîne de caractères
-  })).describe("L'historique de la conversation jusqu'à présent."),
-});
+// Le schéma d'entrée attend maintenant directement un tableau d'objets `history`.
+const ChatInputSchema = z.array(z.object({
+  role: z.enum(['user', 'model']),
+  content: z.string(),
+}));
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 
@@ -36,7 +34,7 @@ const mentalCareChatFlow = ai.defineFlow(
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async ({ history }) => {
+  async (history) => { // L'entrée 'history' est maintenant directement le tableau.
     const { text } = await ai.generate({
       system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 

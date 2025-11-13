@@ -55,11 +55,11 @@ export function MentalCareView() {
 
         const historyForApi = [...messages, userMessage].map(msg => ({
             role: msg.role,
-            content: msg.text, // Modifié pour être une chaîne de caractères simple
+            content: msg.text,
         }));
 
         try {
-            const result = await mentalCareChat({ history: historyForApi });
+            const result = await mentalCareChat(historyForApi); // On envoie directement le tableau
             const modelMessage: Message = { role: 'model', text: result.response };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error) {

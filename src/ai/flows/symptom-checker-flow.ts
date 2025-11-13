@@ -11,12 +11,10 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const SymptomCheckerInputSchema = z.object({
-  history: z.array(z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(), // Le contenu est maintenant une simple chaîne de caractères
-  })).describe("L'historique de la conversation jusqu'à présent."),
-});
+const SymptomCheckerInputSchema = z.array(z.object({
+  role: z.enum(['user', 'model']),
+  content: z.string(),
+}));
 export type SymptomCheckerInput = z.infer<typeof SymptomCheckerInputSchema>;
 
 const SymptomCheckerOutputSchema = z.object({
@@ -36,7 +34,7 @@ const symptomCheckerFlow = ai.defineFlow(
     inputSchema: SymptomCheckerInputSchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async ({ history }) => {
+  async (history) => {
     const { text } = await ai.generate({
       system: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 
