@@ -88,7 +88,7 @@ export default function Home() {
             </div>
             <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Standard Plan */}
-            <Card className="flex flex-col h-full border-accent bg-background">
+            <Card className="flex flex-col h-full border-accent">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Standard</CardTitle>
                     <CardDescription>Pour organiser votre santé au quotidien.</CardDescription>
@@ -113,7 +113,7 @@ export default function Home() {
             </Card>
 
             {/* Premium Plan */}
-            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden bg-background">
+            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">RECOMMANDÉ</div>
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
@@ -180,3 +180,5 @@ export default function Home() {
     </main>
   );
 }
+
+    
