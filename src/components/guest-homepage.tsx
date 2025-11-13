@@ -2,7 +2,7 @@
 'use client';
 
 import Link from "next/link";
-import { CheckCircle2, UserCheck, BotIcon, MessageSquare } from "lucide-react";
+import { CheckCircle2, UserCheck, BotIcon, MessageSquare, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PayPalSubscriptionButton } from "./paypal-subscription-button";
@@ -11,39 +11,38 @@ const gratuitFeatures = [
     "Gestion des rendez-vous",
     "Suivi manuel du traitement",
     "Accès au forum communautaire",
-    "Pas de rappels automatiques"
+    "Annuaire des professionnels",
 ];
 
 const standardFeatures = [
     "Toutes les fonctionnalités du plan Gratuit",
     "Rappels automatiques par notification",
-    "Vérificateur de symptômes (2 fois/semaine)",
+    "Vérificateur de symptômes IA (limité)",
     "Support par email"
 ];
 
 const premiumFeatures = [
     "Toutes les fonctionnalités Standard",
-    "Vérificateur de symptômes illimité",
-    "Analyse d'ordonnances par l'IA",
+    "IA illimitée (symptômes & ordonnances)",
     "Rappels vocaux intelligents par l'IA",
-    "Support prioritaire"
+    "Support prioritaire",
 ];
 
 const howItWorksSteps = [
     {
+        icon: Search,
+        title: "1. Trouvez un professionnel",
+        description: "Explorez notre annuaire complet pour trouver des médecins, pharmacies et spécialistes près de chez vous. Filtrez par spécialité pour affiner votre recherche."
+    },
+    {
         icon: UserCheck,
-        title: "1. Organisez votre santé",
+        title: "2. Organisez votre santé",
         description: "Regroupez vos rendez-vous, vos ordonnances et vos médicaments en un seul endroit. Fini les oublis et les papiers perdus."
     },
     {
         icon: BotIcon,
-        title: "2. Obtenez des conseils instantanés",
+        title: "3. Obtenez des conseils IA (Premium)",
         description: "Utilisez notre assistant IA pour analyser vos symptômes ou extraire les informations de vos ordonnances. Une aide précieuse à portée de main."
-    },
-    {
-        icon: MessageSquare,
-        title: "3. Échangez avec la communauté",
-        description: "Rejoignez notre forum pour discuter avec d'autres utilisateurs, partager des expériences et trouver du soutien dans votre parcours de santé."
     }
 ];
 
