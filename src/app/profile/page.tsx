@@ -3,7 +3,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
-import { collection, doc, query, where } from 'firebase/firestore';
+import { collection, doc, query, where, setDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { updateDocumentNonBlocking, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { updateDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { HealthRecordPDF } from './components/health-record-pdf';
@@ -47,7 +47,6 @@ export default function ProfilePage() {
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
-  // Redirect if user is not logged in
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/auth/login?redirect=/profile');
@@ -61,7 +60,6 @@ export default function ProfilePage() {
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
   
-  // Data fetching for the export
   const medicationsQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'medications'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
   const appointmentsQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'appointments'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
   const vaccinesQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'vaccines'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
@@ -71,7 +69,6 @@ export default function ProfilePage() {
   const { data: appointments } = useCollection<Appointment>(appointmentsQuery);
   const { data: vaccines } = useCollection<Vaccine>(vaccinesQuery);
   const { data: contacts } = useCollection<EmergencyContact>(contactsQuery);
-
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -109,7 +106,12 @@ export default function ProfilePage() {
 
     const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
     if (data.role === "Admin") {
-        setDocumentNonBlocking(adminRoleDocRef, { userId: user.uid, role: 'admin' }, {});
+        // Use blocking setDoc here for reliability when setting crucial roles
+        try {
+            await setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' });
+        } catch (e) {
+            console.error("Error setting admin role:", e);
+        }
     } else {
         deleteDocumentNonBlocking(adminRoleDocRef);
     }
@@ -188,7 +190,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">

@@ -17,11 +17,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow get, update: if isSignedIn() && isOwner(userId);
       allow create: if isSignedIn(); // Any signed-in user can create their own user document.
-      allow list, delete: if isAdmin(); // Only admins can list or delete users.
+      allow list: if isAdmin(); // Only admins can list users.
+      allow delete: if isAdmin(); // Only admins can delete users.
 
       /**
        * @description Secure user-specific subcollections.
-       * The user can read and write any document in their own subcollections.
        */
       match /profiles/{profileId} {
         allow read, write: if isSignedIn() && isOwner(userId);
@@ -61,8 +61,8 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      // Allow any signed-in user to make themselves an admin for demo purposes.
-      allow create: if isSignedIn() && isOwner(userId); 
+      // Allow a user to create their OWN admin doc, or an existing admin to create one for others.
+      allow create: if isSignedIn() && (isOwner(userId) || isAdmin()); 
       allow list, update, delete: if isAdmin();
     }
     
