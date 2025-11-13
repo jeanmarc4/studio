@@ -23,9 +23,9 @@ export function Footer() {
             <a href="mailto:diojm93@gmail.com" className="hover:text-primary transition-colors">
                 Contact
             </a>
-            <Link href="#" className="font-semibold text-primary hover:underline">
+            <a href="https://www.paypal.com/donate/?hosted_button_id=WTNC9Z978PCGS" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
                 Faire un don
-            </Link>
+            </a>
         </div>
       </div>
     </footer>
