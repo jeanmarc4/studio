@@ -18,6 +18,7 @@ import { AddProfessionalDialog } from "./components/add-professional-dialog";
 import { HolisticContentManagement } from "./components/holistic-content-management";
 import { AddHolisticContentDialog } from "./components/add-holistic-content-dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
 
 export default function AdminPage() {
   const { user, isUserLoading, firestore } = useFirebase();
@@ -26,6 +27,7 @@ export default function AdminPage() {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isAddProfessionalDialogOpen, setIsAddProfessionalDialogOpen] = useState(false);
   const [isAddContentDialogOpen, setIsAddContentDialogOpen] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // Check for admin role
   const adminRoleRef = useMemoFirebase(() => {
@@ -36,20 +38,25 @@ export default function AdminPage() {
   const { data: adminRole, isLoading: isAdminRoleLoading } = useDoc(adminRoleRef);
   
   useEffect(() => {
-    const isAuthenticating = isUserLoading || isAdminRoleLoading;
-    if (isAuthenticating) {
-      return; // Do nothing while loading, wait for the check to complete
+    // Wait for auth and role checks to complete
+    if (isUserLoading || isAdminRoleLoading) {
+      return;
     }
     
+    // If not logged in, redirect to login
     if (!user) {
-      // If not logged in after loading, redirect to login
-      router.push('/auth/login');
-    } else if (!adminRole) {
-      // If logged in but not an admin after loading, redirect to home
+      router.push('/auth/login?redirect=/admin');
+      return;
+    }
+
+    // After loading, check if adminRole document exists
+    if (adminRole) {
+      setIsAuthorized(true);
+    } else {
+      setIsAuthorized(false);
       console.log("Accès non autorisé, redirection...");
       router.push('/'); 
     }
-    // If user is logged in and is an admin, the page will render.
   }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
   // Data fetching
@@ -128,26 +135,22 @@ export default function AdminPage() {
   };
 
 
-  const isPageLoading = isUserLoading || isAdminRoleLoading;
-
   // Show a loading skeleton while verifying auth and admin status.
-  if (isPageLoading) {
+  if (isAuthorized === null) {
     return (
-      <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
-        <div className="flex items-center mb-8">
-          <Skeleton className="h-10 w-64" />
-        </div>
-        <Skeleton className="w-full h-[400px]" />
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Vérification des autorisations...</p>
       </div>
     )
   }
 
-  // If after loading, the user is still not an admin, they will be redirected by the useEffect.
-  // We can return null or a skeleton here to avoid a flash of content.
-  if (!adminRole) {
+  // If after loading, the user is not an admin, they will be redirected by the useEffect.
+  // We can return null or a message here to avoid a flash of content.
+  if (!isAuthorized) {
     return (
-       <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
-        <p>Redirection en cours...</p>
+       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
+        <p className="text-muted-foreground">Redirection en cours...</p>
       </div>
     );
   }
