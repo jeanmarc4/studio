@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -30,13 +31,13 @@ export function UserNav() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const adminRoleRef = useMemoFirebase(() => {
+  const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
+    return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: adminRole } = useDoc(adminRoleRef);
-  const isAdmin = !!adminRole;
+  const { data: userProfile } = useDoc<User>(userProfileRef);
+  const isAdmin = userProfile?.role === 'Admin';
 
   const handleSignOut = async () => {
     try {
@@ -84,7 +85,7 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'Utilisateur'}</p>
+            <p className="text-sm font-medium leading-none">{userProfile?.firstName} {userProfile?.lastName}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>

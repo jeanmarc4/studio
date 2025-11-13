@@ -133,7 +133,6 @@ export default function Home() {
                 </CardContent>
                 <CardContent>
                     <Button asChild className="w-full">
-                       {/* IMPORTANT: Remplacez ce lien par votre véritable lien de paiement PayPal */}
                        <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-37M46882XF563383AMX6KSVY" target="_blank" rel="noopener noreferrer">Choisir Premium</a>
                     </Button>
                 </CardContent>
