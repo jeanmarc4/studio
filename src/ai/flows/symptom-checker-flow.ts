@@ -27,7 +27,9 @@ const MessageSchema = z.object({
   content: z.string(),
 });
 
-const SymptomCheckerHistorySchema = z.array(MessageSchema);
+const SymptomCheckerHistorySchema = z.object({
+  history: z.array(MessageSchema)
+});
 export type SymptomCheckerHistory = z.infer<typeof SymptomCheckerHistorySchema>;
 
 const SymptomCheckerOutputSchema = z.object({
@@ -35,8 +37,8 @@ const SymptomCheckerOutputSchema = z.object({
 });
 export type SymptomCheckerOutput = z.infer<typeof SymptomCheckerOutputSchema>;
 
-export async function suggestNextSteps(history: SymptomCheckerHistory): Promise<SymptomCheckerOutput> {
-  return symptomCheckerFlow(history);
+export async function suggestNextSteps(input: SymptomCheckerHistory): Promise<SymptomCheckerOutput> {
+  return symptomCheckerFlow(input);
 }
 
 const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un professionnel de la santé. Les informations que je fournis ne constituent pas un avis médical. Veuillez consulter un médecin qualifié pour tout problème de santé ou avant de prendre toute décision médicale.";
@@ -47,7 +49,7 @@ const symptomCheckerFlow = ai.defineFlow(
     inputSchema: SymptomCheckerHistorySchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async (history) => {
+  async ({ history }) => {
     ensureApiKey(); // Vérifie la présence de la clé API
     
     const { text } = await ai.generate({
