@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Image from 'next/image';
 import { Stethoscope, Calendar, Loader2, Wand2, Pill, PlusCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Prescription } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
       case 'processing': return 'outline';
       case 'processed': return 'secondary';
       case 'error': return 'destructive';
+      case 'archived': return 'outline';
       default: return 'outline';
     }
   };
@@ -51,6 +52,7 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
       case 'processing': return 'Analyse en cours...';
       case 'processed': return 'Analysé';
       case 'error': return 'Erreur';
+      case 'archived': return 'Archivé';
       default: return prescription.status;
     }
   };
@@ -103,14 +105,14 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
               <span>L'IA analyse votre ordonnance...</span>
             </div>
           )}
-          {prescription.status === 'processed' && prescription.extractedMedications.length > 0 && (
+          {prescription.status === 'processed' && prescription.extractedMedications && prescription.extractedMedications.length > 0 && (
             <div className="space-y-3">
               {prescription.extractedMedications.map((med, index) => (
                 <div key={index} className="p-3 bg-muted/50 rounded-lg flex items-start justify-between">
                   <div>
                     <p className="font-bold flex items-center gap-2"><Pill className="h-4 w-4 text-primary" />{med.name}</p>
                     <p className="text-sm text-muted-foreground">Dosage: {med.dosage}</p>
-                    <p className="text-sm text-muted-foreground">Quantité: {med.quantity}</p>
+                    {med.quantity && <p className="text-sm text-muted-foreground">Quantité: {med.quantity}</p>}
                     <p className="text-sm text-muted-foreground">Prises: {med.intakeTimes.join(', ')}</p>
                   </div>
                   <Button size="sm" variant="ghost" onClick={() => handleAddMedication(med)}>
@@ -127,7 +129,7 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
                 </Alert>
             </div>
           )}
-          {(prescription.status === 'processed' && prescription.extractedMedications.length === 0) && (
+          {(prescription.status === 'processed' && (!prescription.extractedMedications || prescription.extractedMedications.length === 0)) && (
              <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Aucun médicament détecté</AlertTitle>
@@ -151,11 +153,11 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
        <CardFooter className="border-t pt-4">
           <Button 
             onClick={() => onAnalyze(prescription)} 
-            disabled={!isPremiumOrAdmin || prescription.status === 'processing' || prescription.status === 'processed'}
+            disabled={!isPremiumOrAdmin || prescription.status === 'processing'}
             className="w-full md:w-auto"
           >
             {prescription.status === 'processing' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-            {prescription.status === 'processed' ? 'Analyser à nouveau' : 'Analyser avec l'IA'}
+            {prescription.status === 'processed' || prescription.status === 'error' ? 'Analyser à nouveau' : "Analyser avec l'IA"}
           </Button>
        </CardFooter>
     </Card>

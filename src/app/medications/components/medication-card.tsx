@@ -73,23 +73,32 @@ export function MedicationCard({ medication }: MedicationCardProps) {
         })
         return;
     }
+    
+    if (audio) {
+      audio.play();
+      return;
+    }
+    
     setIsVocalizing(true);
     
     try {
       const response = await getVocalReminder({ medicationName: medication.name, dosage: medication.dosage });
       const audioSrc = response.audioUrl;
-      const audio = new Audio(audioSrc);
-      setAudio(audio);
-      audio.play();
+      const newAudio = new Audio(audioSrc);
+      setAudio(newAudio);
+      newAudio.play();
 
       toast({
           title: `Rappel vocal pour ${medication.name}`,
           description: `L'assistant IA joue le rappel...`,
       });
 
-      audio.onended = () => {
+      newAudio.onended = () => {
         setIsVocalizing(false);
-        setAudio(null);
+        // Do not setAudio(null) here to allow re-playing
+      }
+      newAudio.onpause = () => {
+        setIsVocalizing(false);
       }
 
     } catch (error) {
@@ -131,8 +140,8 @@ export function MedicationCard({ medication }: MedicationCardProps) {
             <Button size="sm" variant="outline" onClick={handleStandardReminder}>
                 <Bell className="mr-2 h-4 w-4" /> Test Standard
             </Button>
-            <Button size="sm" variant={isPremiumOrAdmin ? "default" : "outline"} onClick={handlePremiumReminder} disabled={isVocalizing}>
-                {isVocalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (audio ? <PlayCircle className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />)}
+            <Button size="sm" variant={isPremiumOrAdmin ? "default" : "outline"} onClick={handlePremiumReminder} disabled={isVocalizing && !audio}>
+                {isVocalizing && !audio ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (audio && !isVocalizing ? <PlayCircle className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />)}
                 Test Premium
             </Button>
         </div>

@@ -1,3 +1,4 @@
+
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -5,7 +6,7 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import type { Prescription } from '@/types';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, FileText, Pill } from 'lucide-react';
+import { PlusCircle, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UploadPrescriptionDialog } from './components/upload-prescription-dialog';
 import { PrescriptionCard } from './components/prescription-card';
@@ -47,17 +48,17 @@ export default function PrescriptionsPage() {
   const handleAnalyzePrescription = async (prescription: Prescription) => {
     if (!firestore || !user) return;
     const prescriptionRef = doc(firestore, 'users', user.uid, 'prescriptions', prescription.id);
-    updateDocumentNonBlocking(prescriptionRef, { status: 'processing' });
+    updateDocumentNonBlocking(prescriptionRef, { status: 'processing' }, {});
     
     try {
       const result = await extractMedicationsFromPrescription({ prescriptionImageUrl: prescription.imageUrl });
       updateDocumentNonBlocking(prescriptionRef, { 
         status: 'processed',
         extractedMedications: result.medications 
-      });
+      }, { merge: true });
     } catch (error) {
       console.error("Erreur lors de l'analyse de l'ordonnance:", error);
-      updateDocumentNonBlocking(prescriptionRef, { status: 'error' });
+      updateDocumentNonBlocking(prescriptionRef, { status: 'error' }, { merge: true });
     }
   };
 
@@ -68,8 +69,15 @@ export default function PrescriptionsPage() {
       userId: user.uid,
       name: medication.name,
       dosage: medication.dosage,
-      quantity: medication.quantity,
-      intakeTimes: medication.intakeTimes,
+      quantity: medication.quantity || 1, // Default to 1 if not present
+      // Map string times like 'matin', 'soir' to HH:mm, or keep as is if format is different
+      intakeTimes: medication.intakeTimes.map(time => {
+          if (time.toLowerCase() === 'matin') return '08:00';
+          if (time.toLowerCase() === 'midi') return '12:00';
+          if (time.toLowerCase() === 'soir') return '20:00';
+          // If it's already a time format or something else, keep it. Validation on the medication form is stricter.
+          return time;
+      })
     };
     addDocumentNonBlocking(medicationsRef, newMed);
   };
@@ -94,7 +102,7 @@ export default function PrescriptionsPage() {
         </header>
 
         {isLoading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-6">
             <Skeleton className="h-64 w-full" />
             <Skeleton className="h-64 w-full" />
           </div>
