@@ -64,7 +64,7 @@ export default function AdminPage() {
               </TabsList>
             </div>
             <TabsContent value="dashboard">
-              <Dashboard />
+              <Dashboard users={users} areUsersLoading={areUsersLoading} />
             </TabsContent>
             <TabsContent value="users">
               <UserManagement 
