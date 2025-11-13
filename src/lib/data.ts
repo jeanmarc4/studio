@@ -1,12 +1,13 @@
 import type { NavItem } from "@/types";
 import { getImage } from "@/lib/placeholder-images";
+import type { MedicalProfessional } from "@/docs/backend-documentation";
 
-export const doctors = [
+export const doctors: (Omit<MedicalProfessional, 'type' | 'phone' | 'location'> & { rating: number, reviews: number, availability: string[], image: string | undefined, imageHint: string | undefined })[] = [
   {
     id: '1',
     name: 'Dr. Évelyne Reed',
     specialty: 'Cardiologue',
-    location: 'Springfield, IL',
+    address: 'Springfield, IL',
     availability: ['Lundi', 'Mercredi', 'Vendredi'],
     rating: 4.9,
     reviews: 124,
@@ -17,7 +18,7 @@ export const doctors = [
     id: '2',
     name: 'Dr. Marcus Thorne',
     specialty: 'Neurologue',
-    location: 'Metropolis, NY',
+    address: 'Metropolis, NY',
     availability: ['Mardi', 'Jeudi'],
     rating: 4.8,
     reviews: 98,
@@ -28,7 +29,7 @@ export const doctors = [
     id: '3',
     name: 'Dr. Lena Petrova',
     specialty: 'Pédiatre',
-    location: 'Gotham, NJ',
+    address: 'Gotham, NJ',
     availability: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'],
     rating: 5.0,
     reviews: 210,
@@ -39,7 +40,7 @@ export const doctors = [
     id: '4',
     name: 'Dr. Samuel Chen',
     specialty: 'Dermatologue',
-    location: 'Star City, CA',
+    address: 'Star City, CA',
     availability: ['Mercredi', 'Vendredi'],
     rating: 4.7,
     reviews: 76,

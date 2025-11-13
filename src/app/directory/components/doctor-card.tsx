@@ -51,7 +51,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <CardContent className="flex-grow space-y-3">
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
-            <span>{doctor.location}</span>
+            <span>{doctor.address}</span>
           </div>
           <div className="flex items-center">
             <div className="flex items-center gap-1 text-sm text-amber-500">
