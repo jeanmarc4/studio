@@ -35,7 +35,7 @@ const mentalCareChatFlow = ai.defineFlow(
     outputSchema: ChatOutputSchema,
   },
   async ({ history }) => {
-    const { output } = await ai.generate({
+    const { text } = await ai.generate({
       system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 
 Règles de conversation :
@@ -48,13 +48,12 @@ Règles de conversation :
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`,
       history: history,
-      output: { schema: ChatOutputSchema },
     });
 
-    if (!output) {
+    if (!text) {
       return { response: "Désolé, je ne suis pas en mesure de traiter votre demande pour le moment." };
     }
     
-    return output;
+    return { response: text };
   }
 );

@@ -37,7 +37,7 @@ const symptomCheckerFlow = ai.defineFlow(
     outputSchema: SymptomCheckerOutputSchema,
   },
   async ({ history }) => {
-    const { output } = await ai.generate({
+    const { text } = await ai.generate({
       system: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 
 Règles importantes :
@@ -49,16 +49,19 @@ Règles importantes :
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`,
       history: history,
-      output: { schema: SymptomCheckerOutputSchema },
     });
 
-    if (!output) {
-      return { analysis: `${disclaimer}\n\nDésolé, je ne suis pas en mesure de traiter votre demande pour le moment.` };
+    let analysis = text;
+
+    if (!analysis) {
+      analysis = "Désolé, je ne suis pas en mesure de traiter votre demande pour le moment.";
     }
+
     // Assurez-vous que l'avertissement est toujours présent.
-    if (!output.analysis.startsWith('AVERTISSEMENT')) {
-        return { analysis: `${disclaimer}\n\n${output.analysis}`};
+    if (!analysis.startsWith('AVERTISSEMENT')) {
+      analysis = `${disclaimer}\n\n${analysis}`;
     }
-    return output;
+
+    return { analysis };
   }
 );
