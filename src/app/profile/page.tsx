@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import type { User } from '@/docs/backend-documentation';
 import { User as UserIcon, Mail, Shield, Save } from 'lucide-react';
 import { useEffect } from 'react';
+import { EmergencyContacts } from './components/emergency-contacts';
 
 export default function ProfilePage() {
   const { user, isUserLoading, firestore } = useFirebase();
@@ -36,7 +37,7 @@ export default function ProfilePage() {
 
   if (isLoading || !userProfile) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         <Card className="mx-auto max-w-2xl">
           <CardHeader>
             <Skeleton className="h-8 w-48" />
@@ -51,13 +52,22 @@ export default function ProfilePage() {
              <Skeleton className="h-10 w-24" />
           </CardFooter>
         </Card>
+         <Card className="mx-auto max-w-2xl">
+          <CardHeader>
+            <Skeleton className="h-8 w-56" />
+            <Skeleton className="h-4 w-72 mt-2" />
+          </CardHeader>
+          <CardContent>
+             <Skeleton className="h-24 w-full" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 space-y-8">
       <Card className="mx-auto max-w-2xl">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Mon Profil</CardTitle>
@@ -98,6 +108,8 @@ export default function ProfilePage() {
             </Button>
         </CardFooter>
       </Card>
+
+      <EmergencyContacts />
     </div>
   );
 }
