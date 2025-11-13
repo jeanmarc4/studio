@@ -8,16 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 const gratuitFeatures = [
     "Gestion des rendez-vous",
-    "Suivi du traitement par confirmation manuelle",
-    "Pas de rappels automatiques",
-    "Accès au forum communautaire"
+    "Suivi manuel du traitement",
+    "Accès au forum communautaire",
+    "Pas de rappels automatiques"
 ];
 
 const standardFeatures = [
     "Toutes les fonctionnalités du plan Gratuit",
-    "Rappels par notification push (médicaments & RDV)",
+    "Rappels automatiques par notification",
     "Vérificateur de symptômes (2 fois/semaine)",
-    "Support standard"
+    "Support par email"
 ];
 
 const premiumFeatures = [
@@ -182,5 +182,7 @@ export function GuestHomepage() {
     </main>
   );
 }
+
+    
 
     
