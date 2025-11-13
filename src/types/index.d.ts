@@ -1,4 +1,4 @@
-import type { MedicalProfessional } from "@/docs/backend-documentation";
+import type { MedicalProfessional, Medication as MedicationSchema } from "@/docs/backend-documentation";
 
 export type NavItem = {
   title: string;
@@ -15,3 +15,5 @@ export type PopulatedMedicalProfessional = MedicalProfessional & {
   image: string | undefined;
   imageHint: string | undefined;
 };
+
+export type Medication = MedicationSchema;

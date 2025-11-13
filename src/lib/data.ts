@@ -96,6 +96,10 @@ export const mainNav: NavItem[] = [
     href: "/symptom-checker",
   },
   {
+    title: "Médicaments",
+    href: "/medications",
+  },
+  {
     title: "Bien-être",
     href: "/wellness",
   },

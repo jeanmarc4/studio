@@ -219,6 +219,49 @@
         "name",
         "phone"
       ]
+    },
+    "Medication": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Medication",
+      "type": "object",
+      "description": "Represents a medication for a user's schedule.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the medication entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Medication)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the medication."
+        },
+        "dosage": {
+          "type": "string",
+          "description": "The dosage of the medication (e.g., '1 comprimé', '10mg')."
+        },
+        "intakeTimes": {
+          "type": "array",
+          "description": "List of times to take the medication (e.g., ['08:00', '20:00']).",
+          "items": {
+            "type": "string",
+            "format": "time"
+          }
+        },
+        "quantity": {
+            "type": "number",
+            "description": "Total quantity of the medication remaining."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "dosage",
+        "intakeTimes"
+      ]
     }
   },
   "auth": {
@@ -280,6 +323,26 @@
             {
               "name": "contactId",
               "description": "The unique identifier of the emergency contact."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/medications/{medicationId}",
+        "definition": {
+          "entityName": "Medication",
+          "schema": {
+            "$ref": "#/backend/entities/Medication"
+          },
+          "description": "Stores medications for a specific user. Path-based ownership ensures only the user can manage their medication schedule.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "medicationId",
+              "description": "The unique identifier of the medication."
             }
           ]
         }

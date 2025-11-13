@@ -1,9 +1,10 @@
+
 /**
  * @fileoverview Firestore Security Rules for SanteConnect.
  *
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model for personal data
- * (users, appointments, emergency contacts) and restricts administrative
+ * (users, appointments, emergency contacts, medications) and restricts administrative
  * functions (medical professionals, holistic content) to authorized admins.
  * Admin privileges are determined by the existence of a document in the `/roles_admin/{userId}` collection.
  *
@@ -11,6 +12,7 @@
  * - /users/{userId}: User profile data, accessible only to the owning user.
  * - /users/{userId}/appointments/{appointmentId}: Appointments for a specific user, accessible only to that user.
  * - /users/{userId}/emergencyContacts/{contactId}: Emergency contacts for a specific user, accessible only to that user.
+ * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
  * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
  * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
  * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
@@ -76,6 +78,17 @@ service cloud.firestore {
       allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
       allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
       allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure medications for a specific user. Only the user can manage their medication schedule.
+     * @path /users/{userId}/medications/{medicationId}
+     * @allow (read, write) User with UID 'user123' can manage their own medication schedule.
+     * @deny (read, write) User with UID 'user456' cannot manage 'user123' medication schedule.
+     * @principle Enforces document ownership for all operations on medications.
+     */
+    match /users/{userId}/medications/{medicationId} {
+      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
     }
 
     /**
