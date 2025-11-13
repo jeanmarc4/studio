@@ -5,8 +5,7 @@
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model for personal data
  * (users, appointments, emergency contacts, medications) and restricts administrative
- * functions (medical professionals, holistic content) to authorized admins.
- * Admin privileges are determined by the existence of a document in the `/roles_admin/{userId}` collection.
+ * functions to a hardcoded list of authorized super-admins.
  *
  * Data Structure:
  * - /users/{userId}: User profile data, accessible only to the owning user.
@@ -18,23 +17,16 @@
  * - /users/{userId}/vaccines/{vaccineId}: Vaccine records for a specific user, accessible only to that user.
  * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
  * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
- * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
+ * - /roles_admin/{userId}: This collection is now effectively deprecated by hardcoded rules, but rules are kept for safety.
  * - /forumThreads/{threadId}: Publicly readable forum threads. Authenticated users can create/delete their own.
  * - /forumThreads/{threadId}/posts/{postId}: Publicly readable replies. Authenticated users can create/delete their own.
  * - /sosAlerts/{alertId}: SOS alerts triggered by users.
  *
  * Key Security Decisions:
+ * - Admin privileges are hardcoded to specific User IDs (UIDs) for maximum security.
+ * - The ability for users (even admins) to grant admin rights via the app is removed.
  * - User data is strictly private; listing all users is disallowed for non-admins.
- * - Admin privileges are granted based on the existence of a document in `/roles_admin/{userId}`.
- * - No custom claims are used.
  * - Data shape validation is relaxed to allow for rapid prototyping. Only critical authorization fields are validated.
- *
- * Denormalization for Authorization:
- * - User ownership is enforced through path-based matching (e.g., `/users/{userId}`).
- * - Admin status is determined by the presence of a document in the `/roles_admin/{userId}` collection.
- *
- * Structural Segregation:
- * - Private user data is stored in user-specific subcollections to prevent accidental public exposure.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -43,9 +35,6 @@ service cloud.firestore {
     /**
      * @description Secure user profiles. Only the authenticated user can access their own profile.
      * @path /users/{userId}
-     * @allow (read, write) User with UID 'user123' can read/write their own profile.
-     * @deny (read, write) User with UID 'user456' cannot read/write 'user123' profile.
-     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
       allow get, update: if isSignedIn() && isOwner(userId);
@@ -55,7 +44,6 @@ service cloud.firestore {
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
        * @path /users/{userId}/profiles/{profileId}
-       * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
         allow read, write: if isSignedIn() && isOwner(userId);
@@ -64,7 +52,6 @@ service cloud.firestore {
       /**
        * @description Secure appointments for a specific user. Only the user can manage their appointments.
        * @path /users/{userId}/appointments/{appointmentId}
-       * @principle Enforces document ownership for all operations on appointments.
        */
       match /appointments/{appointmentId} {
         allow read, write: if isSignedIn() && isOwner(userId);
@@ -73,7 +60,6 @@ service cloud.firestore {
       /**
        * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
        * @path /users/{userId}/emergencyContacts/{contactId}
-       * @principle Enforces document ownership for all operations on emergency contacts.
        */
       match /emergencyContacts/{contactId} {
         allow read, write: if isSignedIn() && isOwner(userId);
@@ -82,7 +68,6 @@ service cloud.firestore {
       /**
        * @description Secure medications for a specific user. Only the user can manage their medication schedule.
        * @path /users/{userId}/medications/{medicationId}
-       * @principle Enforces document ownership for all operations on medications.
        */
       match /medications/{medicationId} {
         allow read, write: if isSignedIn() && isOwner(userId);
@@ -91,7 +76,6 @@ service cloud.firestore {
        /**
        * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
        * @path /users/{userId}/prescriptions/{prescriptionId}
-       * @principle Enforces document ownership for all operations on prescriptions.
        */
       match /prescriptions/{prescriptionId} {
         allow read, write: if isSignedIn() && isOwner(userId);
@@ -100,7 +84,6 @@ service cloud.firestore {
       /**
        * @description Secure vaccine records for a specific user. Only the user can manage their records.
        * @path /users/{userId}/vaccines/{vaccineId}
-       * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
           allow read, write: if isSignedIn() && isOwner(userId);
@@ -111,7 +94,6 @@ service cloud.firestore {
     /**
      * @description Secure medical professional profiles. Only admins can create, update, or delete them.
      * @path /medicalProfessionals/{medicalProfessionalId}
-     * @principle Restricts administrative functions to authorized users.
      */
     match /medicalProfessionals/{medicalProfessionalId} {
       allow get, list: if true;
@@ -121,7 +103,6 @@ service cloud.firestore {
     /**
      * @description Secure holistic wellness content. Only admins can create, update, or delete content.
      * @path /holisticContent/{holisticContentId}
-     * @principle Restricts content management to authorized users.
      */
     match /holisticContent/{holisticContentId} {
       allow get, list: if true;
@@ -129,15 +110,12 @@ service cloud.firestore {
     }
 
     /**
-     * @description Secure admin role assignments.
+     * @description Secure admin role assignments. Writing to this collection is now disabled for clients.
      * @path /roles_admin/{userId}
-     * @principle Manages admin privileges through document existence.
      */
     match /roles_admin/{userId} {
-      allow get: if true;
-      // Allow any signed-in user to make themselves an admin for demo purposes.
-      allow create: if isSignedIn() && isOwner(userId); 
-      allow list, update, delete: if isAdmin();
+      allow get: if isAdmin();
+      allow list, write: if false; // All modifications must be done via hardcoded rules or backend.
     }
     
     /**
@@ -164,7 +142,6 @@ service cloud.firestore {
     /**
      * @description Secure SOS alerts.
      * @path /sosAlerts/{alertId}
-     * @principle Only authenticated users can create alerts for themselves. Alerts are immutable.
      */
     match /sosAlerts/{alertId} {
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
@@ -176,7 +153,6 @@ service cloud.firestore {
 
     /**
      * @description Checks if the user is signed in.
-     * @return {boolean} True if the user is authenticated, false otherwise.
      */
     function isSignedIn() {
       return request.auth != null;
@@ -184,21 +160,21 @@ service cloud.firestore {
 
     /**
      * @description Checks if the user is the owner of the document based on the user ID.
-     * @param {string} userId The user ID to compare against the authenticated user's UID.
-     * @return {boolean} True if the user is the owner, false otherwise.
      */
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
     /**
-     * @description Checks if the user has admin privileges by verifying the existence of a document in the /roles_admin/{userId} collection.
-     * @return {boolean} True if the user is an admin, false otherwise.
+     * @description Checks if the user has admin privileges by comparing their UID against a hardcoded list.
+     * This is the single source of truth for admin status.
      */
     function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      let adminUIDs = [
+          "k8pesCgwu5ewpR4S7IV36k3RG6w2",      // UID for diojm93@gmail.com
+          "REMPLACER_PAR_UID_DE_LUCEMOUCHE3" // IMPORTANT: Replace with the actual UID for lucemouche3@gmail.com
+      ];
+      return isSignedIn() && request.auth.uid in adminUIDs;
     }
   }
 }
-
-    
