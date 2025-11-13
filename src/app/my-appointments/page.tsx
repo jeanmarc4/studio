@@ -9,6 +9,9 @@ import type { Appointment, MedicalProfessional } from '@/docs/backend-documentat
 import { AppointmentCard } from './components/appointment-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CalendarOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { MyDoctorsList } from '@/app/my-health/components/my-doctors-list';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
@@ -83,10 +86,15 @@ export default function MyAppointmentsPage() {
     return (
        <div className="container mx-auto px-4 py-8">
          <Skeleton className="h-12 w-1/3 mb-8" />
-         <div className="space-y-4">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
+         <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+            <div className="lg:col-span-1 space-y-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+            </div>
          </div>
       </div>
     );
@@ -96,35 +104,45 @@ export default function MyAppointmentsPage() {
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8">
         <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-          Mes Rendez-vous
+          Mes Rendez-vous et Médecins
         </h1>
         <p className="mt-2 text-lg text-muted-foreground font-body">
-          Consultez et gérez vos prochains rendez-vous.
+          Consultez vos rendez-vous et la liste de vos professionnels de santé.
         </p>
       </header>
 
-      {isDataLoading ? (
-        <div className="space-y-4">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
+        <div className="grid gap-12 lg:grid-cols-3">
+            <main className="lg:col-span-2">
+                <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Historique des rendez-vous</h2>
+                {isDataLoading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-36 w-full" />
+                        <Skeleton className="h-36 w-full" />
+                        <Skeleton className="h-36 w-full" />
+                    </div>
+                ) : appointmentsWithProf.length > 0 ? (
+                    <div className="space-y-6">
+                    {appointmentsWithProf.map((apt) => (
+                        <AppointmentCard key={apt.id} appointment={apt} />
+                    ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                        <CalendarOff className="mx-auto h-12 w-12 text-muted-foreground" />
+                        <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun rendez-vous trouvé</h3>
+                        <p className="mt-2 text-sm text-muted-foreground">Vous n'avez pas encore de rendez-vous prévus.</p>
+                        <Button asChild className="mt-6">
+                            <Link href="/directory">Prendre un rendez-vous</Link>
+                        </Button>
+                    </div>
+                )}
+            </main>
+            <aside className="lg:col-span-1">
+                <div className="sticky top-24">
+                     <MyDoctorsList />
+                </div>
+            </aside>
         </div>
-      ) : appointmentsWithProf.length > 0 ? (
-        <div className="space-y-6">
-          {appointmentsWithProf.map((apt) => (
-            <AppointmentCard key={apt.id} appointment={apt} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-            <CalendarOff className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun rendez-vous trouvé</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Vous n'avez pas encore de rendez-vous prévus.</p>
-            <Button asChild className="mt-6">
-                <Link href="/directory">Prendre un rendez-vous</Link>
-            </Button>
-        </div>
-      )}
     </div>
   );
 }
