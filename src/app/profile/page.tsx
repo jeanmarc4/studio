@@ -18,7 +18,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { updateDocumentNonBlocking, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 
 const profileSchema = z.object({
@@ -77,11 +77,9 @@ export default function ProfilePage() {
 
     const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
     if (data.role === "Admin") {
-      // Use setDoc which is also non-blocking via our wrapper
-      setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' });
+      setDocumentNonBlocking(adminRoleDocRef, { userId: user.uid, role: 'admin' }, {});
     } else {
-      // deleteDoc is also non-blocking
-      deleteDoc(adminRoleDocRef);
+      deleteDocumentNonBlocking(adminRoleDocRef);
     }
     
     // Simulate save time for feedback
@@ -180,7 +178,7 @@ export default function ProfilePage() {
                       <FormLabel>Rôle</FormLabel>
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-muted-foreground" />
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Sélectionnez un rôle" />
@@ -222,5 +220,6 @@ export default function ProfilePage() {
     </div>
   );
 }
+
 
     
