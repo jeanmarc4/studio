@@ -1,11 +1,21 @@
+
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { WellnessArticle } from "@/lib/data";
+import type { HolisticContent } from "@/docs/backend-documentation";
+
+// Enriched type for display purposes
+type EnrichedHolisticContent = HolisticContent & {
+    image?: string;
+    imageHint?: string;
+    excerpt?: string;
+    readTime?: string;
+    category?: string;
+};
 
 interface ArticleCardProps {
-  article: WellnessArticle;
+  article: EnrichedHolisticContent;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
@@ -31,7 +41,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
       </CardContent>
       <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
         <span>{article.readTime}</span>
-        <Button variant="link" className="text-accent p-0">Lire la suite</Button>
+        <Button asChild variant="link" className="text-accent p-0">
+            <a href={article.url} target="_blank" rel="noopener noreferrer">Lire la suite</a>
+        </Button>
       </CardFooter>
     </Card>
   );
