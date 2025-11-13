@@ -34,21 +34,22 @@ export default function AdminPage() {
   }, [firestore, user]);
 
   const { data: adminRole, isLoading: isAdminRoleLoading } = useDoc(adminRoleRef);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-
-
+  
   useEffect(() => {
     const isAuthenticating = isUserLoading || isAdminRoleLoading;
-    if (!isAuthenticating) {
-      if (!user) {
-        router.push('/auth/login');
-      } else if (!adminRole) {
-        console.log("Accès non autorisé, redirection...");
-        router.push('/'); 
-      } else {
-        setIsAuthorized(true);
-      }
+    if (isAuthenticating) {
+      return; // Do nothing while loading
     }
+    
+    if (!user) {
+      // If not logged in after loading, redirect to login
+      router.push('/auth/login');
+    } else if (!adminRole) {
+      // If logged in but not an admin after loading, redirect to home
+      console.log("Accès non autorisé, redirection...");
+      router.push('/'); 
+    }
+    // If user is logged in and is an admin, do nothing and let the page render.
   }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
   // Data fetching
@@ -122,7 +123,8 @@ export default function AdminPage() {
 
   const isLoading = isUserLoading || isAdminRoleLoading;
 
-  if (isLoading || !isAuthorized) {
+  // Show a loading skeleton if we are authenticating OR if we are logged in as admin but still fetching page data
+  if (isLoading || !adminRole) {
     return (
       <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
         <div className="flex items-center mb-8">
