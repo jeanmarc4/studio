@@ -8,8 +8,19 @@
  * - ChatOutput - Le type de retour pour la fonction.
  */
 
-import { ai, ensureApiKey } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+
+function ensureApiKey() {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+  if (!geminiApiKey) {
+    throw new Error(
+      "La variable d'environnement GEMINI_API_KEY est manquante. " +
+      "Veuillez l'ajouter à votre fichier .env et redémarrer le serveur. " +
+      "Vous pouvez obtenir une clé depuis Google AI Studio."
+    );
+  }
+}
 
 const ChatInputSchema = z.object({
   history: z.array(z.object({
@@ -36,7 +47,7 @@ const mentalCareChatFlow = ai.defineFlow(
   },
   async ({ history }) => {
     ensureApiKey(); // Vérifie la présence de la clé API
-
+    
     const { text } = await ai.generate({
       system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 

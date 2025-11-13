@@ -8,8 +8,19 @@
  * - SymptomCheckerOutput - Le type de retour pour la fonction.
  */
 
-import { ai, ensureApiKey } from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+
+function ensureApiKey() {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+  if (!geminiApiKey) {
+    throw new Error(
+      "La variable d'environnement GEMINI_API_KEY est manquante. " +
+      "Veuillez l'ajouter à votre fichier .env et redémarrer le serveur. " +
+      "Vous pouvez obtenir une clé depuis Google AI Studio."
+    );
+  }
+}
 
 const SymptomCheckerInputSchema = z.object({
   history: z.array(z.object({
@@ -38,7 +49,7 @@ const symptomCheckerFlow = ai.defineFlow(
   },
   async ({ history }) => {
     ensureApiKey(); // Vérifie la présence de la clé API
-
+    
     const { text } = await ai.generate({
       system: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 
