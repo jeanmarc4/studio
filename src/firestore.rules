@@ -50,52 +50,54 @@ service cloud.firestore {
       allow create: if isSignedIn() && isOwner(userId);
       allow list: if isAdmin(); // Only admins can list users.
 
-      /**
-       * @description Secure family profiles. Only the parent user can manage their family profiles.
-       * @path /users/{userId}/profiles/{profileId}
-       */
+      // --- Subcollections ---
+
+      // Profiles
       match /profiles/{profileId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /profiles {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
-      /**
-       * @description Secure appointments. Only the user can manage their appointments.
-       * @path /users/{userId}/appointments/{appointmentId}
-       */
+      // Appointments
       match /appointments/{appointmentId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /appointments {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
-      /**
-       * @description Secure emergency contacts. Only the user can manage their contacts.
-       * @path /users/{userId}/emergencyContacts/{contactId}
-       */
+      // Emergency Contacts
       match /emergencyContacts/{contactId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /emergencyContacts {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
-      /**
-       * @description Secure medications. Only the user can manage their medication schedule.
-       * @path /users/{userId}/medications/{medicationId}
-       */
+      // Medications
       match /medications/{medicationId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /medications {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
-      /**
-       * @description Secure prescriptions. Only the user can manage their prescriptions.
-       * @path /users/{userId}/prescriptions/{prescriptionId}
-       */
+      // Prescriptions
       match /prescriptions/{prescriptionId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /prescriptions {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
       
-      /**
-       * @description Secure vaccine records. Only the user can manage their records.
-       * @path /users/{userId}/vaccines/{vaccineId}
-       */
+      // Vaccines
       match /vaccines/{vaccineId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /vaccines {
+          allow list, create: if isSignedIn() && isOwner(userId);
       }
     }
 
@@ -143,7 +145,10 @@ service cloud.firestore {
          * @path /forumThreads/{threadId}/posts/{postId}
          */
         match /posts/{postId} {
-            allow read, write: if isSignedIn();
+          allow get, update, delete: if isSignedIn();
+        }
+        match /posts {
+            allow list, create: if isSignedIn();
         }
     }
 
