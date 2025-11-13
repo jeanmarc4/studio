@@ -68,7 +68,7 @@ const vocalReminderFlow = ai.defineFlow(
     outputSchema: VocalReminderOutputSchema,
   },
   async ({medicationName, dosage}) => {
-    const prompt = `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${dosage} de ${medicationName}. Prenez bien soin de vous !`;
+    const prompt = `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${medicationName}. Prenez bien soin de vous !`;
 
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',

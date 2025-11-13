@@ -115,11 +115,6 @@ export default function PrescriptionsPage() {
       intakeTimes: convertIntakeTimes(medication.intakeTimes),
     };
     addDocumentNonBlocking(medicationsRef, newMed);
-    
-    toast({
-      title: "Médicament ajouté",
-      description: `${medication.name} a été ajouté au traitement de ${activeProfile.name}.`,
-    });
   };
 
   if (isLoading || !user || !activeProfile) {
@@ -196,4 +191,3 @@ export default function PrescriptionsPage() {
     </>
   );
 }
-
