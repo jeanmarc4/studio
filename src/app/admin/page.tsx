@@ -11,7 +11,7 @@ import { Dashboard } from "./components/dashboard";
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from '@/docs/backend-documentation';
-import { deleteDocumentNonBlocking, updateDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { deleteDocumentNonBlocking, updateDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { AddUserDialog } from "./components/add-user-dialog";
 
 export default function AdminPage() {
@@ -51,12 +51,11 @@ export default function AdminPage() {
 
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
-  const handleAddUser = (newUser: Omit<User, "id">) => {
+  const handleAddUser = (newUser: User) => {
     if (!firestore) return;
-    const usersCollection = collection(firestore, 'users');
-    // In a real app, you would create an auth user first and get the UID.
-    // For this example, we'll use a placeholder ID and assume auth is handled separately.
-    addDocumentNonBlocking(usersCollection, newUser);
+    // We use the ID generated in the dialog as the document ID
+    const userDocRef = doc(firestore, 'users', newUser.id);
+    setDocumentNonBlocking(userDocRef, newUser, {});
   };
 
   const handleDeleteUser = (userId: string) => {

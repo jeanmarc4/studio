@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,13 +36,13 @@ import { useToast } from "@/hooks/use-toast";
 import type { User } from "@/docs/backend-documentation";
 
 const userSchema = z.object({
-  firstName: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères." }),
+  firstName: z.string().min(2, { message: "Le prénom doit comporter au moins 2 caractères." }),
   lastName: z.string().min(2, { message: "Le nom de famille doit comporter au moins 2 caractères." }),
   email: z.string().email({ message: "Adresse email invalide." }),
   role: z.enum(["Admin", "Standard", "Premium"]),
 });
 
-type NewUser = Omit<User, "id">;
+type NewUser = Omit<User, "id"> & { id: string };
 
 interface AddUserDialogProps {
   isOpen: boolean;
@@ -65,17 +66,21 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
 
   async function onSubmit(values: z.infer<typeof userSchema>) {
     setIsLoading(true);
-    // In a real app, you'd also create a Firebase Auth user.
-    // For simplicity, we're just adding to the Firestore collection for now.
+    // Simuler un appel API
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    onUserAdd(values);
+    // Pour cet exemple, nous allons générer un ID aléatoire car nous ne créons pas
+    // un utilisateur d'authentification réel qui nous fournirait un UID.
+    // L'utilisateur devra s'inscrire séparément pour créer un compte d'authentification.
+    const newUser: NewUser = { ...values, id: uuidv4() };
+    
+    onUserAdd(newUser);
     
     setIsLoading(false);
     onOpenChange(false);
     toast({
       title: "Utilisateur ajouté",
-      description: `${values.firstName} ${values.lastName} a été ajouté à la plateforme.`,
+      description: `Le profil de ${values.firstName} ${values.lastName} a été ajouté. L'utilisateur devra s'inscrire pour créer un compte.`,
     });
     form.reset();
   }
@@ -91,9 +96,9 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
+          <DialogTitle>Ajouter un profil utilisateur</DialogTitle>
           <DialogDescription>
-            Remplissez les détails pour ajouter un nouvel utilisateur. Notez que cela ne crée pas de compte d'authentification pour l'instant.
+            Créez un profil pour un nouvel utilisateur. Notez que cela ne crée pas de compte de connexion ; l'utilisateur devra s'inscrire séparément.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -172,7 +177,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
                     Ajout en cours...
                   </>
                 ) : (
-                  "Ajouter un utilisateur"
+                  "Ajouter un profil"
                 )}
               </Button>
             </DialogFooter>
