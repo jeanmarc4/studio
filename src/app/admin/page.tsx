@@ -11,11 +11,13 @@ import { RoleConfiguration } from "./components/role-configuration";
 import { Dashboard } from "./components/dashboard";
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
-import type { User, MedicalProfessional } from '@/docs/backend-documentation';
+import type { User, MedicalProfessional, HolisticContent } from '@/docs/backend-documentation';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { AddUserDialog } from "./components/add-user-dialog";
 import { ProfessionalManagement } from "./components/professional-management";
 import { AddProfessionalDialog } from "./components/add-professional-dialog";
+import { HolisticContentManagement } from "./components/holistic-content-management";
+import { AddHolisticContentDialog } from "./components/add-holistic-content-dialog";
 
 export default function AdminPage() {
   const { user, isUserLoading, firestore } = useFirebase();
@@ -23,6 +25,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isAddProfessionalDialogOpen, setIsAddProfessionalDialogOpen] = useState(false);
+  const [isAddContentDialogOpen, setIsAddContentDialogOpen] = useState(false);
 
   // Check for admin role
   const adminRoleRef = useMemoFirebase(() => {
@@ -51,9 +54,11 @@ export default function AdminPage() {
   // Data fetching
   const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
   const professionalsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'medicalProfessionals') : null, [firestore]);
+  const contentQuery = useMemoFirebase(() => firestore ? collection(firestore, 'holisticContent') : null, [firestore]);
 
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
   const { data: professionals, isLoading: areProfessionalsLoading } = useCollection<MedicalProfessional>(professionalsQuery);
+  const { data: holisticContent, isLoading: areContentLoading } = useCollection<HolisticContent>(contentQuery);
 
   // User management handlers
   const handleAddUser = (newUser: User) => {
@@ -95,6 +100,23 @@ export default function AdminPage() {
     if (!firestore) return;
     updateDocumentNonBlocking(doc(firestore, 'medicalProfessionals', professionalId), data);
   };
+  
+  // Holistic Content management handlers
+  const handleAddHolisticContent = (newContent: HolisticContent) => {
+    if (!firestore) return;
+    const contentDocRef = doc(firestore, 'holisticContent', newContent.id);
+    setDocumentNonBlocking(contentDocRef, newContent, {});
+  };
+
+  const handleDeleteHolisticContent = (contentId: string) => {
+    if (!firestore) return;
+    deleteDocumentNonBlocking(doc(firestore, 'holisticContent', contentId));
+  };
+  
+  const handleUpdateHolisticContent = (contentId: string, data: Partial<HolisticContent>) => {
+    if (!firestore) return;
+    updateDocumentNonBlocking(doc(firestore, 'holisticContent', contentId), data);
+  };
 
 
   const isLoading = isUserLoading || isAdminRoleLoading;
@@ -121,6 +143,7 @@ export default function AdminPage() {
                   <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
                   <TabsTrigger value="users">Utilisateurs</TabsTrigger>
                   <TabsTrigger value="professionals">Professionnels</TabsTrigger>
+                  <TabsTrigger value="articles">Articles</TabsTrigger>
                   <TabsTrigger value="roles">Rôles</TabsTrigger>
                 </TabsList>
                 <div className="ml-auto flex items-center gap-2">
@@ -132,6 +155,11 @@ export default function AdminPage() {
                   {activeTab === 'professionals' && (
                     <Button size="sm" onClick={() => setIsAddProfessionalDialogOpen(true)}>
                       Ajouter un professionnel
+                    </Button>
+                  )}
+                  {activeTab === 'articles' && (
+                    <Button size="sm" onClick={() => setIsAddContentDialogOpen(true)}>
+                      Ajouter un article
                     </Button>
                   )}
                 </div>
@@ -155,6 +183,14 @@ export default function AdminPage() {
                   isLoading={areProfessionalsLoading}
                 />
               </TabsContent>
+               <TabsContent value="articles">
+                 <HolisticContentManagement
+                  articles={holisticContent || []}
+                  onDeleteArticle={handleDeleteHolisticContent}
+                  onUpdateArticle={handleUpdateHolisticContent}
+                  isLoading={areContentLoading}
+                />
+              </TabsContent>
               <TabsContent value="roles">
                 <RoleConfiguration />
               </TabsContent>
@@ -172,6 +208,13 @@ export default function AdminPage() {
         onOpenChange={setIsAddProfessionalDialogOpen}
         onProfessionalAdd={handleAddProfessional}
       />
+      <AddHolisticContentDialog
+        isOpen={isAddContentDialogOpen}
+        onOpenChange={setIsAddContentDialogOpen}
+        onArticleAdd={handleAddHolisticContent}
+      />
     </>
   );
 }
+
+    
