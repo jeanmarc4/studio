@@ -1,53 +1,43 @@
 import type { NavItem } from "@/types";
 import { getImage } from "@/lib/placeholder-images";
-import type { MedicalProfessional } from "@/docs/backend-documentation";
 
-export const doctors: (Omit<MedicalProfessional, 'type' | 'phone' | 'location'> & { rating: number, reviews: number, availability: string[], image: string | undefined, imageHint: string | undefined })[] = [
+// Ces données sont statiques et utilisées pour enrichir les données des médecins provenant de Firestore,
+// car des champs comme rating, reviews, image etc. ne sont pas dans notre schéma de base de données.
+export const staticDoctorImages = [
   {
     id: '1',
-    name: 'Dr. Évelyne Reed',
-    specialty: 'Cardiologue',
-    address: 'Springfield, IL',
-    availability: ['Lundi', 'Mercredi', 'Vendredi'],
     rating: 4.9,
     reviews: 124,
+    availability: ['Lundi', 'Mercredi', 'Vendredi'],
     image: getImage('doctor-1')?.imageUrl,
     imageHint: getImage('doctor-1')?.imageHint
   },
   {
     id: '2',
-    name: 'Dr. Marcus Thorne',
-    specialty: 'Neurologue',
-    address: 'Metropolis, NY',
-    availability: ['Mardi', 'Jeudi'],
     rating: 4.8,
     reviews: 98,
+    availability: ['Mardi', 'Jeudi'],
     image: getImage('doctor-2')?.imageUrl,
     imageHint: getImage('doctor-2')?.imageHint
   },
   {
     id: '3',
-    name: 'Dr. Lena Petrova',
-    specialty: 'Pédiatre',
-    address: 'Gotham, NJ',
-    availability: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'],
     rating: 5.0,
     reviews: 210,
+    availability: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'],
     image: getImage('doctor-3')?.imageUrl,
     imageHint: getImage('doctor-3')?.imageHint
   },
   {
     id: '4',
-    name: 'Dr. Samuel Chen',
-    specialty: 'Dermatologue',
-    address: 'Star City, CA',
-    availability: ['Mercredi', 'Vendredi'],
     rating: 4.7,
     reviews: 76,
+    availability: ['Mercredi', 'Vendredi'],
     image: getImage('doctor-4')?.imageUrl,
     imageHint: getImage('doctor-4')?.imageHint
   },
 ];
+
 
 export const wellnessArticles = [
   {
@@ -111,5 +101,4 @@ export const mainNav: NavItem[] = [
   },
 ];
 
-export type Doctor = typeof doctors[0];
 export type WellnessArticle = typeof wellnessArticles[0];

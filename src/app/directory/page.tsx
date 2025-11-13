@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
@@ -9,48 +9,10 @@ import { DoctorCard } from "./components/doctor-card";
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { MedicalProfessional } from '@/docs/backend-documentation';
-import { doctors as staticDoctors } from "@/lib/data";
-import { Button } from '@/components/ui/button';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { staticDoctorImages } from "@/lib/data";
 import { Skeleton } from '@/components/ui/skeleton';
+import type { PopulatedMedicalProfessional } from '@/types';
 
-// Temporary component to handle data migration
-function DataMigrator() {
-  const { firestore } = useFirebase();
-  const [migrationDone, setMigrationDone] = useState(false);
-
-  const handleMigration = () => {
-    if (!firestore) return;
-    
-    console.log("Démarrage de la migration des médecins...");
-    
-    staticDoctors.forEach(doctor => {
-      // Omettons les champs qui ne sont pas dans le schéma MedicalProfessional
-      const { rating, reviews, availability, image, imageHint, ...professionalData } = doctor;
-      const professionalDoc: Omit<MedicalProfessional, "type" | "phone" | "location"> = {
-        ...professionalData,
-        type: 'doctor', // Ajoutons une valeur par défaut pour le type
-      };
-      
-      const docRef = doc(firestore, "medicalProfessionals", professionalData.id);
-      setDocumentNonBlocking(docRef, professionalDoc, { merge: true });
-    });
-    
-    console.log("Migration terminée !");
-    setMigrationDone(true);
-  };
-
-  return (
-      <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 p-4 rounded-md my-8 max-w-2xl mx-auto text-center">
-          <p className="font-semibold">Action requise : Migration de données</p>
-          <p className="text-sm mb-4">Cliquez sur le bouton pour migrer les profils de médecins statiques vers la base de données Firestore.</p>
-          <Button onClick={handleMigration} disabled={migrationDone} variant="secondary">
-              {migrationDone ? "Migration réussie !" : "Migrer les données des médecins"}
-          </Button>
-          {migrationDone && <p className="text-xs mt-2">Vous pouvez maintenant supprimer le composant DataMigrator de `src/app/directory/page.tsx`.</p>}
-      </div>
-  );
-}
 
 export default function DirectoryPage() {
   const { firestore } = useFirebase();
@@ -65,9 +27,10 @@ export default function DirectoryPage() {
   const doctors = useMemo(() => {
     if (!professionals) return [];
     return professionals.map(prof => {
-      const staticDoctor = staticDoctors.find(d => d.id === prof.id);
+      const staticDoctor = staticDoctorImages.find(d => d.id === prof.id);
       return {
         ...prof,
+        // Ces champs n'existent pas dans le schéma, nous les ajoutons pour l'affichage
         rating: staticDoctor?.rating || 4.5,
         reviews: staticDoctor?.reviews || 0,
         availability: staticDoctor?.availability || [],
@@ -83,9 +46,6 @@ export default function DirectoryPage() {
         <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">Annuaire Médical</h1>
         <p className="mt-2 text-lg text-muted-foreground font-body">Trouvez le professionnel de la santé qui répond à vos besoins.</p>
       </header>
-
-      {/* Le composant de migration est ajouté ici temporairement */}
-      <DataMigrator />
 
       <div className="mb-8 max-w-2xl mx-auto">
         <div className="relative">
@@ -111,7 +71,7 @@ export default function DirectoryPage() {
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {doctors.map((doctor) => (
-                <DoctorCard key={doctor.id} doctor={doctor as any} />
+                <DoctorCard key={doctor.id} doctor={doctor as PopulatedMedicalProfessional} />
               ))}
             </div>
           )}

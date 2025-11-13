@@ -7,7 +7,7 @@ import { Calendar, Clock, Stethoscope, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Appointment, MedicalProfessional } from '@/docs/backend-documentation';
-import { doctors } from '@/lib/data';
+import { staticDoctorImages } from '@/lib/data';
 import Image from 'next/image';
 
 type AppointmentWithProfessional = Appointment & {
@@ -37,7 +37,7 @@ export function AppointmentCard({ appointment }: AppointmentCardProps) {
   };
 
   const getDoctorImage = (professionalId: string) => {
-    const doctor = doctors.find(d => d.id === professionalId);
+    const doctor = staticDoctorImages.find(d => d.id === professionalId);
     return doctor ? { src: doctor.image, hint: doctor.imageHint } : null;
   }
 

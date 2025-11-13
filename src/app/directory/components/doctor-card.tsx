@@ -8,12 +8,12 @@ import { Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Doctor } from "@/lib/data";
 import { AppointmentDialog } from "./appointment-dialog";
 import { useFirebase } from "@/firebase";
+import type { PopulatedMedicalProfessional } from "@/types";
 
 interface DoctorCardProps {
-  doctor: Doctor;
+  doctor: PopulatedMedicalProfessional;
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {

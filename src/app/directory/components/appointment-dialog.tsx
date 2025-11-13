@@ -30,14 +30,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import type { Doctor } from "@/lib/data";
 import { useFirebase } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import type { Appointment } from "@/docs/backend-documentation";
+import type { PopulatedMedicalProfessional } from "@/types";
 
 interface AppointmentDialogProps {
-  doctor: Doctor;
+  doctor: PopulatedMedicalProfessional;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
 }
