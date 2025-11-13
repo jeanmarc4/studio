@@ -60,9 +60,9 @@ export default function ProfilePage() {
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
   
-  const medicationsQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'medications'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
-  const appointmentsQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'appointments'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
-  const vaccinesQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'vaccines'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
+  const medicationsQuery = useMemoFirebase(() => (firestore && user && activeProfile) ? query(collection(firestore, 'users', user.uid, 'medications'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
+  const appointmentsQuery = useMemoFirebase(() => (firestore && user && activeProfile) ? query(collection(firestore, 'users', user.uid, 'appointments'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
+  const vaccinesQuery = useMemoFirebase(() => (firestore && user && activeProfile) ? query(collection(firestore, 'users', user.uid, 'vaccines'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
   const contactsQuery = useMemoFirebase(() => (firestore && user) ? collection(firestore, 'users', user.uid, 'emergencyContacts') : null, [firestore, user]);
 
   const { data: medications } = useCollection<Medication>(medicationsQuery);
