@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Medication } from '@/types';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebase } from '@/firebase';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import {
@@ -23,7 +23,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { User } from '@/docs/backend-documentation';
-import { useDoc, useMemoFirebase } from '@/firebase/firestore/use-doc';
 import { getVocalReminder } from '@/ai/flows/get-vocal-reminder-flow';
 
 interface MedicationCardProps {
