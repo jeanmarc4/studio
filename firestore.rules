@@ -39,7 +39,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow get, update: if isSignedIn() && isOwner(userId);
       allow create: if isSignedIn();
-      allow list, delete: if isAdmin();
+      allow list: if isAdmin();
+      allow delete: if isAdmin();
 
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
@@ -114,7 +115,7 @@ service cloud.firestore {
      * @path /roles_admin/{userId}
      */
     match /roles_admin/{userId} {
-      allow get: if isAdmin();
+      allow get: if isSignedIn() && isOwner(userId);
       allow list, write: if false; // All modifications must be done via hardcoded rules or backend.
     }
     
@@ -172,7 +173,7 @@ service cloud.firestore {
     function isAdmin() {
       let adminUIDs = [
           "k8pesCgwu5ewpR4S7IV36k3RG6w2",      // UID for diojm93@gmail.com
-          "REMPLACER_PAR_UID_DE_LUCEMOUCHE3" // IMPORTANT: Replace with the actual UID for lucemouche3@gmail.com
+          "gLoqR1BkL4UleNRQSVOR2yeHcp13" // UID for lucemouche3@gmail.com
       ];
       return isSignedIn() && request.auth.uid in adminUIDs;
     }
