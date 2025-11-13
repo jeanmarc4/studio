@@ -6,7 +6,7 @@ import { Header } from '@/components/layout/header';
 
 export const metadata: Metadata = {
   title: 'SanteConnect',
-  description: 'Your modern health companion for appointments, symptom checking, and wellness.',
+  description: 'Votre compagnon de santé moderne pour les rendez-vous, la vérification des symptômes et le bien-être.',
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -12,33 +12,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { aiSymptomChecker, AISymptomCheckerOutput } from "@/ai/ai-symptom-checker";
 
 const formSchema = z.object({
   symptoms: z.string().min(10, {
-    message: "Please describe your symptoms in at least 10 characters.",
+    message: "Veuillez décrire vos symptômes en au moins 10 caractères.",
   }),
 });
 
-type SymptomCheckResult = {
-  conditions: {
-    name: string;
-    probability: string;
-  }[];
-  triage: string;
-};
-
-const mockResult: SymptomCheckResult = {
-  conditions: [
-    { name: "Common Cold", probability: "High" },
-    { name: "Allergic Rhinitis", probability: "Medium" },
-    { name: "Influenza", probability: "Low" },
-  ],
-  triage: "Self-care recommended. Consult a doctor if symptoms worsen.",
-};
 
 export function SymptomCheckerForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<SymptomCheckResult | null>(null);
+  const [result, setResult] = useState<AISymptomCheckerOutput | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,9 +35,8 @@ export function SymptomCheckerForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setResult(null);
-    // Simulate GenAI flow call
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    setResult(mockResult);
+    const aiResult = await aiSymptomChecker(values);
+    setResult(aiResult);
     setIsLoading(false);
   }
 
@@ -62,7 +46,7 @@ export function SymptomCheckerForm() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 font-headline">
             <Sparkles className="text-accent" />
-            <span>Describe Your Symptoms</span>
+            <span>Décrivez Vos Symptômes</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -73,10 +57,10 @@ export function SymptomCheckerForm() {
                 name="symptoms"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Symptoms</FormLabel>
+                    <FormLabel>Symptômes</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="e.g., 'I have a sore throat, runny nose, and a slight fever for the past 2 days.'"
+                        placeholder="Ex : 'J'ai mal à la gorge, le nez qui coule et une légère fièvre depuis 2 jours.'"
                         className="min-h-[120px] text-base"
                         {...field}
                       />
@@ -89,10 +73,10 @@ export function SymptomCheckerForm() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Analyzing...
+                    Analyse en cours...
                   </>
                 ) : (
-                  "Analyze Symptoms"
+                  "Analyser les symptômes"
                 )}
               </Button>
             </form>
@@ -103,29 +87,18 @@ export function SymptomCheckerForm() {
       {result && (
         <Card className="max-w-2xl mx-auto mt-8 animate-in fade-in-50">
           <CardHeader>
-            <CardTitle className="font-headline">Analysis Results</CardTitle>
+            <CardTitle className="font-headline">Résultats de l'analyse</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-2">Possible Conditions:</h3>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                {result.conditions.map((condition) => (
-                  <li key={condition.name}>
-                    <span className="text-foreground">{condition.name}</span> - Probability: {condition.probability}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <Separator />
-            <div>
-              <h3 className="font-semibold mb-2 flex items-center gap-2"><Lightbulb className="h-4 w-4"/>Recommendation:</h3>
-              <p className="text-muted-foreground">{result.triage}</p>
+              <h3 className="font-semibold mb-2">Diagnostics possibles :</h3>
+              <p className="text-muted-foreground">{result.possibleDiagnoses}</p>
             </div>
             <Alert variant="destructive" className="mt-4">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Disclaimer</AlertTitle>
+              <AlertTitle>Avertissement</AlertTitle>
               <AlertDescription>
-                This is not a medical diagnosis. This tool is for informational purposes only. Please consult with a healthcare professional for accurate medical advice.
+                Ceci n'est pas un diagnostic médical. Cet outil est à titre informatif uniquement. Veuillez consulter un professionnel de la santé pour un avis médical précis.
               </AlertDescription>
             </Alert>
           </CardContent>

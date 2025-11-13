@@ -54,8 +54,8 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
     if (user.role === 'Super Admin') {
         toast({
             variant: "destructive",
-            title: "Permission Denied",
-            description: "The Super Admin account cannot be deleted."
+            title: "Permission refusée",
+            description: "Le compte Super Admin ne peut pas être supprimé."
         });
         return;
     }
@@ -67,8 +67,8 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
     if (userToDelete) {
       onDeleteUser(userToDelete.id);
       toast({
-        title: "User Deleted",
-        description: `${userToDelete.name} has been removed from the platform.`
+        title: "Utilisateur supprimé",
+        description: `${userToDelete.name} a été supprimé de la plateforme.`
       });
       setUserToDelete(null);
     }
@@ -79,18 +79,18 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Users</CardTitle>
+          <CardTitle>Utilisateurs</CardTitle>
           <CardDescription>
-            Manage platform users and their permissions.
+            Gérez les utilisateurs de la plateforme et leurs autorisations.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nom</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
+                <TableHead>Rôle</TableHead>
                 <TableHead>
                   <span className="sr-only">Actions</span>
                 </TableHead>
@@ -111,19 +111,19 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
+                          <span className="sr-only">Ouvrir/fermer le menu</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit User
+                            Modifier l'utilisateur
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                             <Trash2 className="mr-2 h-4 w-4" />
-                            Delete User
+                            Supprimer l'utilisateur
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -140,16 +140,16 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <ShieldAlert className="h-6 w-6 text-destructive" />
-              Are you absolutely sure?
+              Êtes-vous absolument sûr ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user account for <span className="font-semibold">{userToDelete?.name}</span> and remove their access to the platform.
+              Cette action ne peut pas être annulée. Cela supprimera définitivement le compte de l'utilisateur <span className="font-semibold">{userToDelete?.name}</span> et supprimera son accès à la plateforme.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} variant="destructive">
-              Yes, delete user
+              Oui, supprimer l'utilisateur
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

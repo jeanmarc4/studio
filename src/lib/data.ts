@@ -4,10 +4,10 @@ import { getImage } from "@/lib/placeholder-images";
 export const doctors = [
   {
     id: '1',
-    name: 'Dr. Evelyn Reed',
-    specialty: 'Cardiologist',
+    name: 'Dr. Évelyne Reed',
+    specialty: 'Cardiologue',
     location: 'Springfield, IL',
-    availability: ['Monday', 'Wednesday', 'Friday'],
+    availability: ['Lundi', 'Mercredi', 'Vendredi'],
     rating: 4.9,
     reviews: 124,
     image: getImage('doctor-1')?.imageUrl,
@@ -16,9 +16,9 @@ export const doctors = [
   {
     id: '2',
     name: 'Dr. Marcus Thorne',
-    specialty: 'Neurologist',
+    specialty: 'Neurologue',
     location: 'Metropolis, NY',
-    availability: ['Tuesday', 'Thursday'],
+    availability: ['Mardi', 'Jeudi'],
     rating: 4.8,
     reviews: 98,
     image: getImage('doctor-2')?.imageUrl,
@@ -27,9 +27,9 @@ export const doctors = [
   {
     id: '3',
     name: 'Dr. Lena Petrova',
-    specialty: 'Pediatrician',
+    specialty: 'Pédiatre',
     location: 'Gotham, NJ',
-    availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    availability: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'],
     rating: 5.0,
     reviews: 210,
     image: getImage('doctor-3')?.imageUrl,
@@ -38,9 +38,9 @@ export const doctors = [
   {
     id: '4',
     name: 'Dr. Samuel Chen',
-    specialty: 'Dermatologist',
+    specialty: 'Dermatologue',
     location: 'Star City, CA',
-    availability: ['Wednesday', 'Friday'],
+    availability: ['Mercredi', 'Vendredi'],
     rating: 4.7,
     reviews: 76,
     image: getImage('doctor-4')?.imageUrl,
@@ -51,61 +51,61 @@ export const doctors = [
 export const wellnessArticles = [
   {
     id: '1',
-    title: 'The Art of Mindfulness in a Busy World',
-    category: 'Mental Wellness',
+    title: "L'art de la pleine conscience dans un monde occupé",
+    category: 'Bien-être Mental',
     author: 'Jane Doe',
     date: '2024-05-15',
-    readTime: '7 min read',
+    readTime: '7 min de lecture',
     image: getImage('wellness-1')?.imageUrl,
     imageHint: getImage('wellness-1')?.imageHint,
-    excerpt: 'Learn how to practice mindfulness and reduce stress even on your busiest days. Simple techniques for a calmer mind.'
+    excerpt: "Apprenez à pratiquer la pleine conscience et à réduire le stress même les jours les plus chargés. Des techniques simples pour un esprit plus calme."
   },
   {
     id: '2',
-    title: 'Superfoods: What to Eat for a Healthier You',
+    title: "Superaliments : que manger pour être en meilleure santé",
     category: 'Nutrition',
     author: 'John Smith',
     date: '2024-05-12',
-    readTime: '10 min read',
+    readTime: '10 min de lecture',
     image: getImage('wellness-2')?.imageUrl,
     imageHint: getImage('wellness-2')?.imageHint,
-    excerpt: 'A deep dive into the most nutrient-dense foods that can boost your immune system and overall health.'
+    excerpt: "Une analyse approfondie des aliments les plus riches en nutriments qui peuvent renforcer votre système immunitaire et votre santé globale."
   },
   {
     id: '3',
-    title: 'Beginner\'s Guide to Yoga for Flexibility',
+    title: "Guide du débutant pour le yoga pour la flexibilité",
     category: 'Fitness',
     author: 'Priya Patel',
     date: '2024-05-10',
-    readTime: '12 min read',
+    readTime: '12 min de lecture',
     image: getImage('wellness-3')?.imageUrl,
     imageHint: getImage('wellness-3')?.imageHint,
-    excerpt: 'Start your yoga journey with these fundamental poses designed to improve flexibility and strength.'
+    excerpt: "Commencez votre voyage de yoga avec ces poses fondamentales conçues pour améliorer la flexibilité et la force."
   },
   {
     id: '4',
-    title: 'The Science of Sleep: How to Get a Good Night\'s Rest',
-    category: 'Holistic Health',
+    title: "La science du sommeil : comment passer une bonne nuit de repos",
+    category: 'Santé Holistique',
     author: 'Dr. Alan Grant',
     date: '2024-05-08',
-    readTime: '8 min read',
+    readTime: '8 min de lecture',
     image: getImage('wellness-4')?.imageUrl,
     imageHint: getImage('wellness-4')?.imageHint,
-    excerpt: 'Understand the importance of sleep hygiene and discover tips for falling asleep faster and staying asleep longer.'
+    excerpt: "Comprenez l'importance de l'hygiène du sommeil et découvrez des conseils pour vous endormir plus rapidement et rester endormi plus longtemps."
   },
 ];
 
 export const mainNav: NavItem[] = [
   {
-    title: "Directory",
+    title: "Annuaire",
     href: "/directory",
   },
   {
-    title: "Symptom Checker",
+    title: "Vérificateur de symptômes",
     href: "/symptom-checker",
   },
   {
-    title: "Wellness",
+    title: "Bien-être",
     href: "/wellness",
   },
 ];
@@ -116,24 +116,24 @@ export const adminUsers = [
         name: 'Admin 1',
         email: 'admin1@santeconnect.com',
         role: 'Super Admin',
-        status: 'Active',
-        lastLogin: '2024-05-21 10:00 AM'
+        status: 'Actif',
+        lastLogin: '2024-05-21 10:00'
     },
     {
         id: '2',
-        name: 'Dr. Evelyn Reed',
+        name: 'Dr. Évelyne Reed',
         email: 'e.reed@santeconnect.com',
         role: 'Admin',
-        status: 'Active',
-        lastLogin: '2024-05-20 03:45 PM'
+        status: 'Actif',
+        lastLogin: '2024-05-20 15:45'
     },
     {
         id: '3',
-        name: 'Support Staff',
+        name: 'Personnel de soutien',
         email: 'support@santeconnect.com',
-        role: 'Moderator',
-        status: 'Inactive',
-        lastLogin: '2024-05-18 11:20 AM'
+        role: 'Modérateur',
+        status: 'Inactif',
+        lastLogin: '2024-05-18 11:20'
     },
 ];
 

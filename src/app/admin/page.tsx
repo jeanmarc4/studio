@@ -20,7 +20,7 @@ export default function AdminPage() {
     const userToAdd: AdminUser = {
       ...newUser,
       id: new Date().getTime().toString(),
-      status: "Active",
+      status: "Actif",
       lastLogin: new Date().toLocaleString(),
     };
     setUsers(prevUsers => [userToAdd, ...prevUsers]);
@@ -37,14 +37,14 @@ export default function AdminPage() {
           <Tabs defaultValue="all">
             <div className="flex items-center">
               <TabsList>
-                <TabsTrigger value="all">User Management</TabsTrigger>
-                <TabsTrigger value="config">Role Configuration</TabsTrigger>
+                <TabsTrigger value="all">Gestion des utilisateurs</TabsTrigger>
+                <TabsTrigger value="config">Configuration des rôles</TabsTrigger>
               </TabsList>
               <div className="ml-auto flex items-center gap-2">
                 <Button size="sm" className="h-8 gap-1" onClick={() => setIsAddUserDialogOpen(true)}>
                   <UserPlus className="h-3.5 w-3.5" />
                   <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add User
+                    Ajouter un utilisateur
                   </span>
                 </Button>
               </div>

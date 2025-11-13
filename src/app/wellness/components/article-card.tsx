@@ -31,7 +31,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
       </CardContent>
       <CardFooter className="flex justify-between items-center text-sm text-muted-foreground">
         <span>{article.readTime}</span>
-        <Button variant="link" className="text-accent p-0">Read More</Button>
+        <Button variant="link" className="text-accent p-0">Lire la suite</Button>
       </CardFooter>
     </Card>
   );

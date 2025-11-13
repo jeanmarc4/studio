@@ -11,34 +11,34 @@ const roles = [
     {
         name: 'Super Admin',
         icon: ShieldCheck,
-        description: 'Has all permissions, including managing other admins and configuring system-wide settings.',
+        description: 'Possède toutes les autorisations, y compris la gestion des autres administrateurs et la configuration des paramètres à l\'échelle du système.',
         permissions: [
-            'Manage all users and roles',
-            'Configure platform settings',
-            'Access all data',
-            'Full content management',
+            'Gérer tous les utilisateurs et rôles',
+            'Configurer les paramètres de la plateforme',
+            'Accéder à toutes les données',
+            'Gestion complète du contenu',
         ]
     },
     {
         name: 'Admin',
         icon: UserCog,
-        description: 'Can manage most aspects of the platform, such as content and non-super-admin users.',
+        description: 'Peut gérer la plupart des aspects de la plateforme, tels que le contenu et les utilisateurs non-super-administrateurs.',
         permissions: [
-            'Add/Edit/Delete non-admin users',
-            'Manage medical directory content',
-            'Publish wellness articles',
-            'View platform analytics',
+            'Ajouter/Modifier/Supprimer des utilisateurs non-administrateurs',
+            'Gérer le contenu de l\'annuaire médical',
+            'Publier des articles sur le bien-être',
+            'Voir les analyses de la plateforme',
         ]
     },
     {
-        name: 'Moderator',
+        name: 'Modérateur',
         icon: User,
-        description: 'Has limited permissions, focused on content moderation and community management.',
+        description: 'A des autorisations limitées, axées sur la modération du contenu et la gestion de la communauté.',
         permissions: [
-            'Review and approve content',
-            'Manage user-generated content',
-            'Respond to support tickets',
-            'Flag inappropriate content',
+            'Examiner et approuver le contenu',
+            'Gérer le contenu généré par les utilisateurs',
+            'Répondre aux tickets de support',
+            'Signaler le contenu inapproprié',
         ]
     }
 ];
@@ -56,7 +56,7 @@ export function RoleConfiguration() {
                     </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                    <h4 className="font-semibold text-sm mb-3">Key Permissions:</h4>
+                    <h4 className="font-semibold text-sm mb-3">Autorisations clés :</h4>
                     <ul className="space-y-2">
                         {role.permissions.map((permission) => (
                             <li key={permission} className="flex items-start gap-3">

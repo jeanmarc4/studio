@@ -35,9 +35,9 @@ import { useToast } from "@/hooks/use-toast";
 import type { AdminUser } from "@/lib/data";
 
 const userSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
-  role: z.enum(["Admin", "Moderator"]),
+  name: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères." }),
+  email: z.string().email({ message: "Adresse email invalide." }),
+  role: z.enum(["Admin", "Modérateur"]),
 });
 
 type NewUser = Omit<AdminUser, "id" | "status" | "lastLogin">;
@@ -57,7 +57,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     defaultValues: {
       name: "",
       email: "",
-      role: "Moderator",
+      role: "Modérateur",
     },
   });
 
@@ -70,8 +70,8 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     setIsLoading(false);
     onOpenChange(false);
     toast({
-      title: "User Added",
-      description: `${values.name} has been added to the platform.`,
+      title: "Utilisateur ajouté",
+      description: `${values.name} a été ajouté à la plateforme.`,
     });
   }
 
@@ -86,9 +86,9 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
           <DialogDescription>
-            Fill in the details to add a new administrator or moderator.
+            Remplissez les détails pour ajouter un nouvel administrateur ou modérateur.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -98,9 +98,9 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Nom complet</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. John Doe" {...field} />
+                    <Input placeholder="par ex. John Doe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,7 +113,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="e.g. john.doe@example.com" {...field} />
+                    <Input type="email" placeholder="par ex. john.doe@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,16 +124,16 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>Rôle</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder="Sélectionnez un rôle" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Moderator">Moderator</SelectItem>
+                      <SelectItem value="Modérateur">Modérateur</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -142,16 +142,16 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
             />
             <DialogFooter className="pt-4">
                <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                Cancel
+                Annuler
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding User...
+                    Ajout en cours...
                   </>
                 ) : (
-                  "Add User"
+                  "Ajouter un utilisateur"
                 )}
               </Button>
             </DialogFooter>

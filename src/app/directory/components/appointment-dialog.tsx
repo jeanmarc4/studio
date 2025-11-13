@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -51,8 +52,8 @@ export function AppointmentDialog({
     if (!date || !time) {
       toast({
         variant: "destructive",
-        title: "Incomplete Information",
-        description: "Please select a date and time for your appointment.",
+        title: "Informations incomplètes",
+        description: "Veuillez sélectionner une date et une heure pour votre rendez-vous.",
       });
       return;
     }
@@ -63,11 +64,12 @@ export function AppointmentDialog({
     setIsLoading(false);
     onOpenChange(false);
     toast({
-      title: "Appointment Booked!",
-      description: `Your appointment with ${doctor.name} on ${format(
+      title: "Rendez-vous confirmé !",
+      description: `Votre rendez-vous avec ${doctor.name} le ${format(
         date,
-        "PPP"
-      )} at ${time} is confirmed.`,
+        "PPP",
+        { locale: fr }
+      )} à ${time} est confirmé.`,
     });
   };
 
@@ -75,9 +77,9 @@ export function AppointmentDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Book an Appointment</DialogTitle>
+          <DialogTitle>Prendre un rendez-vous</DialogTitle>
           <DialogDescription>
-            Schedule your visit with {doctor.name} ({doctor.specialty}).
+            Planifiez votre visite avec {doctor.name} ({doctor.specialty}).
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -95,7 +97,7 @@ export function AppointmentDialog({
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  {date ? format(date, "PPP", { locale: fr }) : <span>Choisissez une date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -104,34 +106,35 @@ export function AppointmentDialog({
                   selected={date}
                   onSelect={setDate}
                   initialFocus
+                  locale={fr}
                 />
               </PopoverContent>
             </Popover>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="time" className="text-right">
-              Time
+              Heure
             </Label>
             <Select onValueChange={setTime} value={time}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a time slot" />
+                <SelectValue placeholder="Sélectionnez un créneau horaire" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="09:00 AM">09:00 AM</SelectItem>
-                <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                <SelectItem value="02:00 PM">02:00 PM</SelectItem>
-                <SelectItem value="03:00 PM">03:00 PM</SelectItem>
+                <SelectItem value="09:00">09:00</SelectItem>
+                <SelectItem value="10:00">10:00</SelectItem>
+                <SelectItem value="11:00">11:00</SelectItem>
+                <SelectItem value="14:00">14:00</SelectItem>
+                <SelectItem value="15:00">15:00</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="reason" className="text-right pt-2">
-              Reason
+              Motif
             </Label>
             <Textarea
               id="reason"
-              placeholder="Optional: Briefly describe the reason for your visit."
+              placeholder="Optionnel : Décrivez brièvement le motif de votre visite."
               className="col-span-3"
             />
           </div>
@@ -146,10 +149,10 @@ export function AppointmentDialog({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Booking...
+                Réservation...
               </>
             ) : (
-              "Confirm Booking"
+              "Confirmer la réservation"
             )}
           </Button>
         </DialogFooter>

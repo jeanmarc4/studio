@@ -24,7 +24,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
           {doctor.image && (
             <Image
               src={doctor.image}
-              alt={`Photo of ${doctor.name}`}
+              alt={`Photo de ${doctor.name}`}
               width={80}
               height={80}
               className="rounded-full border"
@@ -46,7 +46,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
               <Star className="h-4 w-4 fill-current" />
               <span className="font-semibold">{doctor.rating.toFixed(1)}</span>
             </div>
-            <span className="ml-2 text-sm text-muted-foreground">({doctor.reviews} reviews)</span>
+            <span className="ml-2 text-sm text-muted-foreground">({doctor.reviews} avis)</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {doctor.availability.map((day) => (
@@ -61,7 +61,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
             onClick={() => setIsDialogOpen(true)}
           >
-            Book Appointment
+            Prendre Rendez-vous
           </Button>
         </CardFooter>
       </Card>

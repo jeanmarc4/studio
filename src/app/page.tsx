@@ -16,24 +16,24 @@ import { SosAlert } from "@/components/sos-alert";
 const featureCards = [
   {
     icon: Stethoscope,
-    title: "Medical Directory",
-    description: "Find doctors, pharmacies, and specialists near you. Book appointments with ease.",
+    title: "Annuaire Médical",
+    description: "Trouvez des médecins, pharmacies et spécialistes près de chez vous. Prenez rendez-vous facilement.",
     href: "/directory",
     bgColor: "bg-blue-100 dark:bg-blue-900/50",
     iconColor: "text-blue-500",
   },
   {
     icon: Sparkles,
-    title: "AI Symptom Checker",
-    description: "Describe your symptoms to our AI for a preliminary analysis. (Not a diagnosis)",
+    title: "Vérificateur de Symptômes IA",
+    description: "Décrivez vos symptômes à notre IA pour une analyse préliminaire. (Ce n'est pas un diagnostic)",
     href: "/symptom-checker",
     bgColor: "bg-purple-100 dark:bg-purple-900/50",
     iconColor: "text-purple-500",
   },
   {
     icon: Leaf,
-    title: "Holistic Wellness",
-    description: "Explore articles, tips, and guides on mental, physical, and spiritual well-being.",
+    title: "Bien-être Holistique",
+    description: "Explorez des articles, des conseils et des guides sur le bien-être mental, physique et spirituel.",
     href: "/wellness",
     bgColor: "bg-green-100 dark:bg-green-900/50",
     iconColor: "text-green-500",
@@ -48,17 +48,17 @@ export default function Home() {
       <section className="w-full bg-primary/5 py-12 md:py-20 lg:py-28 relative">
         <div className="container px-4 md:px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl font-headline text-primary">
-            Your Health, Connected.
+            Votre Santé, Connectée.
           </h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl font-body">
-            SanteConnect is your trusted partner for managing appointments, checking symptoms, and embracing a holistic lifestyle.
+            SanteConnect est votre partenaire de confiance pour gérer les rendez-vous, vérifier les symptômes et adopter un mode de vie holistique.
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/directory">Find a Doctor</Link>
+              <Link href="/directory">Trouver un Médecin</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/symptom-checker">Check Symptoms</Link>
+              <Link href="/symptom-checker">Vérifier les Symptômes</Link>
             </Button>
           </div>
         </div>
@@ -90,7 +90,7 @@ export default function Home() {
                   <CardContent>
                     <Button asChild variant="link" className="p-0 text-accent font-semibold">
                       <Link href={feature.href}>
-                        Explore <ArrowRight className="ml-2 h-4 w-4" />
+                        Explorer <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                   </CardContent>
