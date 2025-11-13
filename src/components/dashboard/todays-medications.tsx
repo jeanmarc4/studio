@@ -1,12 +1,11 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Pill, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Pill, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import type { Medication } from '@/types';
-import { format, isToday } from 'date-fns';
 
 interface TodaysMedicationsProps {
   medications: Medication[];
@@ -25,7 +24,7 @@ export function TodaysMedications({ medications }: TodaysMedicationsProps) {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="font-headline text-xl">Mes Prises du Jour</CardTitle>
-        <CardDescription>Vos médicaments à prendre aujourd'hui.</CardDescription>
+        <CardDescription>Vos médicaments à prendre aujourd'hui. Les rappels sont désormais automatiques.</CardDescription>
       </CardHeader>
       <CardContent>
         {todaysTakes.length > 0 ? (
@@ -54,7 +53,7 @@ export function TodaysMedications({ medications }: TodaysMedicationsProps) {
           </p>
         )}
         <Button className="w-full mt-6" variant="outline" onClick={() => router.push('/medications')}>
-          Voir tout mon traitement
+          Gérer tout mon traitement
         </Button>
       </CardContent>
     </Card>

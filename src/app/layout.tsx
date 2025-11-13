@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/layout/header';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { GlobalReminderProvider } from '@/components/reminders/global-reminder-provider';
 
 export const metadata: Metadata = {
   title: 'SanteConnect',
@@ -29,11 +30,13 @@ export default function RootLayout({
         )}
       >
         <FirebaseClientProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <Header />
-            <div className="flex-1">{children}</div>
-          </div>
-          <Toaster />
+          <GlobalReminderProvider>
+            <div className="relative flex min-h-screen flex-col">
+              <Header />
+              <div className="flex-1">{children}</div>
+            </div>
+            <Toaster />
+          </GlobalReminderProvider>
         </FirebaseClientProvider>
       </body>
     </html>
