@@ -88,7 +88,7 @@ export default function Home() {
             </div>
             <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Standard Plan */}
-            <Card className="flex flex-col h-full border-accent">
+            <Card className="flex flex-col h-full">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Standard</CardTitle>
                     <CardDescription>Pour organiser votre santé au quotidien.</CardDescription>
@@ -180,5 +180,3 @@ export default function Home() {
     </main>
   );
 }
-
-    
