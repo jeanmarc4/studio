@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -12,8 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { aiSymptomChecker, AISymptomCheckerOutput } from "@/ai/ai-symptom-checker";
-import { useFirebase } from "@/firebase";
-import { useDoc, useMemoFirebase } from "@/firebase/firestore/use-doc";
+import { useFirebase, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
 import type { User } from "@/docs/backend-documentation";
 
