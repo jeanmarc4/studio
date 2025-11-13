@@ -54,7 +54,7 @@ service cloud.firestore {
 
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
-       * @path /users/{userId}/profiles/{profileId}
+       * @path /users/{userId}/profiles
        * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
@@ -64,7 +64,7 @@ service cloud.firestore {
 
       /**
        * @description Secure appointments for a specific user. Only the user can manage their appointments.
-       * @path /users/{userId}/appointments/{appointmentId}
+       * @path /users/{userId}/appointments
        * @principle Enforces document ownership for all operations on appointments.
        */
       match /appointments/{appointmentId} {
@@ -74,7 +74,7 @@ service cloud.firestore {
 
       /**
        * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
-       * @path /users/{userId}/emergencyContacts/{contactId}
+       * @path /users/{userId}/emergencyContacts
        * @principle Enforces document ownership for all operations on emergency contacts.
        */
       match /emergencyContacts/{contactId} {
@@ -84,7 +84,7 @@ service cloud.firestore {
 
       /**
        * @description Secure medications for a specific user. Only the user can manage their medication schedule.
-       * @path /users/{userId}/medications/{medicationId}
+       * @path /users/{userId}/medications
        * @principle Enforces document ownership for all operations on medications.
        */
       match /medications/{medicationId} {
@@ -94,7 +94,7 @@ service cloud.firestore {
 
        /**
        * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
-       * @path /users/{userId}/prescriptions/{prescriptionId}
+       * @path /users/{userId}/prescriptions
        * @principle Enforces document ownership for all operations on prescriptions.
        */
       match /prescriptions/{prescriptionId} {
@@ -104,7 +104,7 @@ service cloud.firestore {
       
       /**
        * @description Secure vaccine records for a specific user. Only the user can manage their records.
-       * @path /users/{userId}/vaccines/{vaccineId}
+       * @path /users/{userId}/vaccines
        * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
@@ -207,5 +207,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
