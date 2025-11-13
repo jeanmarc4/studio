@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from 'next/navigation';
-import { collection, doc, getDoc, setDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserManagement } from "./components/user-management";
