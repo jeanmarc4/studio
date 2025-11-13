@@ -1,6 +1,7 @@
+
 'use client';
 
-import { Stethoscope, Sparkles, Leaf, ArrowRight, Pill, FileText, Calendar, CheckCircle2 } from "lucide-react";
+import { Stethoscope, Sparkles, Leaf, ArrowRight, Pill, FileText, Calendar, CheckCircle2, UserCheck, MessageSquare, BotIcon } from "lucide-react";
 import Link from "next/link";
 import { useFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,23 @@ const premiumFeatures = [
     "Support prioritaire"
 ];
 
+const howItWorksSteps = [
+    {
+        icon: UserCheck,
+        title: "1. Organisez votre santé",
+        description: "Regroupez vos rendez-vous, vos ordonnances et vos médicaments en un seul endroit. Fini les oublis et les papiers perdus."
+    },
+    {
+        icon: BotIcon,
+        title: "2. Obtenez des conseils instantanés",
+        description: "Utilisez notre assistant IA pour analyser vos symptômes ou extraire les informations de vos ordonnances. Une aide précieuse à portée de main."
+    },
+    {
+        icon: MessageSquare,
+        title: "3. Échangez avec la communauté",
+        description: "Rejoignez notre forum pour discuter avec d'autres utilisateurs, partager des expériences et trouver du soutien dans votre parcours de santé."
+    }
+]
 
 export default function Home() {
   const { user, isUserLoading } = useFirebase();
@@ -80,39 +98,40 @@ export default function Home() {
   );
 
   const renderGuestHomepage = () => (
-    <section className="container w-full max-w-6xl py-12 md:py-16">
-        <div className="grid gap-12 md:gap-20">
-          
-          {/* Feature Highlight Section */}
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight font-headline">Une plateforme unique pour tous vos besoins de santé</h2>
+    <>
+      {/* How it works Section */}
+      <section className="container w-full max-w-6xl py-12 md:py-16">
+         <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight font-headline">Comment SanteConnect vous accompagne</h2>
             <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-                De la prise de rendez-vous à l'analyse intelligente de vos symptômes, SanteConnect centralise votre parcours de soins.
+                Simplifiez la gestion de votre santé en 3 étapes claires.
             </p>
           </div>
-          
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featureCards.slice(0,3).map((feature) => (
-              <Card key={feature.title} className="bg-muted/30 border-accent shadow-none">
-                  <CardHeader className="flex flex-row items-start gap-4 pb-4">
-                    <div className={`p-3 rounded-full ${feature.bgColor}`}>
-                      <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
+          <div className="mt-12 grid gap-8 md:grid-cols-3">
+            {howItWorksSteps.map(step => (
+                 <div key={step.title} className="text-center flex flex-col items-center">
+                    <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-4">
+                        <step.icon className="h-8 w-8 text-primary" />
                     </div>
-                    <div>
-                      <CardTitle className="font-headline text-lg">{feature.title}</CardTitle>
-                       <CardDescription className="text-base font-body pt-1">
-                         {feature.description}
-                       </CardDescription>
-                    </div>
-                  </CardHeader>
-              </Card>
+                    <h3 className="text-xl font-headline font-semibold">{step.title}</h3>
+                    <p className="mt-2 text-muted-foreground">{step.description}</p>
+                 </div>
             ))}
           </div>
+      </section>
 
-           {/* Pricing/Subscription Section */}
-          <div className="grid md:grid-cols-2 gap-8 items-start">
+      {/* Pricing/Subscription Section */}
+      <section id="pricing" className="w-full bg-muted/40 py-12 md:py-20">
+        <div className="container w-full max-w-6xl">
+            <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tight font-headline">Choisissez le plan qui vous convient</h2>
+                <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+                    Commencez gratuitement ou débloquez toute la puissance de l'IA avec notre plan Premium.
+                </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 items-start">
             {/* Standard Plan */}
-            <Card className="flex flex-col h-full border-accent">
+            <Card className="flex flex-col h-full border-accent bg-background">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Standard</CardTitle>
                     <CardDescription>Pour organiser votre santé au quotidien.</CardDescription>
@@ -137,7 +156,7 @@ export default function Home() {
             </Card>
 
             {/* Premium Plan */}
-            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
+            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden bg-background">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">RECOMMANDÉ</div>
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
@@ -158,13 +177,14 @@ export default function Home() {
                 <CardContent>
                     <Button asChild className="w-full">
                        {/* IMPORTANT: Remplacez ce lien par votre véritable lien de paiement PayPal */}
-                       <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1234567890ABCDEFG" target="_blank" rel="noopener noreferrer">Choisir Premium</a>
+                       <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-37M46882XF563383AMX6KSVY" target="_blank" rel="noopener noreferrer">Choisir Premium</a>
                     </Button>
                 </CardContent>
             </Card>
-          </div>
+            </div>
         </div>
       </section>
+    </>
   );
 
   return (
@@ -203,3 +223,8 @@ export default function Home() {
     </main>
   );
 }
+
+
+    
+
+    
