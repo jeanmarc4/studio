@@ -125,7 +125,7 @@ export function GuestHomepage() {
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
                     <CardDescription>L'assistance de l'IA pour une santé proactive.</CardDescription>
-                    <p className="text-4xl font-bold pt-2">12,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
+                    <p className="text-4xl font-bold pt-2">19,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
                     <p className="font-semibold">Fonctionnalités incluses :</p>
