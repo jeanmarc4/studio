@@ -17,24 +17,6 @@ import { Badge } from "@/components/ui/badge";
 
 const featureCards = [
   {
-    icon: Stethoscope,
-    title: "Annuaire Médical",
-    description: "Trouvez des médecins, pharmacies et spécialistes près de chez vous. Prenez rendez-vous facilement.",
-    href: "/directory",
-    bgColor: "bg-blue-100 dark:bg-blue-900/50",
-    iconColor: "text-blue-500",
-    isPremium: false,
-  },
-  {
-    icon: Sparkles,
-    title: "Vérificateur de Symptômes IA",
-    description: "Décrivez vos symptômes à notre IA pour une analyse préliminaire. (Ce n'est pas un diagnostic)",
-    href: "/symptom-checker",
-    bgColor: "bg-purple-100 dark:bg-purple-900/50",
-    iconColor: "text-purple-500",
-    isPremium: true,
-  },
-  {
     icon: Leaf,
     title: "Soins Holistiques",
     description: "Explorez des articles, des conseils et des guides sur le bien-être mental, physique et spirituel.",
@@ -60,10 +42,10 @@ export default function Home() {
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-              <Link href="/directory">Trouver un Médecin</Link>
+              <Link href="/my-appointments">Mes rendez-vous</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href="/symptom-checker">Vérifier les Symptômes</Link>
+              <Link href="/prescriptions">Gérer mes ordonnances</Link>
             </Button>
           </div>
         </div>
@@ -78,7 +60,7 @@ export default function Home() {
           </div>
 
           {/* Feature Cards Section */}
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-1">
             {featureCards.map((feature) => (
               <Card key={feature.title} className="flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-xl">
                   <CardHeader className="flex flex-row items-start gap-4 pb-4">
