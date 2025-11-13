@@ -1,33 +1,53 @@
 'use client';
 
-import { Stethoscope, Sparkles, Leaf, ArrowRight, ShieldCheck } from "lucide-react";
+import { Stethoscope, Sparkles, Leaf, ArrowRight, Pill, FileText, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { SosAlert } from "@/components/sos-alert";
-import { Badge } from "@/components/ui/badge";
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const featureCards = [
    {
+    icon: Calendar,
+    title: "Mes Rendez-vous",
+    description: "Consultez, planifiez et gérez tous vos rendez-vous médicaux en un seul endroit.",
+    href: "/my-appointments",
+    bgColor: "bg-red-100 dark:bg-red-900/50",
+    iconColor: "text-red-500",
+  },
+  {
+    icon: FileText,
+    title: "Gestion d'Ordonnances",
+    description: "Ajoutez vos ordonnances et laissez l'IA extraire les informations pour un suivi facile.",
+    href: "/prescriptions",
+    bgColor: "bg-yellow-100 dark:bg-yellow-900/50",
+    iconColor: "text-yellow-500",
+  },
+  {
+    icon: Pill,
+    title: "Suivi de Traitement",
+    description: "Organisez votre plan de médication, recevez des rappels et ne manquez plus jamais une prise.",
+    href: "/medications",
+    bgColor: "bg-purple-100 dark:bg-purple-900/50",
+    iconColor: "text-purple-500",
+  },
+   {
     icon: Sparkles,
     title: "Vérificateur de Symptômes IA",
-    description: "Décrivez vos symptômes à notre assistant IA pour obtenir des conseils et une orientation vers le bon spécialiste.",
+    description: "Décrivez vos symptômes à notre assistant IA pour obtenir des conseils et une orientation.",
     href: "/symptom-checker",
     bgColor: "bg-blue-100 dark:bg-blue-900/50",
     iconColor: "text-blue-500",
-    isPremium: true,
   },
   {
     icon: Leaf,
-    title: "Soins Holistiques",
-    description: "Explorez des articles, des conseils et des guides sur le bien-être mental, physique et spirituel.",
+    title: "Soins Holistiques & Forum",
+    description: "Explorez des articles sur le bien-être et échangez avec la communauté sur notre forum.",
     href: "/wellness",
     bgColor: "bg-green-100 dark:bg-green-900/50",
     iconColor: "text-green-500",
-    isPremium: false,
   },
 ];
 
@@ -46,13 +66,8 @@ export default function Home() {
   const renderGuestHomepage = () => (
     <section className="container w-full max-w-6xl py-12 md:py-16">
         <div className="grid gap-10 md:gap-16">
-          {/* SOS Section */}
-          <div id="sos">
-            <SosAlert />
-          </div>
-
           {/* Feature Cards Section */}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {featureCards.map((feature) => (
               <Card key={feature.title} className="flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-xl">
                   <CardHeader className="flex flex-row items-start gap-4 pb-4">
@@ -61,12 +76,6 @@ export default function Home() {
                     </div>
                     <div className="flex-1">
                       <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
-                      {feature.isPremium && (
-                        <Badge variant="secondary" className="mt-2 bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700">
-                          <ShieldCheck className="mr-1 h-3 w-3" />
-                          Premium
-                        </Badge>
-                      )}
                     </div>
                   </CardHeader>
                   <CardContent className="flex-grow">
@@ -104,10 +113,10 @@ export default function Home() {
           {!user && (
             <div className="mt-8 flex justify-center gap-4">
               <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                <Link href="/my-appointments">Mes rendez-vous</Link>
+                <Link href="/auth/signup">Créer un compte</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/prescriptions">Gérer mes ordonnances</Link>
+                <Link href="/auth/login">Se connecter</Link>
               </Button>
             </div>
           )}
