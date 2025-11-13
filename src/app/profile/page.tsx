@@ -3,15 +3,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from '@/docs/backend-documentation';
-import { User as UserIcon, Mail, Shield, Save, Loader2 } from 'lucide-react';
+import { Mail, Shield, Save, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { EmergencyContacts } from './components/emergency-contacts';
 import { useForm } from 'react-hook-form';
@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 const profileSchema = z.object({
   firstName: z.string().min(2, "Le prénom est requis."),
   lastName: z.string().min(2, "Le nom de famille est requis."),
+  role: z.enum(["Standard", "Premium", "Admin"]),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -50,6 +51,11 @@ export default function ProfilePage() {
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      role: 'Standard',
+    }
   });
 
   useEffect(() => {
@@ -57,6 +63,7 @@ export default function ProfilePage() {
       form.reset({
         firstName: userProfile.firstName,
         lastName: userProfile.lastName,
+        role: userProfile.role,
       });
     }
   }, [userProfile, form]);
@@ -67,6 +74,15 @@ export default function ProfilePage() {
     
     const profileDocRef = doc(firestore, 'users', user.uid);
     updateDocumentNonBlocking(profileDocRef, data);
+
+    const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
+    if (data.role === "Admin") {
+      // Use setDoc which is also non-blocking via our wrapper
+      setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' });
+    } else {
+      // deleteDoc is also non-blocking
+      deleteDoc(adminRoleDocRef);
+    }
     
     // Simulate save time for feedback
     await new Promise(resolve => setTimeout(resolve, 700));
@@ -156,15 +172,31 @@ export default function ProfilePage() {
                   <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Rôle</Label>
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <Badge variant={userProfile.role === 'Admin' ? 'secondary' : 'outline'}>
-                    {userProfile.role}
-                  </Badge>
-                </div>
-              </div>
+               <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rôle</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-muted-foreground" />
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Sélectionnez un rôle" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            <SelectItem value="Standard">Standard</SelectItem>
+                            <SelectItem value="Premium">Premium</SelectItem>
+                            <SelectItem value="Admin">Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={isSaving}>
@@ -176,7 +208,7 @@ export default function ProfilePage() {
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Sauvegarder
+                    Sauvegarder les changements
                   </>
                 )}
               </Button>
