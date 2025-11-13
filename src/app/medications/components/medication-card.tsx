@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { User } from '@/docs/backend-documentation';
 import { useDoc, useMemoFirebase } from '@/firebase/firestore/use-doc';
+import { getVocalReminder } from '@/ai/flows/get-vocal-reminder-flow';
 
 interface MedicationCardProps {
   medication: Medication;
@@ -34,6 +35,7 @@ export function MedicationCard({ medication }: MedicationCardProps) {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVocalizing, setIsVocalizing] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -73,19 +75,33 @@ export function MedicationCard({ medication }: MedicationCardProps) {
         return;
     }
     setIsVocalizing(true);
-    // Here you would call your AI TTS flow
-    // const response = await getVocalReminder({ medicationName: medication.name, dosage: medication.dosage });
-    // const audio = new Audio(response.audioUrl);
-    // audio.play();
     
-    // Simulating AI voice generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-        title: `Rappel vocal pour ${medication.name}`,
-        description: `L'assistant IA joue le rappel : "Il est temps de prendre ${medication.dosage} de ${medication.name}"`,
-    })
-    setIsVocalizing(false);
+    try {
+      const response = await getVocalReminder({ medicationName: medication.name, dosage: medication.dosage });
+      const audioSrc = response.audioUrl;
+      const audio = new Audio(audioSrc);
+      setAudio(audio);
+      audio.play();
+
+      toast({
+          title: `Rappel vocal pour ${medication.name}`,
+          description: `L'assistant IA joue le rappel...`,
+      });
+
+      audio.onended = () => {
+        setIsVocalizing(false);
+        setAudio(null);
+      }
+
+    } catch (error) {
+       console.error("Erreur lors de la génération du rappel vocal :", error);
+       toast({
+           variant: "destructive",
+           title: "Erreur de l'IA",
+           description: "Impossible de générer le rappel vocal pour le moment.",
+       });
+       setIsVocalizing(false);
+    }
   }
 
   return (
@@ -117,7 +133,7 @@ export function MedicationCard({ medication }: MedicationCardProps) {
                 <Bell className="mr-2 h-4 w-4" /> Test Standard
             </Button>
             <Button size="sm" variant={isPremiumOrAdmin ? "default" : "outline"} onClick={handlePremiumReminder} disabled={isVocalizing}>
-                {isVocalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="mr-2 h-4 w-4" />}
+                {isVocalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (audio ? <PlayCircle className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />)}
                 Test Premium
             </Button>
         </div>
