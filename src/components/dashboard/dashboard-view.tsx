@@ -4,7 +4,7 @@
 import { User } from 'firebase/auth';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
-import type { Medication, Appointment } from '@/types';
+import type { Appointment } from '@/types';
 import { TodaysMedications } from './todays-medications';
 import { UpcomingAppointments } from './upcoming-appointments';
 import { QuickAccess } from './quick-access';
@@ -20,14 +20,6 @@ export function DashboardView({ user }: DashboardViewProps) {
   const { firestore } = useFirebase();
   const { activeProfile } = useProfile();
 
-  const medicationsQuery = useMemoFirebase(() => {
-    if (!firestore || !user || !activeProfile) return null;
-    return query(
-        collection(firestore, 'users', user.uid, 'medications'),
-        where('profileId', '==', activeProfile.id)
-    );
-  }, [firestore, user, activeProfile]);
-
   const appointmentsQuery = useMemoFirebase(() => {
     if (!firestore || !user || !activeProfile) return null;
     return query(
@@ -36,16 +28,13 @@ export function DashboardView({ user }: DashboardViewProps) {
     );
   }, [firestore, user, activeProfile]);
 
-  const { data: medications, isLoading: areMedicationsLoading } = useCollection<Medication>(medicationsQuery);
   const { data: appointments, isLoading: areAppointmentsLoading } = useCollection<Appointment>(appointmentsQuery);
-
-  const isLoading = areMedicationsLoading || areAppointmentsLoading;
 
   return (
     <div className="container w-full max-w-6xl py-12 md:py-16">
       <div className="grid gap-8">
         <SosAlert />
-        {isLoading ? (
+        {areAppointmentsLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Skeleton className="h-64 w-full lg:col-span-2" />
             <Skeleton className="h-64 w-full" />
@@ -53,7 +42,7 @@ export function DashboardView({ user }: DashboardViewProps) {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <TodaysMedications medications={medications || []} />
+              <TodaysMedications />
             </div>
             <div>
               <UpcomingAppointments appointments={appointments || []} />

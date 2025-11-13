@@ -7,26 +7,37 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import type { Medication, User } from '@/types';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
+import { useProfile } from '@/hooks/use-profile';
+import { Skeleton } from '../ui/skeleton';
 
-interface TodaysMedicationsProps {
-  medications: Medication[];
-}
 
-export function TodaysMedications({ medications }: TodaysMedicationsProps) {
+export function TodaysMedications() {
   const router = useRouter();
   const { user, firestore } = useFirebase();
+  const { activeProfile } = useProfile();
   const [taken, setTaken] = useState<Set<string>>(new Set());
+
+  const medicationsQuery = useMemoFirebase(() => {
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+        collection(firestore, 'users', user.uid, 'medications'),
+        where('profileId', '==', activeProfile.id)
+    );
+  }, [firestore, user, activeProfile]);
+
+  const { data: medications, isLoading: areMedicationsLoading } = useCollection<Medication>(medicationsQuery);
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
   
-  const { data: userProfile } = useDoc<User>(userProfileRef);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
 
   const todaysTakes = useMemo(() => {
+    if (!medications) return [];
     return medications
       .flatMap(med => med.intakeTimes.map(time => ({ ...med, takeTime: time })))
       .sort((a, b) => a.takeTime.localeCompare(b.takeTime));
@@ -37,22 +48,30 @@ export function TodaysMedications({ medications }: TodaysMedicationsProps) {
   };
 
   const isFreePlan = userProfile?.role === 'Gratuit';
+  const isLoading = areMedicationsLoading || isProfileLoading;
 
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="font-headline text-xl">Mes Prises du Jour</CardTitle>
+        <CardTitle className="font-headline text-xl">
+          Prises du Jour pour {activeProfile?.relationship === 'self' ? "Moi" : activeProfile?.name}
+        </CardTitle>
         <CardDescription>
           {isFreePlan 
             ? "Confirmez manuellement chaque prise ci-dessous." 
-            : "Vos rappels sont gérés par l'IA. Voici votre programme pour aujourd'hui."
+            : `Le programme de ${activeProfile?.name} pour aujourd'hui. Les rappels sont gérés par l'IA.`
           }
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {todaysTakes.length > 0 ? (
+        {isLoading ? (
+            <div className="space-y-4">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+            </div>
+        ) : todaysTakes.length > 0 ? (
           <ul className="space-y-4">
-            {todaysTakes.map((med, index) => {
+            {todaysTakes.map((med) => {
               const takeId = `${med.id}-${med.takeTime}`;
               const isTaken = taken.has(takeId);
               return (
@@ -94,7 +113,7 @@ export function TodaysMedications({ medications }: TodaysMedicationsProps) {
           </p>
         )}
         <Button className="w-full mt-6" variant="outline" onClick={() => router.push('/medications')}>
-          Gérer tout mon traitement
+          Gérer tout le traitement
         </Button>
       </CardContent>
     </Card>
