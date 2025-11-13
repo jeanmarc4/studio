@@ -11,13 +11,28 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { User } from '@/docs/backend-documentation';
-import { User as UserIcon, Mail, Shield, Save } from 'lucide-react';
-import { useEffect } from 'react';
+import { User as UserIcon, Mail, Shield, Save, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { EmergencyContacts } from './components/emergency-contacts';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useToast } from '@/hooks/use-toast';
+
+const profileSchema = z.object({
+  firstName: z.string().min(2, "Le prénom est requis."),
+  lastName: z.string().min(2, "Le nom de famille est requis."),
+});
+
+type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
   // Redirect if user is not logged in
   useEffect(() => {
@@ -32,6 +47,36 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
+
+  const form = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+  });
+
+  useEffect(() => {
+    if (userProfile) {
+      form.reset({
+        firstName: userProfile.firstName,
+        lastName: userProfile.lastName,
+      });
+    }
+  }, [userProfile, form]);
+
+  const onSubmit = async (data: ProfileFormData) => {
+    if (!user || !firestore) return;
+    setIsSaving(true);
+    
+    const profileDocRef = doc(firestore, 'users', user.uid);
+    updateDocumentNonBlocking(profileDocRef, data);
+    
+    // Simulate save time for feedback
+    await new Promise(resolve => setTimeout(resolve, 700));
+
+    toast({
+        title: "Profil mis à jour",
+        description: "Vos informations ont été sauvegardées avec succès."
+    });
+    setIsSaving(false);
+  }
 
   const isLoading = isUserLoading || isProfileLoading;
 
@@ -69,44 +114,75 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <Card className="mx-auto max-w-2xl">
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl">Mon Profil</CardTitle>
-          <CardDescription>Consultez et mettez à jour vos informations personnelles.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="firstName">Prénom</Label>
-                    <Input id="firstName" value={userProfile.firstName} disabled />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="lastName">Nom</Label>
-                    <Input id="lastName" value={userProfile.lastName} disabled />
-                </div>
-            </div>
-            <div className="space-y-2">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardHeader>
+              <CardTitle className="font-headline text-2xl">Mon Profil</CardTitle>
+              <CardDescription>Consultez et mettez à jour vos informations personnelles.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prénom</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nom</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="email">Adresse e-mail</Label>
                 <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
                 </div>
-            </div>
-             <div className="space-y-2">
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="role">Rôle</Label>
                 <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    <Badge variant={userProfile.role === 'Admin' ? 'secondary' : 'outline'}>
-                        {userProfile.role}
-                    </Badge>
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <Badge variant={userProfile.role === 'Admin' ? 'secondary' : 'outline'}>
+                    {userProfile.role}
+                  </Badge>
                 </div>
-            </div>
-        </CardContent>
-        <CardFooter>
-            <Button disabled>
-                <Save className="mr-2 h-4 w-4" />
-                Sauvegarder (bientôt disponible)
-            </Button>
-        </CardFooter>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sauvegarde...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Sauvegarder
+                  </>
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
 
       <EmergencyContacts />
