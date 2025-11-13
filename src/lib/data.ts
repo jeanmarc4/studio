@@ -74,19 +74,15 @@ export const wellnessArticles = [
     excerpt: "Commencez votre voyage de yoga avec ces poses fondamentales conçues pour améliorer la flexibilité et la force."
   },
   {
-    id: '4',
-    title: "La science du sommeil : comment passer une bonne nuit de repos",
-    category: 'Santé Holistique',
-    author: 'Dr. Alan Grant',
-    date: '2024-05-08',
-    readTime: '8 min de lecture',
-    image: getImage('wellness-4')?.imageUrl,
-    imageHint: getImage('wellness-4')?.imageHint,
-    excerpt: "Comprenez l'importance de l'hygiène du sommeil et découvrez des conseils pour vous endormir plus rapidement et rester endormi plus longtemps."
-  },
+    id: '4'
+  }
 ];
 
 export const mainNav: NavItem[] = [
+  {
+    title: "Mon Espace Santé",
+    href: "/my-health",
+  },
   {
     title: "Annuaire",
     href: "/directory",

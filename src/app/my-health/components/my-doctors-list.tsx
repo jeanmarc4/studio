@@ -1,0 +1,137 @@
+
+'use client';
+
+import { useMemo, useEffect, useState } from 'react';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, doc, getDoc, DocumentReference } from 'firebase/firestore';
+import Image from 'next/image';
+import { Stethoscope, MapPin, Phone } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { staticDoctorImages } from '@/lib/data';
+import type { Appointment, MedicalProfessional } from '@/docs/backend-documentation';
+import { useRouter } from 'next/navigation';
+
+type EnrichedProfessional = MedicalProfessional & { image?: string; imageHint?: string; };
+
+export function MyDoctorsList() {
+  const { user, firestore } = useFirebase();
+  const router = useRouter();
+  const [doctors, setDoctors] = useState<EnrichedProfessional[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const appointmentsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'users', user.uid, 'appointments');
+  }, [firestore, user]);
+
+  const { data: appointments, isLoading: areAppointmentsLoading } = useCollection<Appointment>(appointmentsQuery);
+
+  useEffect(() => {
+    if (areAppointmentsLoading || !firestore) return;
+    if (!appointments) {
+        setIsLoading(false);
+        return;
+    }
+
+    const fetchDoctors = async () => {
+      const professionalIds = [...new Set(appointments.map(apt => apt.medicalProfessionalId))];
+      
+      const uniqueDoctors: EnrichedProfessional[] = [];
+      const fetchedIds = new Set();
+
+      for (const id of professionalIds) {
+        if (!id || fetchedIds.has(id)) continue;
+        
+        const profRef = doc(firestore, 'medicalProfessionals', id) as DocumentReference<MedicalProfessional>;
+        const profSnap = await getDoc(profRef);
+
+        if (profSnap.exists()) {
+          const professional = profSnap.data();
+          const staticData = staticDoctorImages.find(d => d.id === professional.id);
+          uniqueDoctors.push({
+            ...professional,
+            image: staticData?.image,
+            imageHint: staticData?.imageHint
+          });
+          fetchedIds.add(id);
+        }
+      }
+
+      setDoctors(uniqueDoctors);
+      setIsLoading(false);
+    };
+
+    fetchDoctors();
+  }, [appointments, areAppointmentsLoading, firestore]);
+
+  const handleBookAppointmentClick = () => {
+    router.push('/directory');
+  }
+
+  if (isLoading) {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold font-headline mb-4">Mes Médecins</h2>
+        <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Mes Médecins</h2>
+      {doctors.length > 0 ? (
+        <div className="space-y-4">
+          {doctors.map(doctor => (
+            <Card key={doctor.id} className="transition-shadow hover:shadow-md">
+              <CardContent className="p-4 flex flex-col sm:flex-row items-start gap-4">
+                {doctor.image && (
+                  <Image
+                    src={doctor.image}
+                    alt={`Photo de ${doctor.name}`}
+                    width={100}
+                    height={100}
+                    className="rounded-lg border object-cover"
+                    data-ai-hint={doctor.imageHint}
+                  />
+                )}
+                <div className="flex-grow">
+                  <h3 className="text-lg font-bold text-primary">{doctor.name}</h3>
+                  <p className="flex items-center text-sm text-muted-foreground mt-1">
+                    <Stethoscope className="mr-2 h-4 w-4 flex-shrink-0" />
+                    {doctor.specialty}
+                  </p>
+                  <p className="flex items-center text-sm text-muted-foreground mt-1">
+                    <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
+                    {doctor.address}
+                  </p>
+                   <p className="flex items-center text-sm text-muted-foreground mt-1">
+                    <Phone className="mr-2 h-4 w-4 flex-shrink-0" />
+                    {doctor.phone}
+                  </p>
+                </div>
+                 <Button onClick={handleBookAppointmentClick} className="w-full mt-4 sm:w-auto sm:mt-0 self-center sm:self-end">
+                    Prendre RDV
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 border-2 border-dashed rounded-lg">
+            <Stethoscope className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun médecin trouvé</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Prenez votre premier rendez-vous pour ajouter un médecin.</p>
+            <Button className="mt-6" onClick={handleBookAppointmentClick}>
+                Trouver un médecin
+            </Button>
+        </div>
+      )}
+    </div>
+  );
+}
