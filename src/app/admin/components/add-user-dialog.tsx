@@ -42,7 +42,7 @@ const userSchema = z.object({
   role: z.enum(["Admin", "Standard", "Premium"]),
 });
 
-type NewUser = Omit<User, "id"> & { id: string };
+type NewUser = Omit<User, "id" | 'phone'> & { id: string };
 
 interface AddUserDialogProps {
   isOpen: boolean;

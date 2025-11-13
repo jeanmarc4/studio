@@ -38,7 +38,7 @@ export default function AdminPage() {
   useEffect(() => {
     const isAuthenticating = isUserLoading || isAdminRoleLoading;
     if (isAuthenticating) {
-      return; // Do nothing while loading
+      return; // Do nothing while loading, wait for the check to complete
     }
     
     if (!user) {
@@ -49,7 +49,7 @@ export default function AdminPage() {
       console.log("Accès non autorisé, redirection...");
       router.push('/'); 
     }
-    // If user is logged in and is an admin, do nothing and let the page render.
+    // If user is logged in and is an admin, the page will render.
   }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
   // Data fetching
@@ -66,6 +66,11 @@ export default function AdminPage() {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', newUser.id);
     setDocumentNonBlocking(userDocRef, newUser, {});
+    // If the new user is an Admin, also add them to the roles_admin collection
+    if (newUser.role === 'Admin') {
+      const adminRoleDocRef = doc(firestore, 'roles_admin', newUser.id);
+      setDoc(adminRoleDocRef, { userId: newUser.id, role: 'admin' });
+    }
   };
 
   const handleDeleteUser = (userId: string) => {
@@ -80,8 +85,10 @@ export default function AdminPage() {
     updateDocumentNonBlocking(doc(firestore, 'users', userId), { role });
     const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
     if (role === "Admin") {
+      // Use setDoc to create or overwrite the role document
       setDoc(adminRoleDocRef, { userId, role: 'admin' });
     } else {
+      // Use deleteDoc to remove the role document if it exists
       deleteDoc(adminRoleDocRef);
     }
   };
@@ -121,10 +128,10 @@ export default function AdminPage() {
   };
 
 
-  const isLoading = isUserLoading || isAdminRoleLoading;
+  const isPageLoading = isUserLoading || isAdminRoleLoading;
 
-  // Show a loading skeleton if we are authenticating OR if we are logged in as admin but still fetching page data
-  if (isLoading || !adminRole) {
+  // Show a loading skeleton while verifying auth and admin status.
+  if (isPageLoading) {
     return (
       <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
         <div className="flex items-center mb-8">
@@ -133,6 +140,16 @@ export default function AdminPage() {
         <Skeleton className="w-full h-[400px]" />
       </div>
     )
+  }
+
+  // If after loading, the user is still not an admin, they will be redirected by the useEffect.
+  // We can return null or a skeleton here to avoid a flash of content.
+  if (!adminRole) {
+    return (
+       <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
+        <p>Redirection en cours...</p>
+      </div>
+    );
   }
 
   return (
