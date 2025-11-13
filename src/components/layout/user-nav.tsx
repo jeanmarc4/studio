@@ -82,10 +82,12 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Profil</span>
-          </DropdownMenuItem>
+          <Link href="/profile">
+            <DropdownMenuItem>
+              <UserIcon className="mr-2 h-4 w-4" />
+              <span>Profil</span>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>
             <Settings className="mr-2 h-4 w-4" />
             <span>Paramètres</span>
