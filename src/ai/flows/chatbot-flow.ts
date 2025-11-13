@@ -11,7 +11,6 @@
 import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// Le schéma d'entrée est maintenant un objet avec une clé 'history'
 const ChatInputSchema = z.object({
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
@@ -50,7 +49,7 @@ Règles de conversation :
 6. Le but n'est pas de "résoudre" les problèmes, mais d'offrir un espace sûr pour que l'utilisateur puisse s'exprimer.
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`,
-      history: history.map(m => ({role: m.role, content: m.content})),
+      history: history.map(m => ({ role: m.role, content: [{ text: m.content }] })),
     });
 
     if (!text) {
