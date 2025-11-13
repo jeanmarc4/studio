@@ -101,7 +101,7 @@ export const mainNav: NavItem[] = [
     href: "/prescriptions",
   },
   {
-    title: "Médicaments",
+    title: "Traitements",
     href: "/medications",
   },
   {

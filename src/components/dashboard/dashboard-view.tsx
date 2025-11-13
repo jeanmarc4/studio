@@ -3,13 +3,14 @@
 
 import { User } from 'firebase/auth';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { Medication, Appointment } from '@/types';
 import { TodaysMedications } from './todays-medications';
 import { UpcomingAppointments } from './upcoming-appointments';
 import { QuickAccess } from './quick-access';
 import { SosAlert } from '@/components/sos-alert';
 import { Skeleton } from '../ui/skeleton';
+import { useProfile } from '@/hooks/use-profile';
 
 interface DashboardViewProps {
   user: User;
@@ -17,16 +18,23 @@ interface DashboardViewProps {
 
 export function DashboardView({ user }: DashboardViewProps) {
   const { firestore } = useFirebase();
+  const { activeProfile } = useProfile();
 
   const medicationsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'medications');
-  }, [firestore, user]);
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+        collection(firestore, 'users', user.uid, 'medications'),
+        where('profileId', '==', activeProfile.id)
+    );
+  }, [firestore, user, activeProfile]);
 
   const appointmentsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'appointments');
-  }, [firestore, user]);
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+        collection(firestore, 'users', user.uid, 'appointments'),
+        where('profileId', '==', activeProfile.id)
+    );
+  }, [firestore, user, activeProfile]);
 
   const { data: medications, isLoading: areMedicationsLoading } = useCollection<Medication>(medicationsQuery);
   const { data: appointments, isLoading: areAppointmentsLoading } = useCollection<Appointment>(appointmentsQuery);
