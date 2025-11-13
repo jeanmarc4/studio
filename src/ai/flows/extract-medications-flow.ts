@@ -71,3 +71,5 @@ Analysez l'image suivante et renvoyez les informations sous forme de liste d'obj
     return output;
   }
 );
+
+    

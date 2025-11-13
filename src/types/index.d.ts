@@ -34,3 +34,5 @@ export type ExtractedMedication = ExtractedMedicationSchema;
 export type ForumThread = ForumThreadSchema & { id: string };
 
 export type ForumPost = ForumPostSchema & { id: string };
+
+    

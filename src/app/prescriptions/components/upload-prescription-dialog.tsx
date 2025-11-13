@@ -222,3 +222,5 @@ export function UploadPrescriptionDialog({ isOpen, onOpenChange, onAddPrescripti
     </Dialog>
   );
 }
+
+    
