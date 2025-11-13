@@ -11,6 +11,15 @@ import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const featureCards = [
+   {
+    icon: Sparkles,
+    title: "Vérificateur de Symptômes IA",
+    description: "Décrivez vos symptômes à notre assistant IA pour obtenir des conseils et une orientation vers le bon spécialiste.",
+    href: "/symptom-checker",
+    bgColor: "bg-blue-100 dark:bg-blue-900/50",
+    iconColor: "text-blue-500",
+    isPremium: true,
+  },
   {
     icon: Leaf,
     title: "Soins Holistiques",
@@ -43,7 +52,7 @@ export default function Home() {
           </div>
 
           {/* Feature Cards Section */}
-          <div className="grid gap-6 md:grid-cols-1">
+          <div className="grid gap-6 md:grid-cols-2">
             {featureCards.map((feature) => (
               <Card key={feature.title} className="flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-xl">
                   <CardHeader className="flex flex-row items-start gap-4 pb-4">
