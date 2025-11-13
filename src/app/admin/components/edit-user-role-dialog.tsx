@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -129,5 +128,3 @@ export function EditUserRoleDialog({ isOpen, onOpenChange, user, onUpdateRole }:
     </Dialog>
   );
 }
-
-    

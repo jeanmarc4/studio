@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -191,5 +190,3 @@ export function UserManagement({ users, onDeleteUser, onUpdateUserRole, isLoadin
     </>
   );
 }
-
-    

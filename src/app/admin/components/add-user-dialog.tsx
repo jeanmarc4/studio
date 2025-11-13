@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -189,5 +188,3 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     </Dialog>
   );
 }
-
-    

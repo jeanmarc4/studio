@@ -374,7 +374,7 @@
         "definition": {
           "entityName": "User",
           "schema": {
-            "$ref": "#/entities/User"
+            "$ref": "#/backend/entities/User"
           },
           "description": "Stores user profiles. Path-based ownership enforces that only the authenticated user can access their profile data.",
           "params": [
@@ -390,7 +390,7 @@
         "definition": {
           "entityName": "Appointment",
           "schema": {
-            "$ref": "#/entities/Appointment"
+            "$ref": "#/backend/entities/Appointment"
           },
           "description": "Stores appointments for a specific user. Path-based ownership ensures only the user can manage their appointments.",
           "params": [
@@ -410,7 +410,7 @@
         "definition": {
           "entityName": "EmergencyContact",
           "schema": {
-            "$ref": "#/entities/EmergencyContact"
+            "$ref": "#/backend/entities/EmergencyContact"
           },
           "description": "Stores emergency contacts for a specific user. Path-based ownership guarantees only the user can manage their contacts.",
           "params": [
@@ -430,7 +430,7 @@
         "definition": {
           "entityName": "Medication",
           "schema": {
-            "$ref": "#/entities/Medication"
+            "$ref": "#/backend/entities/Medication"
           },
           "description": "Stores medications for a specific user. Path-based ownership ensures only the user can manage their medication schedule.",
           "params": [
@@ -450,7 +450,7 @@
         "definition": {
           "entityName": "Prescription",
           "schema": {
-            "$ref": "#/entities/Prescription"
+            "$ref": "#/backend/entities/Prescription"
           },
           "description": "Stores prescriptions for a specific user. Path-based ownership ensures only the user can manage their prescriptions.",
           "params": [
@@ -470,7 +470,7 @@
         "definition": {
           "entityName": "MedicalProfessional",
           "schema": {
-            "$ref": "#/entities/MedicalProfessional"
+            "$ref": "#/backend/entities/MedicalProfessional"
           },
           "description": "Stores profiles of medical professionals.  Admin roles control creation/modification.",
           "params": [
@@ -486,7 +486,7 @@
         "definition": {
           "entityName": "HolisticContent",
           "schema": {
-            "$ref": "#/entities/HolisticContent"
+            "$ref": "#/backend/entities/HolisticContent"
           },
           "description": "Stores holistic wellness content. Admin roles control creation/modification.",
           "params": [
@@ -502,7 +502,7 @@
         "definition": {
           "entityName": "Admin",
           "schema": {
-            "$ref": "#/entities/Admin"
+            "$ref": "#/backend/entities/Admin"
           },
           "description": "Marks a user as an admin.  The *existence* of a document at this path grants admin privileges.",
           "params": [
@@ -517,7 +517,7 @@
         "path": "/forumThreads/{threadId}",
         "definition": {
           "entityName": "ForumThread",
-          "schema": { "$ref": "#/entities/ForumThread" },
+          "schema": { "$ref": "#/backend/entities/ForumThread" },
           "description": "Stores wellness forum discussion threads. Publicly readable, but only authenticated users can create.",
           "params": [
             {
@@ -531,7 +531,7 @@
         "path": "/forumThreads/{threadId}/posts/{postId}",
         "definition": {
           "entityName": "ForumPost",
-          "schema": { "$ref": "#/entities/ForumPost" },
+          "schema": { "$ref": "#/backend/entities/ForumPost" },
           "description": "Stores replies within a specific forum thread. Publicly readable, but only authenticated users can post replies.",
           "params": [
             {
@@ -549,5 +549,3 @@
     "reasoning": "This Firestore structure is designed to support the SanteConnect application, emphasizing secure access control, scalability, and maintainability. It leverages path-based ownership and denormalization to ensure Authorization Independence. The structure facilitates simple, robust, and easily debuggable security rules by adhering to the principles outlined in the prompt.\n\n**Authorization Independence and QAPs:**\n\n*   **Users Collection (`/users/{userId}`):**  User data is stored in a dedicated collection, enabling straightforward read/write rules based on `request.auth.uid`. The `userId` parameter in the path directly corresponds to the authenticated user's ID, providing clear ownership.\n*   **Appointments Subcollection (`/users/{userId}/appointments/{appointmentId}`):** Appointments are stored as a subcollection of users. This structure enforces that only the user can access their appointments.  This eliminates the need for complex `get()` calls in security rules.\n*   **Emergency Contacts Subcollection (`/users/{userId}/emergencyContacts/{contactId}`):** Storing emergency contacts as subcollections of users makes ownership explicit and ensures that only the user can manage their contacts.\n*   **Medical Professionals Collection (`/medicalProfessionals/{medicalProfessionalId}`):** Medical professionals are stored in a top-level collection, allowing easy listing and querying.  Security rules can control who can create/modify medical professional data (e.g., only admins).\n*   **Holistic Content Collection (`/holisticContent/{holisticContentId}`):** Holistic content is stored in a top-level collection, enabling listing and querying.  Security rules can control who can create/modify content (e.g., only admins).\n*   **Admin Roles Collection (`/roles_admin/{userId}`):** Administrative privileges are managed through the existence of documents in this collection. This 'existence over content' approach simplifies security rules for admin-only operations. The absence of custom claims reduces complexity and improves security.\n*   **Forum Collections:** The `/forumThreads` collection is top-level to allow all users to browse discussions. Replies are in a subcollection (`/posts/{postId}`) to keep threads organized. Security rules will allow any authenticated user to create content, but only the original author to delete it, promoting community interaction."
   }
 }
-
-    
