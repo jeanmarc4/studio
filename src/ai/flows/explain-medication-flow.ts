@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview Un flux Genkit pour expliquer l'utilité d'un médicament.
+ * @fileOverview Un flux Genkit pour expliquer l'utilité d'un médicament, avec un cache en mémoire.
  *
  * - explainMedication - Une fonction qui prend le nom d'un médicament et renvoie une explication simple.
  * - MedicationExplanationInput - Le type d'entrée pour la fonction.
@@ -10,6 +10,9 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+
+// Cache simple en mémoire pour stocker les explications déjà générées.
+const explanationCache = new Map<string, string>();
 
 const MedicationExplanationInputSchema = z.object({
   medicationName: z.string().describe('Le nom du médicament à expliquer.'),
@@ -32,6 +35,14 @@ const explainMedicationFlow = ai.defineFlow(
     outputSchema: MedicationExplanationOutputSchema,
   },
   async ({ medicationName }) => {
+    const cacheKey = medicationName.trim().toLowerCase();
+    
+    // 1. Vérifier si l'explication est déjà dans le cache.
+    if (explanationCache.has(cacheKey)) {
+      return { explanation: explanationCache.get(cacheKey)! };
+    }
+
+    // 2. Si ce n'est pas dans le cache, appeler l'IA.
     const { output } = await ai.generate({
       prompt: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
 Un patient te demande à quoi sert le médicament suivant : ${medicationName}.
@@ -46,9 +57,13 @@ Maintenant, fournis l'explication pour le médicament : ${medicationName}.`,
       output: { schema: MedicationExplanationOutputSchema },
     });
     
-    if (!output) {
+    if (!output?.explanation) {
       return { explanation: "Désolé, je n'ai pas pu trouver d'informations pour ce médicament." };
     }
+    
+    // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
+    explanationCache.set(cacheKey, output.explanation);
+    
     return output;
   }
 );
