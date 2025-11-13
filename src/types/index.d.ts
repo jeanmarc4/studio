@@ -1,6 +1,6 @@
 
 
-import type { MedicalProfessional, Medication as MedicationSchema, Prescription as PrescriptionSchema, ForumThread as ForumThreadSchema, ForumPost as ForumPostSchema, User as UserSchema, Appointment as AppointmentSchema, Vaccine as VaccineSchema, FamilyProfile as FamilyProfileSchema } from "@/docs/backend-documentation";
+import type { MedicalProfessional, Medication as MedicationSchema, Prescription as PrescriptionSchema, ForumThread as ForumThreadSchema, ForumPost as ForumPostSchema, User as UserSchema, Appointment as AppointmentSchema, Vaccine as VaccineSchema, EmergencyContact as EmergencyContactSchema, FamilyProfile as FamilyProfileSchema } from "@/docs/backend-documentation";
 import type { ExtractedMedication as ExtractedMedicationSchema } from "@/ai/flows/extract-medications-flow";
 
 export type NavItem = {
@@ -46,6 +46,7 @@ export type ForumPost = ForumPostSchema & { id:string };
 
 export type Vaccine = Omit<VaccineSchema, 'userId'> & { id: string, profileId: string };
 
+export type EmergencyContact = EmergencyContactSchema;
     
 
     

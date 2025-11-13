@@ -164,10 +164,29 @@ export interface HolisticContent {
     required: ["id", "title", "type", "url", "description"];
 }
 export interface EmergencyContact {
-    id: string;
-    userId: string;
-    name: string;
-    phone: string;
+    "$schema": "http://json-schema.org/draft-07/schema#";
+    title: "EmergencyContact";
+    type: "object";
+    description: "Represents an emergency contact for a user.";
+    properties: {
+        id: {
+            type: "string";
+            description: "Unique identifier for the emergency contact entity.";
+        };
+        userId: {
+            type: "string";
+            description: "Reference to User. (Relationship: User 1:N EmergencyContact)";
+        };
+        name: {
+            type: "string";
+            description: "The name of the emergency contact.";
+        };
+        phone: {
+            type: "string";
+            description: "The phone number of the emergency contact.";
+        };
+    };
+    required: ["id", "userId", "name", "phone"];
 }
 export interface Medication {
     "$schema": "http://json-schema.org/draft-07/schema#";
@@ -347,41 +366,6 @@ export interface ForumPost {
         };
     };
     required: ["id", "threadId", "content", "authorId", "authorName", "createdAt"];
-}
-export interface Vaccine {
-    "$schema": "http://json-schema.org/draft-07/schema#";
-    title: "Vaccine";
-    type: "object";
-    description: "Represents a vaccine record in the user's vaccination booklet.";
-    properties: {
-        id: {
-            type: "string";
-            description: "Unique identifier for the vaccine record.";
-        };
-        userId: {
-            type: "string";
-            description: "Reference to User. (Relationship: User 1:N Vaccine)";
-        };
-        name: {
-            type: "string";
-            description: "The name of the vaccine (e.g., 'Tétanos, Diphtérie, Poliomyélite').";
-        };
-        date: {
-            type: "string";
-            format: "date-time";
-            description: "The date the vaccine was administered.";
-        };
-        lotNumber: {
-            type: "string";
-            description: "The lot number of the vaccine administered.";
-        };
-        nextBooster: {
-            type: "string";
-            format: "date-time";
-            description: "The date for the next scheduled booster shot.";
-        };
-    };
-    required: ["id", "userId", "name", "date"];
 }
 export interface Auth {
     providers: "password"[];

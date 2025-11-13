@@ -77,11 +77,7 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations on emergency contacts.
      */
     match /users/{userId}/emergencyContacts/{contactId} {
-      allow read: if isSignedIn() && isOwner(userId);
-      allow list: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
     }
 
     /**
@@ -227,5 +223,3 @@ service cloud.firestore {
     }
   }
 }
-
-    
