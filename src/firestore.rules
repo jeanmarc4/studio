@@ -61,8 +61,8 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      // Allow only specific UIDs to become admins.
-      allow create: if isSignedIn() && (request.auth.uid == 'k8pesCgwu5ewpR4S7IV36k3RG6w2' || request.auth.uid == 'LUCEMOUCHE3_UID_PLACEHOLDER');
+      // Only an existing admin can create a new admin role.
+      allow create: if isAdmin();
       allow list, update, delete: if isAdmin();
     }
     
