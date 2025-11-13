@@ -2,17 +2,17 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirebase, useDoc, useMemoFirebase, useCollection } from '@/firebase';
+import { collection, doc, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { User } from '@/types';
-import { Mail, Shield, Save, Loader2, Phone, HeartPulse, Droplets, Info } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import type { User, Medication, Appointment, Vaccine, EmergencyContact, FamilyProfile } from '@/types';
+import { Mail, Shield, Save, Loader2, Phone, HeartPulse, Droplets, Info, Download } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import { EmergencyContacts } from './components/emergency-contacts';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +21,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { updateDocumentNonBlocking, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { HealthRecordPDF } from './components/health-record-pdf';
+import { useProfile } from '@/hooks/use-profile';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "Le prénom est requis."),
@@ -37,8 +41,13 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 export default function ProfilePage() {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
+  const { activeProfile } = useProfile();
+
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
+
+  const pdfRef = useRef<HTMLDivElement>(null);
 
   // Redirect if user is not logged in
   useEffect(() => {
@@ -53,6 +62,18 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
+  
+  // Data fetching for the export
+  const medicationsQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'medications'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
+  const appointmentsQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'appointments'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
+  const vaccinesQuery = useMemoFirebase(() => (firestore && activeProfile) ? query(collection(firestore, 'users', user!.uid, 'vaccines'), where('profileId', '==', activeProfile.id)) : null, [firestore, user, activeProfile]);
+  const contactsQuery = useMemoFirebase(() => (firestore && user) ? collection(firestore, 'users', user.uid, 'emergencyContacts') : null, [firestore, user]);
+
+  const { data: medications } = useCollection<Medication>(medicationsQuery);
+  const { data: appointments } = useCollection<Appointment>(appointmentsQuery);
+  const { data: vaccines } = useCollection<Vaccine>(vaccinesQuery);
+  const { data: contacts } = useCollection<EmergencyContact>(contactsQuery);
+
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -95,7 +116,6 @@ export default function ProfilePage() {
       deleteDocumentNonBlocking(adminRoleDocRef);
     }
     
-    // Simulate save time for feedback
     await new Promise(resolve => setTimeout(resolve, 700));
 
     toast({
@@ -103,6 +123,37 @@ export default function ProfilePage() {
         description: "Vos informations ont été sauvegardées avec succès."
     });
     setIsSaving(false);
+  }
+
+  const handleExport = async () => {
+    if (!pdfRef.current) return;
+    setIsExporting(true);
+
+    const canvas = await html2canvas(pdfRef.current, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const ratio = canvasWidth / pdfWidth;
+    const finalHeight = canvasHeight / ratio;
+    
+    let heightLeft = finalHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, finalHeight);
+    heightLeft -= pdfHeight;
+
+    while (heightLeft > 0) {
+      position -= pdfHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, finalHeight);
+      heightLeft -= pdfHeight;
+    }
+
+    pdf.save('Dossier-Sante-SanteConnect.pdf');
+    setIsExporting(false);
   }
 
   const isLoading = isUserLoading || isProfileLoading;
@@ -279,7 +330,7 @@ export default function ProfilePage() {
                         )}
                         />
                  </CardContent>
-                <CardFooter>
+                <CardFooter className="flex justify-between">
                 <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
                     <>
@@ -293,14 +344,32 @@ export default function ProfilePage() {
                     </>
                     )}
                 </Button>
+                <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+                    {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                    Exporter mon dossier
+                </Button>
                 </CardFooter>
             </Card>
           </form>
         </Form>
 
       <EmergencyContacts />
+
+      {/* Hidden component for PDF generation */}
+      <div className="absolute -z-10 -left-[9999px] top-0 w-[800px]">
+        <div ref={pdfRef}>
+            {userProfile && activeProfile && (
+                <HealthRecordPDF 
+                    user={userProfile}
+                    profile={activeProfile}
+                    medications={medications || []}
+                    appointments={appointments || []}
+                    vaccines={vaccines || []}
+                    emergencyContacts={contacts || []}
+                />
+            )}
+        </div>
+      </div>
     </div>
   );
 }
-
-    
