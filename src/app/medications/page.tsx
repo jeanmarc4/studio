@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, query, where } from 'firebase/firestore';
 import type { Medication } from '@/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Pill, HelpCircle } from 'lucide-react';
@@ -14,9 +14,11 @@ import { AddMedicationDialog } from './components/add-medication-dialog';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { EditMedicationDialog } from './components/edit-medication-dialog';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useProfile } from '@/hooks/use-profile';
 
 export default function MedicationsPage() {
   const { user, isUserLoading, firestore } = useFirebase();
+  const { activeProfile } = useProfile();
   const router = useRouter();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -30,9 +32,12 @@ export default function MedicationsPage() {
   }, [isUserLoading, user, router]);
 
   const medicationsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'medications');
-  }, [firestore, user]);
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+      collection(firestore, 'users', user.uid, 'medications'),
+      where('profileId', '==', activeProfile.id)
+    );
+  }, [firestore, user, activeProfile]);
 
   const { data: medications, isLoading: areMedicationsLoading } = useCollection<Medication>(medicationsQuery);
 
@@ -47,7 +52,7 @@ export default function MedicationsPage() {
     updateDocumentNonBlocking(medRef, data);
   };
 
-  const isLoading = isUserLoading || areMedicationsLoading;
+  const isLoading = isUserLoading || areMedicationsLoading || !activeProfile;
   
   if (isLoading || !user) {
     return (
@@ -74,7 +79,7 @@ export default function MedicationsPage() {
         <header className="mb-8 text-center sm:text-left">
           <div>
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-              Mon Traitement
+              Traitement de {activeProfile?.name}
             </h1>
             <p className="mt-2 text-lg text-muted-foreground font-body">
               Gérez vos médicaments et ne manquez jamais une prise.

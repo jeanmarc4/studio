@@ -16,7 +16,7 @@ import { Skeleton } from '../ui/skeleton';
 export function TodaysMedications() {
   const router = useRouter();
   const { user, firestore } = useFirebase();
-  const { activeProfile } = useProfile();
+  const { activeProfile, isLoading: isProfileHookLoading } = useProfile();
   const [taken, setTaken] = useState<Set<string>>(new Set());
 
   const medicationsQuery = useMemoFirebase(() => {
@@ -34,7 +34,7 @@ export function TodaysMedications() {
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
   
-  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
+  const { data: userProfile, isLoading: isUserProfileLoading } = useDoc<User>(userProfileRef);
 
   const todaysTakes = useMemo(() => {
     if (!medications) return [];
@@ -48,9 +48,10 @@ export function TodaysMedications() {
   };
 
   const isFreePlan = userProfile?.role === 'Gratuit';
-  const isLoading = areMedicationsLoading || isProfileLoading;
+  const isLoading = areMedicationsLoading || isUserProfileLoading || isProfileHookLoading || !activeProfile;
 
   const getDescription = () => {
+      if (isLoading) return <Skeleton className="h-4 w-3/4" />;
       const profileName = activeProfile?.relationship === 'self' ? "vous" : activeProfile?.name;
       if (todaysTakes.length > 0) {
         if (isFreePlan) {
@@ -65,10 +66,10 @@ export function TodaysMedications() {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="font-headline text-xl">
-          Prises du Jour pour {activeProfile?.relationship === 'self' ? "Moi" : activeProfile?.name}
+          {isLoading ? <Skeleton className="h-7 w-1/2"/> : `Prises du Jour pour ${activeProfile?.relationship === 'self' ? "Moi" : activeProfile?.name}`}
         </CardTitle>
         <CardDescription>
-          {isLoading ? <Skeleton className="h-4 w-3/4" /> : getDescription()}
+          {getDescription()}
         </CardDescription>
       </CardHeader>
       <CardContent>
