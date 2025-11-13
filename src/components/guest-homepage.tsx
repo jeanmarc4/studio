@@ -6,16 +6,23 @@ import { CheckCircle2, UserCheck, BotIcon, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-const standardFeatures = [
+const gratuitFeatures = [
     "Gestion des rendez-vous",
-    "Suivi du traitement (ajout manuel)",
-    "Rappels par notification push",
+    "Suivi du traitement par confirmation manuelle",
+    "Pas de rappels automatiques",
     "Accès au forum communautaire"
+];
+
+const standardFeatures = [
+    "Toutes les fonctionnalités du plan Gratuit",
+    "Rappels par notification push (médicaments & RDV)",
+    "Vérificateur de symptômes (2 fois/semaine)",
+    "Support standard"
 ];
 
 const premiumFeatures = [
     "Toutes les fonctionnalités Standard",
-    "Vérificateur de symptômes par l'IA",
+    "Vérificateur de symptômes illimité",
     "Analyse d'ordonnances par l'IA",
     "Rappels vocaux intelligents par l'IA",
     "Support prioritaire"
@@ -90,21 +97,21 @@ export function GuestHomepage() {
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tight font-headline">Choisissez le plan qui vous convient</h2>
                 <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-                    Commencez gratuitement ou débloquez toute la puissance de l'IA avec notre plan Premium.
+                    Commencez gratuitement ou débloquez plus de fonctionnalités avec nos plans payants.
                 </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-8 items-start">
-            {/* Standard Plan */}
+            <div className="grid md:grid-cols-3 gap-8 items-start">
+            {/* Free Plan */}
             <Card className="flex flex-col h-full">
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Standard</CardTitle>
-                    <CardDescription>Pour organiser votre santé au quotidien.</CardDescription>
-                    <p className="text-4xl font-bold pt-2">Gratuit</p>
+                    <CardTitle className="font-headline text-2xl">Gratuit</CardTitle>
+                    <CardDescription>L'essentiel pour commencer à s'organiser.</CardDescription>
+                    <p className="text-4xl font-bold pt-2">0 €</p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
                     <p className="font-semibold">Fonctionnalités incluses :</p>
                     <ul className="space-y-2">
-                       {standardFeatures.map(feat => (
+                       {gratuitFeatures.map(feat => (
                         <li key={feat} className="flex items-center gap-2">
                             <CheckCircle2 className="h-5 w-5 text-accent" />
                             <span>{feat}</span>
@@ -119,18 +126,18 @@ export function GuestHomepage() {
                 </CardContent>
             </Card>
 
-            {/* Premium Plan */}
+            {/* Standard Plan */}
             <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">RECOMMANDÉ</div>
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
-                    <CardDescription>L'assistance de l'IA pour une santé proactive.</CardDescription>
-                    <p className="text-4xl font-bold pt-2">19,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
+                    <CardTitle className="font-headline text-2xl text-primary">Standard</CardTitle>
+                    <CardDescription>Pour une tranquillité d'esprit avec des rappels automatisés.</CardDescription>
+                    <p className="text-4xl font-bold pt-2">9,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
                     <p className="font-semibold">Fonctionnalités incluses :</p>
                     <ul className="space-y-2">
-                       {premiumFeatures.map(feat => (
+                       {standardFeatures.map(feat => (
                         <li key={feat} className="flex items-center gap-2">
                             <CheckCircle2 className="h-5 w-5 text-primary" />
                             <span>{feat}</span>
@@ -139,8 +146,33 @@ export function GuestHomepage() {
                     </ul>
                 </CardContent>
                 <CardContent>
-                    <Button asChild className="w-full">
-                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">S'abonner via PayPal</a>
+                     <Button asChild className="w-full">
+                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">Choisir Standard</a>
+                    </Button>
+                </CardContent>
+            </Card>
+
+            {/* Premium Plan */}
+            <Card className="flex flex-col h-full">
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Premium</CardTitle>
+                    <CardDescription>L'assistance de l'IA pour une santé proactive.</CardDescription>
+                    <p className="text-4xl font-bold pt-2">19,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-3">
+                    <p className="font-semibold">Fonctionnalités incluses :</p>
+                    <ul className="space-y-2">
+                       {premiumFeatures.map(feat => (
+                        <li key={feat} className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-accent" />
+                            <span>{feat}</span>
+                        </li>
+                       ))}
+                    </ul>
+                </CardContent>
+                <CardContent>
+                    <Button asChild className="w-full" variant="outline">
+                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">Choisir Premium</a>
                     </Button>
                 </CardContent>
             </Card>
@@ -150,3 +182,5 @@ export function GuestHomepage() {
     </main>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -54,7 +55,7 @@ export default function SignupPage() {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
-        role: "Standard",
+        role: "Gratuit",
       };
 
       setDoc(userDocRef, userData).catch((serverError) => {
@@ -177,3 +178,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+    

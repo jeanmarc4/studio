@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -39,7 +40,7 @@ const userSchema = z.object({
   firstName: z.string().min(2, { message: "Le prénom doit comporter au moins 2 caractères." }),
   lastName: z.string().min(2, { message: "Le nom de famille doit comporter au moins 2 caractères." }),
   email: z.string().email({ message: "Adresse email invalide." }),
-  role: z.enum(["Admin", "Standard", "Premium"]),
+  role: z.enum(["Admin", "Gratuit", "Standard", "Premium"]),
 });
 
 type NewUser = Omit<User, "id" | 'phone'> & { id: string };
@@ -60,7 +61,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
       firstName: "",
       lastName: "",
       email: "",
-      role: "Standard",
+      role: "Gratuit",
     },
   });
 
@@ -157,6 +158,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="Gratuit">Gratuit</SelectItem>
                       <SelectItem value="Standard">Standard</SelectItem>
                       <SelectItem value="Premium">Premium</SelectItem>
                       <SelectItem value="Admin">Admin</SelectItem>
@@ -187,3 +189,5 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     </Dialog>
   );
 }
+
+    

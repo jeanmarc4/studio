@@ -95,7 +95,7 @@ export default function AdminPage() {
     deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userId));
   };
   
-  const handleUpdateUserRole = (userId: string, role: "Admin" | "Standard" | "Premium") => {
+  const handleUpdateUserRole = (userId: string, role: "Admin" | "Gratuit" | "Standard" | "Premium") => {
     if (!firestore) return;
     updateDocumentNonBlocking(doc(firestore, 'users', userId), { role });
     const adminRoleDocRef = doc(firestore, 'roles_admin', userId);

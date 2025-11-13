@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 const profileSchema = z.object({
   firstName: z.string().min(2, "Le prénom est requis."),
   lastName: z.string().min(2, "Le nom de famille est requis."),
-  role: z.enum(["Standard", "Premium", "Admin"]),
+  role: z.enum(["Gratuit", "Standard", "Premium", "Admin"]),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -54,7 +54,7 @@ export default function ProfilePage() {
     defaultValues: {
       firstName: '',
       lastName: '',
-      role: 'Standard',
+      role: 'Gratuit',
     }
   });
 
@@ -187,9 +187,10 @@ export default function ProfilePage() {
                             </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                            <SelectItem value="Standard">Standard</SelectItem>
-                            <SelectItem value="Premium">Premium</SelectItem>
-                            <SelectItem value="Admin">Admin</SelectItem>
+                              <SelectItem value="Gratuit">Gratuit</SelectItem>
+                              <SelectItem value="Standard">Standard</SelectItem>
+                              <SelectItem value="Premium">Premium</SelectItem>
+                              <SelectItem value="Admin">Admin</SelectItem>
                             </SelectContent>
                         </Select>
                       </div>
@@ -221,3 +222,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -45,7 +46,7 @@ import { EditUserRoleDialog } from "./edit-user-role-dialog";
 interface UserManagementProps {
     users: User[];
     onDeleteUser: (userId: string) => void;
-    onUpdateUserRole: (userId: string, role: "Admin" | "Standard" | "Premium") => void;
+    onUpdateUserRole: (userId: string, role: "Admin" | "Gratuit" | "Standard" | "Premium") => void;
     isLoading: boolean;
 }
 
@@ -78,7 +79,7 @@ export function UserManagement({ users, onDeleteUser, onUpdateUserRole, isLoadin
     setIsEditDialogOpen(true);
   };
 
-  const handleRoleUpdate = (role: "Admin" | "Standard" | "Premium") => {
+  const handleRoleUpdate = (role: "Admin" | "Gratuit" | "Standard" | "Premium") => {
     if (userToEdit?.id) {
         onUpdateUserRole(userToEdit.id, role);
         toast({
@@ -190,3 +191,5 @@ export function UserManagement({ users, onDeleteUser, onUpdateUserRole, isLoadin
     </>
   );
 }
+
+    

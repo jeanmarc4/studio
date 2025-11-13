@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -33,14 +34,14 @@ import {
 import type { User } from "@/docs/backend-documentation";
 
 const formSchema = z.object({
-  role: z.enum(["Admin", "Standard", "Premium"]),
+  role: z.enum(["Admin", "Gratuit", "Standard", "Premium"]),
 });
 
 interface EditUserRoleDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   user: User;
-  onUpdateRole: (role: "Admin" | "Standard" | "Premium") => void;
+  onUpdateRole: (role: "Admin" | "Gratuit" | "Standard" | "Premium") => void;
 }
 
 export function EditUserRoleDialog({ isOpen, onOpenChange, user, onUpdateRole }: EditUserRoleDialogProps) {
@@ -97,6 +98,7 @@ export function EditUserRoleDialog({ isOpen, onOpenChange, user, onUpdateRole }:
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="Gratuit">Gratuit</SelectItem>
                       <SelectItem value="Standard">Standard</SelectItem>
                       <SelectItem value="Premium">Premium</SelectItem>
                       <SelectItem value="Admin">Admin</SelectItem>
@@ -127,3 +129,5 @@ export function EditUserRoleDialog({ isOpen, onOpenChange, user, onUpdateRole }:
     </Dialog>
   );
 }
+
+    
