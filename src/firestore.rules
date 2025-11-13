@@ -43,8 +43,6 @@ service cloud.firestore {
     /**
      * @description Secure user profiles. Only the authenticated user can access their own profile.
      * @path /users/{userId}
-     * @allow (read, write) User with UID 'user123' can read/write their own profile.
-     * @deny (read, write) User with UID 'user456' cannot read/write 'user123' profile.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
@@ -55,63 +53,56 @@ service cloud.firestore {
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
        * @path /users/{userId}/profiles/{profileId}
-       * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
-       * @description Secure appointments for a specific user. Only the user can manage their appointments.
+       * @description Secure appointments. Only the user can manage their appointments.
        * @path /users/{userId}/appointments/{appointmentId}
-       * @principle Enforces document ownership for all operations on appointments.
        */
-       match /appointments/{appointmentId} {
+      match /appointments/{appointmentId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
-       * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
+       * @description Secure emergency contacts. Only the user can manage their contacts.
        * @path /users/{userId}/emergencyContacts/{contactId}
-       * @principle Enforces document ownership for all operations on emergency contacts.
        */
-       match /emergencyContacts/{contactId} {
+      match /emergencyContacts/{contactId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
-       * @description Secure medications for a specific user. Only the user can manage their medication schedule.
+       * @description Secure medications. Only the user can manage their medication schedule.
        * @path /users/{userId}/medications/{medicationId}
-       * @principle Enforces document ownership for all operations on medications.
        */
-       match /medications/{medicationId} {
+      match /medications/{medicationId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
 
-       /**
-       * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
+      /**
+       * @description Secure prescriptions. Only the user can manage their prescriptions.
        * @path /users/{userId}/prescriptions/{prescriptionId}
-       * @principle Enforces document ownership for all operations on prescriptions.
        */
-       match /prescriptions/{prescriptionId} {
+      match /prescriptions/{prescriptionId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
       
       /**
-       * @description Secure vaccine records for a specific user. Only the user can manage their records.
+       * @description Secure vaccine records. Only the user can manage their records.
        * @path /users/{userId}/vaccines/{vaccineId}
-       * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
-          allow read, write: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
     }
 
 
     /**
-     * @description Secure medical professional profiles. Only admins can create, update, or delete them.
+     * @description Secure medical professional profiles. Admins can manage them.
      * @path /medicalProfessionals/{medicalProfessionalId}
-     * @principle Restricts administrative functions to authorized users.
      */
     match /medicalProfessionals/{medicalProfessionalId} {
       allow get, list: if true;
@@ -119,9 +110,8 @@ service cloud.firestore {
     }
 
     /**
-     * @description Secure holistic wellness content. Only admins can create, update, or delete content.
+     * @description Secure holistic wellness content. Admins can manage it.
      * @path /holisticContent/{holisticContentId}
-     * @principle Restricts content management to authorized users.
      */
     match /holisticContent/{holisticContentId} {
       allow get, list: if true;
@@ -131,7 +121,6 @@ service cloud.firestore {
     /**
      * @description Secure admin role assignments.
      * @path /roles_admin/{userId}
-     * @principle Manages admin privileges through document existence.
      */
     match /roles_admin/{userId} {
       allow get: if true;
@@ -141,7 +130,7 @@ service cloud.firestore {
     }
     
     /**
-     * @description Secure forum threads. Any authenticated user can create a thread.
+     * @description Secure forum threads and posts.
      * @path /forumThreads/{threadId}
      */
     match /forumThreads/{threadId} {
@@ -151,7 +140,6 @@ service cloud.firestore {
         allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
 
         /**
-         * @description Secure forum posts/replies. Any authenticated user can create a post.
          * @path /forumThreads/{threadId}/posts/{postId}
          */
         match /posts/{postId} {
@@ -162,11 +150,10 @@ service cloud.firestore {
     /**
      * @description Secure SOS alerts.
      * @path /sosAlerts/{alertId}
-     * @principle Only authenticated users can create alerts for themselves. Alerts are immutable.
      */
     match /sosAlerts/{alertId} {
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        allow read, list, update, delete: if false; // Alerts are write-only for clients. They should be processed by a backend service.
+        allow read, list, update, delete: if false; // Write-only for clients.
     }
 
 
@@ -174,24 +161,20 @@ service cloud.firestore {
 
     /**
      * @description Checks if the user is signed in.
-     * @return {boolean} True if the user is authenticated, false otherwise.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * @description Checks if the user is the owner of the document based on the user ID.
-     * @param {string} userId The user ID to compare against the authenticated user's UID.
-     * @return {boolean} True if the user is the owner, false otherwise.
+     * @description Checks if the user is the owner of the document.
      */
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
     /**
-     * @description Checks if the user has admin privileges by verifying the existence of a document in the /roles_admin/{userId} collection.
-     * @return {boolean} True if the user is an admin, false otherwise.
+     * @description Checks if the user has admin privileges.
      */
     function isAdmin() {
       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
