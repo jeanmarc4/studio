@@ -45,9 +45,8 @@ export function MyDoctorsList() {
     }
 
     const fetchDoctors = async () => {
-      // Filter out dummy/archived appointments before processing
-      const realAppointments = appointments.filter(apt => apt.status !== 'archived');
-      const professionalIds = [...new Set(realAppointments.map(apt => apt.medicalProfessionalId))];
+      // Use all appointments (including archived) to discover linked doctors
+      const professionalIds = [...new Set(appointments.map(apt => apt.medicalProfessionalId))];
       
       const uniqueDoctors: EnrichedProfessional[] = [];
       const fetchedIds = new Set();
@@ -62,8 +61,8 @@ export function MyDoctorsList() {
           const professional = profSnap.data();
           const staticData = staticDoctorImages.find(d => d.id === professional.id);
 
-          // Find the next upcoming appointment for this doctor from the real appointments
-          const nextAppointment = realAppointments
+          // Find the next upcoming appointment for this doctor from the *real* (non-archived) appointments
+          const nextAppointment = appointments
             .filter(apt => apt.medicalProfessionalId === id && new Date(apt.dateTime) > new Date() && apt.status === 'scheduled')
             .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())[0];
 
@@ -152,7 +151,7 @@ export function MyDoctorsList() {
         <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <Stethoscope className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun médecin trouvé</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Commencez par ajouter un médecin à votre liste.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Commencez par ajouter un médecin à votre liste ou prenez un rendez-vous.</p>
         </div>
       )}
     </>

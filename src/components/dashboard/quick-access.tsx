@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -17,8 +18,8 @@ const quickLinks = [
     icon: Pill,
   },
   {
-    title: 'Consulter mes Rendez-vous',
-    href: '/my-appointments',
+    title: 'Mon Espace Santé',
+    href: '/my-health',
     icon: Calendar,
   },
   {

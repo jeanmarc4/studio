@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { AddDoctorDialog } from './components/add-doctor-dialog';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { collection } from 'firebase/firestore';
+import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { collection, doc } from 'firebase/firestore';
 import type { MedicalProfessional } from '@/docs/backend-documentation';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,7 +27,7 @@ export default function MyHealthPage() {
     }
   }, [isUserLoading, user, router]);
   
-  const handleAddDoctor = (values: { name: string; specialty: string; address: string; phone: string; }) => {
+  const handleAddDoctor = (values: { name: string; specialty: string; address?: string; phone?: string; }) => {
     if (!firestore || !user) return;
 
     // 1. Create the new medical professional
@@ -37,8 +37,8 @@ export default function MyHealthPage() {
       type: 'Médecin', // Default type
       location: ''
     };
-    const profRef = collection(firestore, 'medicalProfessionals');
-    addDocumentNonBlocking(profRef, newProfessional);
+    const profRef = doc(firestore, 'medicalProfessionals', newProfessional.id);
+    setDocumentNonBlocking(profRef, newProfessional, {});
 
     // 2. Create a dummy appointment to link the user to the new doctor
     const appointmentRef = collection(firestore, 'users', user.uid, 'appointments');

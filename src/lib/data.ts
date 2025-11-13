@@ -81,7 +81,7 @@ export const wellnessArticles = [
 
 export const mainNav: NavItem[] = [
   {
-    title: "Mon Espace Santé",
+    title: "Tableau de Bord",
     href: "/",
   },
    {
@@ -89,8 +89,8 @@ export const mainNav: NavItem[] = [
     href: "/directory",
   },
   {
-    title: "Mes Rendez-vous",
-    href: "/my-appointments",
+    title: "Mon Espace Santé",
+    href: "/my-health",
   },
   {
     title: "Vérificateur de Symptômes",
