@@ -54,74 +54,56 @@ service cloud.firestore {
 
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
-       * @path /users/{userId}/profiles
+       * @path /users/{userId}/profiles/{profileId}
        * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
-        allow get, update, delete: if isSignedIn() && isOwner(userId);
-      }
-      match /profiles {
-        allow list, create: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
        * @description Secure appointments for a specific user. Only the user can manage their appointments.
-       * @path /users/{userId}/appointments
+       * @path /users/{userId}/appointments/{appointmentId}
        * @principle Enforces document ownership for all operations on appointments.
        */
        match /appointments/{appointmentId} {
-        allow get, update, delete: if isSignedIn() && isOwner(userId);
-      }
-      match /appointments {
-        allow list, create: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
        * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
-       * @path /users/{userId}/emergencyContacts
+       * @path /users/{userId}/emergencyContacts/{contactId}
        * @principle Enforces document ownership for all operations on emergency contacts.
        */
        match /emergencyContacts/{contactId} {
-        allow get, update, delete: if isSignedIn() && isOwner(userId);
-      }
-      match /emergencyContacts {
-        allow list, create: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
        * @description Secure medications for a specific user. Only the user can manage their medication schedule.
-       * @path /users/{userId}/medications
+       * @path /users/{userId}/medications/{medicationId}
        * @principle Enforces document ownership for all operations on medications.
        */
        match /medications/{medicationId} {
-        allow get, update, delete: if isSignedIn() && isOwner(userId);
-      }
-      match /medications {
-        allow list, create: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
        /**
        * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
-       * @path /users/{userId}/prescriptions
+       * @path /users/{userId}/prescriptions/{prescriptionId}
        * @principle Enforces document ownership for all operations on prescriptions.
        */
        match /prescriptions/{prescriptionId} {
-        allow get, update, delete: if isSignedIn() && isOwner(userId);
-      }
-      match /prescriptions {
-        allow list, create: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
       
       /**
        * @description Secure vaccine records for a specific user. Only the user can manage their records.
-       * @path /users/{userId}/vaccines
+       * @path /users/{userId}/vaccines/{vaccineId}
        * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
-          allow get, update, delete: if isSignedIn() && isOwner(userId);
-      }
-      match /vaccines {
-          allow list, create: if isSignedIn() && isOwner(userId);
+          allow read, write: if isSignedIn() && isOwner(userId);
       }
     }
 
@@ -173,10 +155,7 @@ service cloud.firestore {
          * @path /forumThreads/{threadId}/posts/{postId}
          */
         match /posts/{postId} {
-            allow get, list: if true;
-            allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-            allow update: if false;
-            allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+            allow read, write: if isSignedIn();
         }
     }
 
