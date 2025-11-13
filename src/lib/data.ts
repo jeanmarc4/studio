@@ -89,11 +89,11 @@ export const mainNav: NavItem[] = [
     href: "/directory",
   },
   {
-    title: "Mon Espace Santé",
+    title: "Espace Santé",
     href: "/my-appointments",
   },
   {
-    title: "Vérificateur de Symptômes",
+    title: "Symptômes",
     href: "/symptom-checker",
   },
   {
@@ -105,7 +105,7 @@ export const mainNav: NavItem[] = [
     href: "/medications",
   },
   {
-    title: "Mes Vaccins",
+    title: "Vaccins",
     href: "/vaccinations",
   },
   {
