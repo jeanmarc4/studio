@@ -8,10 +8,13 @@ import { collection, doc, getDoc, DocumentReference } from 'firebase/firestore';
 import type { Appointment, MedicalProfessional } from '@/docs/backend-documentation';
 import { AppointmentCard } from './components/appointment-card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarOff } from 'lucide-react';
+import { CalendarOff, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { MyDoctorsList } from './components/my-doctors-list';
+import { AddDoctorDialog } from './components/add-doctor-dialog';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { v4 as uuidv4 } from 'uuid';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
@@ -25,6 +28,8 @@ export default function MyAppointmentsPage() {
   // State to hold combined appointment data
   const [appointmentsWithProf, setAppointmentsWithProf] = useState<AppointmentWithProfessional[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isAddDoctorDialogOpen, setIsAddDoctorDialogOpen] = useState(false);
+
 
   // Redirect if user is not logged in
   useEffect(() => {
@@ -32,6 +37,31 @@ export default function MyAppointmentsPage() {
       router.push('/auth/login?redirect=/my-appointments');
     }
   }, [user, isUserLoading, router]);
+  
+  const handleAddDoctor = (values: { name: string; specialty: string; address?: string; phone?: string; }) => {
+    if (!firestore || !user) return;
+
+    // 1. Create the new medical professional
+    const newProfessional: MedicalProfessional = {
+      ...values,
+      id: uuidv4(),
+      type: 'Médecin', // Default type
+      location: ''
+    };
+    const profRef = doc(firestore, 'medicalProfessionals', newProfessional.id);
+    addDocumentNonBlocking(collection(firestore, 'medicalProfessionals'), newProfessional);
+
+    // 2. Create a dummy appointment to link the user to the new doctor
+    const appointmentRef = collection(firestore, 'users', user.uid, 'appointments');
+    const dummyAppointment = {
+      userId: user.uid,
+      medicalProfessionalId: newProfessional.id,
+      dateTime: new Date().toISOString(),
+      reason: 'Ajout initial du médecin par le patient',
+      status: 'archived', // Use 'archived' or a similar status to not show it as a real appointment
+    };
+    addDocumentNonBlocking(appointmentRef, dummyAppointment);
+  };
 
   // Memoize the query to fetch user's appointments
   const appointmentsQuery = useMemoFirebase(() => {
@@ -56,7 +86,8 @@ export default function MyAppointmentsPage() {
     const fetchProfessionalData = async () => {
       setIsDataLoading(true);
       const enrichedAppointments = await Promise.all(
-        appointments.map(async (apt) => {
+        // We filter out archived appointments from the main display list
+        appointments.filter(apt => apt.status !== 'archived').map(async (apt) => {
           if (!apt.medicalProfessionalId) {
             return apt; // Return appointment as is if no professional ID
           }
@@ -101,49 +132,62 @@ export default function MyAppointmentsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-          Mes Rendez-vous et Médecins
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground font-body">
-          Consultez vos rendez-vous et la liste de vos professionnels de santé.
-        </p>
-      </header>
+    <>
+        <div className="container mx-auto px-4 py-8">
+        <header className="mb-8">
+            <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
+            Mes Rendez-vous et Médecins
+            </h1>
+            <p className="mt-2 text-lg text-muted-foreground font-body">
+            Consultez vos rendez-vous et la liste de vos professionnels de santé.
+            </p>
+        </header>
 
-        <div className="grid gap-12 lg:grid-cols-3">
-            <main className="lg:col-span-2">
-                <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Historique des rendez-vous</h2>
-                {isDataLoading ? (
-                    <div className="space-y-4">
-                        <Skeleton className="h-36 w-full" />
-                        <Skeleton className="h-36 w-full" />
-                        <Skeleton className="h-36 w-full" />
-                    </div>
-                ) : appointmentsWithProf.length > 0 ? (
-                    <div className="space-y-6">
-                    {appointmentsWithProf.map((apt) => (
-                        <AppointmentCard key={apt.id} appointment={apt} />
-                    ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                        <CalendarOff className="mx-auto h-12 w-12 text-muted-foreground" />
-                        <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun rendez-vous trouvé</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">Vous n'avez pas encore de rendez-vous prévus.</p>
-                        <Button asChild className="mt-6" disabled>
-                            <Link href="/directory">Prendre un rendez-vous</Link>
+            <div className="grid gap-12 lg:grid-cols-3">
+                <main className="lg:col-span-2">
+                    <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Historique des rendez-vous</h2>
+                    {isDataLoading ? (
+                        <div className="space-y-4">
+                            <Skeleton className="h-36 w-full" />
+                            <Skeleton className="h-36 w-full" />
+                            <Skeleton className="h-36 w-full" />
+                        </div>
+                    ) : appointmentsWithProf.length > 0 ? (
+                        <div className="space-y-6">
+                        {appointmentsWithProf.map((apt) => (
+                            <AppointmentCard key={apt.id} appointment={apt} />
+                        ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                            <CalendarOff className="mx-auto h-12 w-12 text-muted-foreground" />
+                            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun rendez-vous trouvé</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">Vous n'avez pas encore de rendez-vous prévus.</p>
+                            <Button asChild className="mt-6" disabled>
+                                <Link href="/directory">Prendre un rendez-vous</Link>
+                            </Button>
+                        </div>
+                    )}
+                </main>
+                <aside className="lg:col-span-1">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold font-headline text-gray-800 dark:text-gray-200">Mes Médecins</h2>
+                        <Button variant="outline" onClick={() => setIsAddDoctorDialogOpen(true)}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Ajouter
                         </Button>
                     </div>
-                )}
-            </main>
-            <aside className="lg:col-span-1">
-                 <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Mes Médecins</h2>
-                <div className="sticky top-24">
-                     <MyDoctorsList />
-                </div>
-            </aside>
+                    <div className="sticky top-24">
+                        <MyDoctorsList />
+                    </div>
+                </aside>
+            </div>
         </div>
-    </div>
+        <AddDoctorDialog 
+            isOpen={isAddDoctorDialogOpen}
+            onOpenChange={setIsAddDoctorDialogOpen}
+            onAddDoctor={handleAddDoctor}
+      />
+    </>
   );
 }
