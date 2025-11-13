@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { MyDoctorsList } from './components/my-doctors-list';
 import { AddDoctorDialog } from './components/add-doctor-dialog';
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { v4 as uuidv4 } from 'uuid';
 
 // Define a type for the combined appointment and professional data
@@ -49,7 +49,7 @@ export default function MyAppointmentsPage() {
       location: ''
     };
     const profRef = doc(firestore, 'medicalProfessionals', newProfessional.id);
-    addDocumentNonBlocking(collection(firestore, 'medicalProfessionals'), newProfessional);
+    setDocumentNonBlocking(profRef, newProfessional, {});
 
     // 2. Create a dummy appointment to link the user to the new doctor
     const appointmentRef = collection(firestore, 'users', user.uid, 'appointments');
