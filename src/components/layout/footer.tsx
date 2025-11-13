@@ -23,6 +23,9 @@ export function Footer() {
             <a href="mailto:diojm93@gmail.com" className="hover:text-primary transition-colors">
                 Contact
             </a>
+            <Link href="#" className="font-semibold text-primary hover:underline">
+                Faire un don
+            </Link>
         </div>
       </div>
     </footer>
