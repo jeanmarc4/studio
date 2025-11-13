@@ -111,11 +111,7 @@ export default function ProfilePage() {
     if (data.role === "Admin") {
         setDocumentNonBlocking(adminRoleDocRef, { userId: user.uid, role: 'admin' }, {});
     } else {
-        // This check is important. Only delete the role if the user was an admin before.
-        // We can check the original userProfile state for this.
-        if(userProfile?.role === 'Admin') {
-            deleteDocumentNonBlocking(adminRoleDocRef);
-        }
+        deleteDocumentNonBlocking(adminRoleDocRef);
     }
     
     await new Promise(resolve => setTimeout(resolve, 700));
@@ -378,5 +374,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    

@@ -76,9 +76,9 @@ export default function AdminPage() {
     setIsAuthorizing(true);
     const adminDocRef = doc(firestore, 'roles_admin', user.uid);
     try {
+      // Using setDoc from the main SDK for this critical, blocking operation
       await setDoc(adminDocRef, { userId: user.uid, role: 'admin' });
-      // The useDoc hook will automatically update the UI once the document is created
-      // and the useEffect will set isAuthorized to true.
+      setIsAuthorized(true); // Manually trigger UI update as useDoc might have a slight delay
     } catch (e) {
        console.error("Failed to become admin", e);
     } finally {
@@ -93,7 +93,7 @@ export default function AdminPage() {
     setDocumentNonBlocking(userDocRef, newUser, {});
     if (newUser.role === 'Admin' && newUser.id) {
       const adminRoleDocRef = doc(firestore, 'roles_admin', newUser.id);
-      setDoc(adminRoleDocRef, { userId: newUser.id, role: 'admin' });
+      setDocumentNonBlocking(adminRoleDocRef, { userId: newUser.id, role: 'admin' }, {});
     }
   };
 
@@ -107,12 +107,11 @@ export default function AdminPage() {
   const handleUpdateUserRole = (userId: string, role: "Admin" | "Gratuit" | "Standard" | "Premium") => {
     if (!firestore) return;
     updateDocumentNonBlocking(doc(firestore, 'users', userId), { role });
+    
     const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
     if (role === "Admin") {
         setDocumentNonBlocking(adminRoleDocRef, { userId, role: 'admin' }, {});
     } else {
-        // Only delete the admin role if the user is being demoted FROM admin.
-        // This prevents accidental deletion if the user was never an admin.
         deleteDocumentNonBlocking(adminRoleDocRef);
     }
   };
@@ -298,5 +297,3 @@ export default function AdminPage() {
     </>
   );
 }
-
-    
