@@ -1,16 +1,17 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { User } from '@/docs/backend-documentation';
-import { Mail, Shield, Save, Loader2, Phone } from 'lucide-react';
+import type { User } from '@/types';
+import { Mail, Shield, Save, Loader2, Phone, HeartPulse, Droplets, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { EmergencyContacts } from './components/emergency-contacts';
 import { useForm } from 'react-hook-form';
@@ -19,12 +20,16 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { updateDocumentNonBlocking, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "Le prénom est requis."),
   lastName: z.string().min(2, "Le nom de famille est requis."),
   phone: z.string().optional(),
   role: z.enum(["Gratuit", "Standard", "Premium", "Admin"]),
+  bloodType: z.string().optional(),
+  allergies: z.string().optional(),
+  medicalConditions: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -56,6 +61,9 @@ export default function ProfilePage() {
       lastName: '',
       phone: '',
       role: 'Gratuit',
+      bloodType: '',
+      allergies: '',
+      medicalConditions: ''
     }
   });
 
@@ -66,6 +74,9 @@ export default function ProfilePage() {
         lastName: userProfile.lastName,
         phone: userProfile.phone || '',
         role: userProfile.role,
+        bloodType: userProfile.bloodType || '',
+        allergies: userProfile.allergies || '',
+        medicalConditions: userProfile.medicalConditions || '',
       });
     }
   }, [userProfile, form]);
@@ -129,114 +140,167 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      <Card className="mx-auto max-w-2xl">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardHeader>
-              <CardTitle className="font-headline text-2xl">Mon Profil</CardTitle>
-              <CardDescription>Consultez et mettez à jour vos informations personnelles.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prénom</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="email">Adresse e-mail</Label>
-                    <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
-                    </div>
-                </div>
-                 <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Téléphone</FormLabel>
-                       <div className="relative">
-                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                         <FormControl>
-                            <Input type="tel" placeholder="Non défini" {...field} className="pl-10"/>
-                         </FormControl>
-                       </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-               <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rôle</FormLabel>
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-muted-foreground" />
-                        <Select onValueChange={field.onChange} value={field.value}>
+            <Card className="mx-auto max-w-2xl">
+                <CardHeader>
+                <CardTitle className="font-headline text-2xl">Mon Profil</CardTitle>
+                <CardDescription>Consultez et mettez à jour vos informations personnelles et médicales.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <h3 className="font-semibold text-lg border-b pb-2">Informations Personnelles</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Prénom</FormLabel>
                             <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Sélectionnez un rôle" />
-                            </SelectTrigger>
+                                <Input {...field} />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Gratuit">Gratuit</SelectItem>
-                              <SelectItem value="Standard">Standard</SelectItem>
-                              <SelectItem value="Premium">Premium</SelectItem>
-                              <SelectItem value="Admin">Admin</SelectItem>
-                            </SelectContent>
-                        </Select>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sauvegarde...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Sauvegarder les changements
-                  </>
-                )}
-              </Button>
-            </CardFooter>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Nom</FormLabel>
+                            <FormControl>
+                                <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Adresse e-mail</Label>
+                            <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
+                            </div>
+                        </div>
+                        <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Téléphone</FormLabel>
+                            <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <FormControl>
+                                    <Input type="tel" placeholder="Non défini" {...field} className="pl-10"/>
+                                </FormControl>
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                </CardContent>
+                <CardContent className="space-y-6">
+                    <h3 className="font-semibold text-lg border-b pb-2">Informations Médicales d'Urgence</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         <FormField
+                            control={form.control}
+                            name="bloodType"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Groupe Sanguin</FormLabel>
+                                <div className="relative">
+                                     <Droplets className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                     <FormControl>
+                                        <Input placeholder="ex: A+, O-" {...field} className="pl-10"/>
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                     <FormField
+                        control={form.control}
+                        name="allergies"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Allergies connues</FormLabel>
+                             <FormControl>
+                                <Textarea placeholder="ex: Pollen, Pénicilline, Arachides..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="medicalConditions"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Conditions médicales importantes</FormLabel>
+                             <FormControl>
+                                <Textarea placeholder="ex: Diabète de type 2, Asthme, Hypertension..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+                 <CardContent className="space-y-6">
+                    <h3 className="font-semibold text-lg border-b pb-2">Paramètres du Compte</h3>
+                    <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Abonnement</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-muted-foreground" />
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sélectionnez un rôle" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                    <SelectItem value="Gratuit">Gratuit</SelectItem>
+                                    <SelectItem value="Standard">Standard</SelectItem>
+                                    <SelectItem value="Premium">Premium</SelectItem>
+                                    <SelectItem value="Admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                 </CardContent>
+                <CardFooter>
+                <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sauvegarde...
+                    </>
+                    ) : (
+                    <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Sauvegarder les changements
+                    </>
+                    )}
+                </Button>
+                </CardFooter>
+            </Card>
           </form>
         </Form>
-      </Card>
 
       <EmergencyContacts />
     </div>
   );
 }
+
+    

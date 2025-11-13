@@ -1,4 +1,5 @@
 
+
 import type { MedicalProfessional, Medication as MedicationSchema, Prescription as PrescriptionSchema, ForumThread as ForumThreadSchema, ForumPost as ForumPostSchema, User as UserSchema, Appointment as AppointmentSchema, Vaccine as VaccineSchema, FamilyProfile as FamilyProfileSchema } from "@/docs/backend-documentation";
 import type { ExtractedMedication as ExtractedMedicationSchema } from "@/ai/flows/extract-medications-flow";
 
@@ -18,25 +19,33 @@ export type PopulatedMedicalProfessional = MedicalProfessional & {
   imageHint: string | undefined;
 };
 
-export type User = UserSchema;
+export type User = UserSchema & {
+    id: string;
+    bloodType?: string;
+    allergies?: string;
+    medicalConditions?: string;
+};
 
 export type FamilyProfile = FamilyProfileSchema & { id: string };
 
-export type Medication = Omit<MedicationSchema, 'userId'> & { id: string };
+export type Medication = Omit<MedicationSchema, 'userId'> & { id: string, profileId: string };
 
 export type Prescription = Omit<PrescriptionSchema, 'userId' | 'extractedMedications'> & { 
   id: string;
+  profileId: string;
   extractedMedications?: ExtractedMedication[];
 };
 
-export type Appointment = Omit<AppointmentSchema, 'userId'> & { id: string };
+export type Appointment = Omit<AppointmentSchema, 'userId'> & { id: string, profileId: string };
 
 export type ExtractedMedication = ExtractedMedicationSchema;
 
 export type ForumThread = ForumThreadSchema & { id: string };
 
-export type ForumPost = ForumPostSchema & { id: string };
+export type ForumPost = ForumPostSchema & { id:string };
 
-export type Vaccine = Omit<VaccineSchema, 'userId'> & { id: string };
+export type Vaccine = Omit<VaccineSchema, 'userId'> & { id: string, profileId: string };
+
+    
 
     

@@ -32,6 +32,18 @@
           "type": "string",
           "description": "The role or plan of the user.",
           "enum": ["Gratuit", "Standard", "Premium", "Admin"]
+        },
+        "bloodType": {
+            "type": "string",
+            "description": "The blood type of the user (e.g., 'A+', 'O-')."
+        },
+        "allergies": {
+            "type": "string",
+            "description": "A list of known allergies for the user."
+        },
+        "medicalConditions": {
+            "type": "string",
+            "description": "A summary of important medical conditions for the user."
         }
       },
       "required": [
@@ -41,6 +53,18 @@
         "email",
         "role"
       ]
+    },
+    "FamilyProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FamilyProfile",
+      "type": "object",
+      "description": "Represents a family member's profile managed by the main user.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the family profile." },
+        "name": { "type": "string", "description": "The full name of the family member." },
+        "relationship": { "type": "string", "description": "The relationship to the main user (e.g., 'Child', 'Spouse')." }
+      },
+      "required": ["id", "name", "relationship"]
     },
     "Admin": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -129,6 +153,7 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Appointment)"
         },
+        "profileId": { "type": "string", "description": "The profile this appointment belongs to (user's self or family member)." },
         "medicalProfessionalId": {
           "type": "string",
           "description": "Reference to MedicalProfessional. (Relationship: MedicalProfessional 1:N Appointment)"
@@ -150,6 +175,7 @@
       "required": [
         "id",
         "userId",
+        "profileId",
         "medicalProfessionalId",
         "dateTime",
         "status"
@@ -235,6 +261,7 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Medication)"
         },
+        "profileId": { "type": "string", "description": "The profile this medication belongs to (user's self or family member)." },
         "name": {
           "type": "string",
           "description": "The name of the medication."
@@ -259,6 +286,7 @@
       "required": [
         "id",
         "userId",
+        "profileId",
         "name",
         "dosage",
         "intakeTimes"
@@ -294,6 +322,7 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Prescription)"
         },
+        "profileId": { "type": "string", "description": "The profile this prescription belongs to (user's self or family member)." },
         "doctorName": {
             "type": "string",
             "description": "The name of the doctor who issued the prescription."
@@ -324,6 +353,7 @@
       "required": [
         "id",
         "userId",
+        "profileId",
         "doctorName",
         "issueDate",
         "imageUrl",
@@ -369,12 +399,13 @@
       "properties": {
         "id": { "type": "string", "description": "Unique identifier for the vaccine record." },
         "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N Vaccine)" },
+        "profileId": { "type": "string", "description": "The profile this vaccine belongs to (user's self or family member)." },
         "name": { "type": "string", "description": "The name of the vaccine (e.g., 'Tétanos, Diphtérie, Poliomyélite')." },
         "date": { "type": "string", "format": "date-time", "description": "The date the vaccine was administered." },
         "lotNumber": { "type": "string", "description": "The lot number of the vaccine administered." },
         "nextBooster": { "type": "string", "format": "date-time", "description": "The date for the next scheduled booster shot." }
       },
-      "required": ["id", "userId", "name", "date"]
+      "required": ["id", "userId", "profileId", "name", "date"]
     }
   },
   "auth": {
@@ -398,6 +429,18 @@
               "description": "The unique identifier of the user.  Corresponds to the Firebase Auth UID."
             }
           ]
+        }
+      },
+      {
+        "path": "/users/{userId}/profiles/{profileId}",
+        "definition": {
+            "entityName": "FamilyProfile",
+            "schema": { "$ref": "#/backend/entities/FamilyProfile" },
+            "description": "Stores family member profiles linked to a main user account.",
+            "params": [
+                { "name": "userId", "description": "The unique identifier of the main user." },
+                { "name": "profileId", "description": "The unique identifier of the family profile." }
+            ]
         }
       },
       {
