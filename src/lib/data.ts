@@ -110,33 +110,5 @@ export const mainNav: NavItem[] = [
   },
 ];
 
-export const adminUsers = [
-    {
-        id: '1',
-        name: 'Admin 1',
-        email: 'admin1@santeconnect.com',
-        role: 'Super Admin',
-        status: 'Actif',
-        lastLogin: '2024-05-21 10:00'
-    },
-    {
-        id: '2',
-        name: 'Dr. Évelyne Reed',
-        email: 'e.reed@santeconnect.com',
-        role: 'Admin',
-        status: 'Actif',
-        lastLogin: '2024-05-20 15:45'
-    },
-    {
-        id: '3',
-        name: 'Personnel de soutien',
-        email: 'support@santeconnect.com',
-        role: 'Modérateur',
-        status: 'Inactif',
-        lastLogin: '2024-05-18 11:20'
-    },
-];
-
 export type Doctor = typeof doctors[0];
 export type WellnessArticle = typeof wellnessArticles[0];
-export type AdminUser = typeof adminUsers[0];

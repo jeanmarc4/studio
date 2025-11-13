@@ -4,7 +4,7 @@ import { UserNav } from "@/components/layout/user-nav";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
-import { Menu, HeartPulse } from "lucide-react";
+import { Menu } from "lucide-react";
 import { AppLogo } from "../app-logo";
 
 export function Header() {

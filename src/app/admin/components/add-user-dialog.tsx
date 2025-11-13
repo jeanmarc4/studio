@@ -32,15 +32,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import type { AdminUser } from "@/lib/data";
+import type { User } from "@/docs/backend-documentation";
 
 const userSchema = z.object({
-  name: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères." }),
+  firstName: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères." }),
+  lastName: z.string().min(2, { message: "Le nom de famille doit comporter au moins 2 caractères." }),
   email: z.string().email({ message: "Adresse email invalide." }),
-  role: z.enum(["Admin", "Modérateur"]),
+  role: z.enum(["Admin", "Standard", "Premium"]),
 });
 
-type NewUser = Omit<AdminUser, "id" | "status" | "lastLogin">;
+type NewUser = Omit<User, "id">;
 
 interface AddUserDialogProps {
   isOpen: boolean;
@@ -55,14 +56,17 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
   const form = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
-      role: "Modérateur",
+      role: "Standard",
     },
   });
 
   async function onSubmit(values: z.infer<typeof userSchema>) {
     setIsLoading(true);
+    // In a real app, you'd also create a Firebase Auth user.
+    // For simplicity, we're just adding to the Firestore collection for now.
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
     onUserAdd(values);
@@ -71,7 +75,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     onOpenChange(false);
     toast({
       title: "Utilisateur ajouté",
-      description: `${values.name} a été ajouté à la plateforme.`,
+      description: `${values.firstName} ${values.lastName} a été ajouté à la plateforme.`,
     });
   }
 
@@ -88,24 +92,39 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
         <DialogHeader>
           <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
           <DialogDescription>
-            Remplissez les détails pour ajouter un nouvel administrateur ou modérateur.
+            Remplissez les détails pour ajouter un nouvel utilisateur.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom complet</FormLabel>
-                  <FormControl>
-                    <Input placeholder="par ex. John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prénom</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Jean" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nom</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Dupont" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             <FormField
               control={form.control}
               name="email"
@@ -113,7 +132,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="par ex. john.doe@example.com" {...field} />
+                    <Input type="email" placeholder="par ex. jean.dupont@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,8 +151,9 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="Standard">Standard</SelectItem>
+                      <SelectItem value="Premium">Premium</SelectItem>
                       <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Modérateur">Modérateur</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

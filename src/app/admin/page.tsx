@@ -1,46 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from 'next/navigation';
+import { collection } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus } from "lucide-react";
 import { UserManagement } from "./components/user-management";
-import { AddUserDialog } from "./components/add-user-dialog";
 import { RoleConfiguration } from "./components/role-configuration";
 import { Dashboard } from "./components/dashboard";
-import { adminUsers } from "@/lib/data";
-import type { AdminUser } from "@/lib/data";
-import { useFirebase } from '@/firebase/provider';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
-
-type NewUser = Omit<AdminUser, "id" | "status" | "lastLogin">;
+import type { User } from '@/docs/backend-documentation';
+import { deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { doc } from "firebase/firestore";
 
 export default function AdminPage() {
-  const [users, setUsers] = useState<AdminUser[]>(adminUsers);
-  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const { user, isUserLoading } = useFirebase();
+  const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/auth/login');
     }
+    // We will check for admin role later
   }, [user, isUserLoading, router]);
 
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'users');
+  }, [firestore]);
 
-  const handleAddUser = (newUser: NewUser) => {
-    const userToAdd: AdminUser = {
-      ...newUser,
-      id: new Date().getTime().toString(),
-      status: "Actif",
-      lastLogin: new Date().toLocaleString(),
-    };
-    setUsers(prevUsers => [userToAdd, ...prevUsers]);
-  };
+  const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
 
   const handleDeleteUser = (userId: string) => {
-    setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+    if (!firestore) return;
+    // Note: This only deletes the Firestore document, not the Firebase Auth user.
+    // A more complete solution would use a Cloud Function to delete the auth user as well.
+    const userDocRef = doc(firestore, 'users', userId);
+    deleteDocumentNonBlocking(userDocRef);
   };
   
   if (isUserLoading || !user) {
@@ -48,9 +45,6 @@ export default function AdminPage() {
       <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
         <div className="flex items-center mb-8">
           <Skeleton className="h-10 w-64" />
-          <div className="ml-auto flex items-center gap-2">
-            <Skeleton className="h-8 w-32" />
-          </div>
         </div>
         <Skeleton className="w-full h-[400px]" />
       </div>
@@ -68,20 +62,16 @@ export default function AdminPage() {
                 <TabsTrigger value="users">Gestion des utilisateurs</TabsTrigger>
                 <TabsTrigger value="roles">Configuration des rôles</TabsTrigger>
               </TabsList>
-              <div className="ml-auto flex items-center gap-2">
-                <Button size="sm" className="h-8 gap-1" onClick={() => setIsAddUserDialogOpen(true)}>
-                  <UserPlus className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Ajouter un utilisateur
-                  </span>
-                </Button>
-              </div>
             </div>
             <TabsContent value="dashboard">
               <Dashboard />
             </TabsContent>
             <TabsContent value="users">
-              <UserManagement users={users} onDeleteUser={handleDeleteUser} />
+              <UserManagement 
+                users={users || []} 
+                onDeleteUser={handleDeleteUser}
+                isLoading={areUsersLoading}
+              />
             </TabsContent>
             <TabsContent value="roles">
               <RoleConfiguration />
@@ -89,11 +79,6 @@ export default function AdminPage() {
           </Tabs>
         </main>
       </div>
-      <AddUserDialog
-        isOpen={isAddUserDialogOpen}
-        onOpenChange={setIsAddUserDialogOpen}
-        onUserAdd={handleAddUser}
-      />
     </div>
   );
 }

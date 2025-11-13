@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
+import { doc, setDoc } from "firebase/firestore";
 
 import { AppLogo } from "@/components/app-logo";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebase } from "@/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { FirestorePermissionError, errorEmitter } from "@/firebase";
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: "Le prénom est requis." }),
@@ -26,7 +28,7 @@ const formSchema = z.object({
 
 export default function SignupPage() {
   const router = useRouter();
-  const { auth } = useFirebase();
+  const { auth, firestore } = useFirebase();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,7 +45,27 @@ export default function SignupPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      const userDocRef = doc(firestore, "users", user.uid);
+      const userData = {
+        id: user.uid,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        role: "Standard",
+      };
+
+      setDoc(userDocRef, userData).catch((serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: userDocRef.path,
+          operation: 'create',
+          requestResourceData: userData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
       toast({
         title: "Inscription réussie",
         description: "Votre compte a été créé. Vous pouvez maintenant vous connecter.",

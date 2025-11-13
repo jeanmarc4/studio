@@ -37,38 +37,33 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { AdminUser } from "@/lib/data";
+import type { User } from "@/docs/backend-documentation";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface UserManagementProps {
-    users: AdminUser[];
+    users: User[];
     onDeleteUser: (userId: string) => void;
+    isLoading: boolean;
 }
 
-export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
+export function UserManagement({ users, onDeleteUser, isLoading }: UserManagementProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const { toast } = useToast();
 
-  const handleDeleteClick = (user: AdminUser) => {
-    if (user.role === 'Super Admin') {
-        toast({
-            variant: "destructive",
-            title: "Permission refusée",
-            description: "Le compte Super Admin ne peut pas être supprimé."
-        });
-        return;
-    }
+  const handleDeleteClick = (user: User) => {
+    // Logic to prevent deleting super admin can be added here based on role property
     setUserToDelete(user);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (userToDelete) {
+    if (userToDelete?.id) {
       onDeleteUser(userToDelete.id);
       toast({
         title: "Utilisateur supprimé",
-        description: `${userToDelete.name} a été supprimé de la plateforme.`
+        description: `${userToDelete.firstName} ${userToDelete.lastName} a été supprimé de la plateforme.`
       });
       setUserToDelete(null);
     }
@@ -97,39 +92,50 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.role === 'Super Admin' ? 'default' : (user.role === 'Admin' ? 'secondary' : 'outline')}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Ouvrir/fermer le menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Modifier l'utilisateur
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Supprimer l'utilisateur
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {isLoading ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-48" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-8" /></TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === 'Admin' ? 'secondary' : 'outline'}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Ouvrir/fermer le menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Modifier le rôle
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleDeleteClick(user)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Supprimer l'utilisateur
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -143,7 +149,7 @@ export function UserManagement({ users, onDeleteUser }: UserManagementProps) {
               Êtes-vous absolument sûr ?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action ne peut pas être annulée. Cela supprimera définitivement le compte de l'utilisateur <span className="font-semibold">{userToDelete?.name}</span> et supprimera son accès à la plateforme.
+              Cette action ne peut pas être annulée. Cela supprimera définitivement le compte de l'utilisateur <span className="font-semibold">{userToDelete?.firstName} {userToDelete?.lastName}</span> et supprimera ses données de la base de données.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

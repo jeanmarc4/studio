@@ -26,13 +26,19 @@
         "phone": {
           "type": "string",
           "description": "The phone number of the user."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role or plan of the user.",
+          "enum": ["Standard", "Premium", "Admin"]
         }
       },
       "required": [
         "id",
         "firstName",
         "lastName",
-        "email"
+        "email",
+        "role"
       ]
     },
     "Admin": {
