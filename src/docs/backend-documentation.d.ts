@@ -164,29 +164,10 @@ export interface HolisticContent {
     required: ["id", "title", "type", "url", "description"];
 }
 export interface EmergencyContact {
-    "$schema": "http://json-schema.org/draft-07/schema#";
-    title: "EmergencyContact";
-    type: "object";
-    description: "Represents an emergency contact for a user.";
-    properties: {
-        id: {
-            type: "string";
-            description: "Unique identifier for the emergency contact entity.";
-        };
-        userId: {
-            type: "string";
-            description: "Reference to User. (Relationship: User 1:N EmergencyContact)";
-        };
-        name: {
-            type: "string";
-            description: "The name of the emergency contact.";
-        };
-        phone: {
-            type: "string";
-            description: "The phone number of the emergency contact.";
-        };
-    };
-    required: ["id", "userId", "name", "phone"];
+    id: string;
+    userId: string;
+    name: string;
+    phone: string;
 }
 export interface Medication {
     "$schema": "http://json-schema.org/draft-07/schema#";

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -21,8 +20,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { updateDocumentNonBlocking, setDocumentNonBlocking, deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { HealthRecordPDF } from './components/health-record-pdf';
 import { useProfile } from '@/hooks/use-profile';
 
@@ -128,6 +125,9 @@ export default function ProfilePage() {
   const handleExport = async () => {
     if (!pdfRef.current) return;
     setIsExporting(true);
+
+    const { default: jsPDF } = await import('jspdf');
+    const { default: html2canvas } = await import('html2canvas');
 
     const canvas = await html2canvas(pdfRef.current, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
