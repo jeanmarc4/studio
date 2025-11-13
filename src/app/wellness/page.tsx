@@ -49,7 +49,7 @@ export default function WellnessPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">Centre de Bien-être Holistique</h1>
+        <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">Centre de Soins Holistiques</h1>
         <p className="mt-2 text-lg text-muted-foreground font-body">Nourrissez votre esprit, votre corps et votre âme.</p>
       </header>
 
@@ -68,7 +68,7 @@ export default function WellnessPage() {
       ) : (
         <div className="text-center py-16 border-2 border-dashed rounded-lg">
             <Leaf className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun article de bien-être pour le moment</h3>
+            <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun article pour le moment</h3>
             <p className="mt-2 text-sm text-muted-foreground">Revenez bientôt pour des conseils et des guides.</p>
         </div>
       )}

@@ -36,7 +36,7 @@ const featureCards = [
   },
   {
     icon: Leaf,
-    title: "Bien-être Holistique",
+    title: "Soins Holistiques",
     description: "Explorez des articles, des conseils et des guides sur le bien-être mental, physique et spirituel.",
     href: "/wellness",
     bgColor: "bg-green-100 dark:bg-green-900/50",

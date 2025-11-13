@@ -100,7 +100,7 @@ export const mainNav: NavItem[] = [
     href: "/medications",
   },
   {
-    title: "Bien-être",
+    title: "Soins Holistiques",
     href: "/wellness",
   },
 ];
