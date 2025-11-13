@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { collection, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,18 @@ import { RoleConfiguration } from "./components/role-configuration";
 import { Dashboard } from "./components/dashboard";
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
-import type { User } from '@/docs/backend-documentation';
+import type { User, MedicalProfessional } from '@/docs/backend-documentation';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { AddUserDialog } from "./components/add-user-dialog";
+import { ProfessionalManagement } from "./components/professional-management";
+import { AddProfessionalDialog } from "./components/add-professional-dialog";
 
 export default function AdminPage() {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
+  const [isAddProfessionalDialogOpen, setIsAddProfessionalDialogOpen] = useState(false);
 
   // Check for admin role
   const adminRoleRef = useMemoFirebase(() => {
@@ -35,7 +40,6 @@ export default function AdminPage() {
       if (!user) {
         router.push('/auth/login');
       } else if (!adminRole) {
-        // Not an admin, redirect
         console.log("Accès non autorisé, redirection...");
         router.push('/'); 
       } else {
@@ -44,41 +48,33 @@ export default function AdminPage() {
     }
   }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
-  const usersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'users');
-  }, [firestore]);
+  // Data fetching
+  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+  const professionalsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'medicalProfessionals') : null, [firestore]);
 
   const { data: users, isLoading: areUsersLoading } = useCollection<User>(usersQuery);
+  const { data: professionals, isLoading: areProfessionalsLoading } = useCollection<MedicalProfessional>(professionalsQuery);
 
+  // User management handlers
   const handleAddUser = (newUser: User) => {
     if (!firestore) return;
-    // We use the ID generated in the dialog as the document ID
     const userDocRef = doc(firestore, 'users', newUser.id);
     setDocumentNonBlocking(userDocRef, newUser, {});
   };
 
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
-    const userDocRef = doc(firestore, 'users', userId);
-    deleteDocumentNonBlocking(userDocRef);
-    
-    // Also delete admin role if it exists
-    const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
-    deleteDocumentNonBlocking(adminRoleDocRef);
+    deleteDocumentNonBlocking(doc(firestore, 'users', userId));
+    deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userId));
   };
   
   const handleUpdateUserRole = (userId: string, role: "Admin" | "Standard" | "Premium") => {
     if (!firestore) return;
-    const userDocRef = doc(firestore, 'users', userId);
-    updateDocumentNonBlocking(userDocRef, { role });
-
+    updateDocumentNonBlocking(doc(firestore, 'users', userId), { role });
     const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
     if (role === "Admin") {
-      // Add to admin roles collection
       setDoc(adminRoleDocRef, { userId, role: 'admin' });
     } else {
-      // Remove from admin roles collection
       deleteDoc(adminRoleDocRef);
     }
   };
@@ -101,17 +97,25 @@ export default function AdminPage() {
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <div className="flex flex-col sm:gap-4 sm:py-4">
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            <Tabs defaultValue="dashboard">
+            <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
               <div className="flex items-center">
                 <TabsList>
                   <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-                  <TabsTrigger value="users">Gestion des utilisateurs</TabsTrigger>
-                  <TabsTrigger value="roles">Configuration des rôles</TabsTrigger>
+                  <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+                  <TabsTrigger value="professionals">Professionnels</TabsTrigger>
+                  <TabsTrigger value="roles">Rôles</TabsTrigger>
                 </TabsList>
-                 <div className="ml-auto flex items-center gap-2">
-                  <Button size="sm" onClick={() => setIsAddUserDialogOpen(true)}>
-                    Ajouter un utilisateur
-                  </Button>
+                <div className="ml-auto flex items-center gap-2">
+                   {activeTab === 'users' && (
+                    <Button size="sm" onClick={() => setIsAddUserDialogOpen(true)}>
+                      Ajouter un utilisateur
+                    </Button>
+                  )}
+                  {activeTab === 'professionals' && (
+                    <Button size="sm" onClick={() => setIsAddProfessionalDialogOpen(true)}>
+                      Ajouter un professionnel
+                    </Button>
+                  )}
                 </div>
               </div>
               <TabsContent value="dashboard">
@@ -125,6 +129,14 @@ export default function AdminPage() {
                   isLoading={areUsersLoading}
                 />
               </TabsContent>
+              <TabsContent value="professionals">
+                 <ProfessionalManagement
+                  professionals={professionals || []}
+                  onDeleteProfessional={() => {}} // TODO: Implement
+                  onUpdateProfessional={() => {}} // TODO: Implement
+                  isLoading={areProfessionalsLoading}
+                />
+              </TabsContent>
               <TabsContent value="roles">
                 <RoleConfiguration />
               </TabsContent>
@@ -136,6 +148,11 @@ export default function AdminPage() {
         isOpen={isAddUserDialogOpen}
         onOpenChange={setIsAddUserDialogOpen}
         onUserAdd={handleAddUser}
+      />
+      <AddProfessionalDialog
+        isOpen={isAddProfessionalDialogOpen}
+        onOpenChange={setIsAddProfessionalDialogOpen}
+        onProfessionalAdd={() => {}} // TODO: Implement
       />
     </>
   );
