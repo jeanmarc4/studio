@@ -25,7 +25,7 @@ export function PayPalSubscriptionButton({ planId }: PayPalSubscriptionButtonPro
   };
 
   useEffect(() => {
-    if (isSdkReady && window.paypal) {
+    if (isSdkReady && window.paypal && planId) {
       // Clear previous button if any
       const container = document.getElementById(`paypal-button-container-${planId}`);
       if (container) {
@@ -57,7 +57,7 @@ export function PayPalSubscriptionButton({ planId }: PayPalSubscriptionButtonPro
             toast({
               variant: 'destructive',
               title: "Erreur d'abonnement",
-              description: "Une erreur est survenue lors de la tentative d'abonnement. Veuillez réessayer.",
+              description: "Une erreur est survenue lors de la tentative d'abonnement. Veuillez réessayer ou vérifier l'ID du plan.",
             });
           }
         }).render(`#paypal-button-container-${planId}`);
@@ -67,11 +67,6 @@ export function PayPalSubscriptionButton({ planId }: PayPalSubscriptionButtonPro
     }
   }, [isSdkReady, planId, toast]);
   
-  // Affiche un placeholder si l'ID du plan n'est pas celui pour la démo
-  if (planId !== 'P-4P647554GL1336123NEKZ2HI') {
-      return <div className="text-center text-sm text-muted-foreground p-4">Bouton d'abonnement Premium bientôt disponible.</div>
-  }
-
   return (
     <>
       <Script 
@@ -84,4 +79,3 @@ export function PayPalSubscriptionButton({ planId }: PayPalSubscriptionButtonPro
     </>
   );
 }
-
