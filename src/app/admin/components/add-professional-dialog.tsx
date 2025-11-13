@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { MedicalProfessional } from "@/docs/backend-documentation";
+import { useToast } from "@/hooks/use-toast";
 
 const professionalSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit comporter au moins 2 caractères." }),
@@ -42,14 +44,17 @@ const professionalSchema = z.object({
   phone: z.string().optional(),
 });
 
+type NewProfessional = Omit<MedicalProfessional, "id"> & { id: string };
+
 interface AddProfessionalDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onProfessionalAdd: (professional: Omit<MedicalProfessional, "id">) => void;
+  onProfessionalAdd: (professional: NewProfessional) => void;
 }
 
 export function AddProfessionalDialog({ isOpen, onOpenChange, onProfessionalAdd }: AddProfessionalDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof professionalSchema>>({
     resolver: zodResolver(professionalSchema),
@@ -64,11 +69,20 @@ export function AddProfessionalDialog({ isOpen, onOpenChange, onProfessionalAdd 
 
   async function onSubmit(values: z.infer<typeof professionalSchema>) {
     setIsLoading(true);
-    // onProfessionalAdd(values); TODO: Implement
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-    console.log("Adding professional:", values);
+    
+    // In a real app, the backend would generate the ID. Here we generate it client-side.
+    const newProfessional: NewProfessional = { ...values, id: uuidv4(), location: "" }; // Add empty location
+    
+    onProfessionalAdd(newProfessional);
+    
+    await new Promise(resolve => setTimeout(resolve, 500)); // Give time for Firestore update
+    
     setIsLoading(false);
     onOpenChange(false);
+    toast({
+      title: "Professionnel ajouté",
+      description: `Le profil de ${values.name} a été créé.`,
+    });
     form.reset();
   }
 

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
-import { collection, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserManagement } from "./components/user-management";
@@ -79,6 +79,18 @@ export default function AdminPage() {
     }
   };
 
+  // Professional management handlers
+  const handleAddProfessional = (newProfessional: MedicalProfessional) => {
+    if (!firestore) return;
+    const professionalDocRef = doc(firestore, 'medicalProfessionals', newProfessional.id);
+    setDocumentNonBlocking(professionalDocRef, newProfessional, {});
+  };
+
+  const handleDeleteProfessional = (professionalId: string) => {
+    if (!firestore) return;
+    deleteDocumentNonBlocking(doc(firestore, 'medicalProfessionals', professionalId));
+  };
+
   const isLoading = isUserLoading || isAdminRoleLoading;
 
   if (isLoading || !isAuthorized) {
@@ -132,7 +144,7 @@ export default function AdminPage() {
               <TabsContent value="professionals">
                  <ProfessionalManagement
                   professionals={professionals || []}
-                  onDeleteProfessional={() => {}} // TODO: Implement
+                  onDeleteProfessional={handleDeleteProfessional}
                   onUpdateProfessional={() => {}} // TODO: Implement
                   isLoading={areProfessionalsLoading}
                 />
@@ -152,7 +164,7 @@ export default function AdminPage() {
       <AddProfessionalDialog
         isOpen={isAddProfessionalDialogOpen}
         onOpenChange={setIsAddProfessionalDialogOpen}
-        onProfessionalAdd={() => {}} // TODO: Implement
+        onProfessionalAdd={handleAddProfessional}
       />
     </>
   );
