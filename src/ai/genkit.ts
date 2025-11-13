@@ -19,6 +19,7 @@ export const ai = genkit({
   plugins: [
     googleAI({
       apiKey: geminiApiKey, // Passez la clé, même si elle est undefined, pour que Genkit gère l'erreur.
+      apiVersion: 'v1', // Forcer l'utilisation de la version d'API stable
     }),
   ],
   // Utiliser un nom de modèle stable et reconnu.
