@@ -8,7 +8,7 @@
  * - MedicationExtractionOutput - Le type de retour pour la fonction.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
 // Schéma pour un seul médicament extrait
@@ -47,6 +47,8 @@ const extractMedicationsFlow = ai.defineFlow(
     outputSchema: MedicationExtractionOutputSchema,
   },
   async ({ prescriptionImageUrl }) => {
+    ensureApiKey(); // Vérifie la présence de la clé API
+    
     const { output } = await ai.generate({
       prompt: [
         { text: `Vous êtes un assistant pharmaceutique expert en reconnaissance optique de caractères sur des ordonnances médicales. Votre tâche est d'analyser l'image d'ordonnance fournie et d'extraire TOUS les médicaments listés avec leurs détails.
@@ -71,5 +73,3 @@ Analysez l'image suivante et renvoyez les informations sous forme de liste d'obj
     return output;
   }
 );
-
-    

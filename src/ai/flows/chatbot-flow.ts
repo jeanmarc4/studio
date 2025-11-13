@@ -8,7 +8,7 @@
  * - ChatOutput - Le type de retour pour la fonction.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const ChatInputSchema = z.array(z.object({
@@ -33,6 +33,8 @@ const mentalCareChatFlow = ai.defineFlow(
     outputSchema: ChatOutputSchema,
   },
   async (history) => {
+    ensureApiKey(); // Vérifie la présence de la clé API
+
     const { text } = await ai.generate({
       system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 

@@ -63,14 +63,28 @@ export function MentalCareView() {
             const result = await mentalCareChat(historyForApi);
             const modelMessage: Message = { role: 'model', text: result.response };
             setMessages(prev => [...prev, modelMessage]);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Erreur de l'IA:", error);
-            const errorMessage: Message = { role: 'model', text: "Désolé, une erreur est survenue. Veuillez réessayer." };
+            const errorMessage: Message = { role: 'model', text: `Désolé, une erreur est survenue. ${error.message || 'Veuillez réessayer.'}` };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
         }
     };
+    
+    if (isUserLoading) {
+      return (
+         <Card className="max-w-3xl mx-auto">
+              <CardHeader>
+                  <Skeleton className="h-8 w-48" />
+                  <Skeleton className="h-5 w-full mt-2" />
+              </CardHeader>
+              <CardContent>
+                  <Skeleton className="h-96 w-full" />
+              </CardContent>
+          </Card>
+      )
+    }
     
     if (!user) {
         return (

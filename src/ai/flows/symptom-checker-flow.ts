@@ -8,7 +8,7 @@
  * - SymptomCheckerOutput - Le type de retour pour la fonction.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const SymptomCheckerInputSchema = z.array(z.object({
@@ -35,6 +35,8 @@ const symptomCheckerFlow = ai.defineFlow(
     outputSchema: SymptomCheckerOutputSchema,
   },
   async (history) => {
+    ensureApiKey(); // Vérifie la présence de la clé API
+
     const { text } = await ai.generate({
       system: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 

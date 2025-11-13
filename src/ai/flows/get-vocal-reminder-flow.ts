@@ -8,7 +8,7 @@
  * - VocalReminderOutput - Le type de retour pour la fonction getVocalReminder.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, ensureApiKey} from '@/ai/genkit';
 import {z} from 'genkit';
 import wav from 'wav';
 
@@ -68,6 +68,7 @@ const vocalReminderFlow = ai.defineFlow(
     outputSchema: VocalReminderOutputSchema,
   },
   async ({medicationName, dosage}) => {
+    ensureApiKey(); // Vérifie la présence de la clé API
     const prompt = `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${medicationName}. Prenez bien soin de vous !`;
 
     const {media} = await ai.generate({

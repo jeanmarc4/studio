@@ -8,7 +8,7 @@
  * - MedicationExplanationOutput - Le type de retour pour la fonction.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
 // Cache simple en mémoire pour stocker les explications déjà générées.
@@ -35,6 +35,8 @@ const explainMedicationFlow = ai.defineFlow(
     outputSchema: MedicationExplanationOutputSchema,
   },
   async ({ medicationName }) => {
+    ensureApiKey(); // Vérifie la présence de la clé API
+    
     const cacheKey = medicationName.trim().toLowerCase();
     
     // 1. Vérifier si l'explication est déjà dans le cache.
