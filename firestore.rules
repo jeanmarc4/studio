@@ -146,11 +146,11 @@ service cloud.firestore {
     match /roles_admin/{userId} {
       allow get: if true;
       allow list: if false;
-      // Allow a signed-in user to create or update their OWN admin document.
+      // Allow a signed-in user to create their OWN admin document.
       // This is the bootstrap rule to create the first admin.
       // It can be tightened after the first admin is created.
-      allow write: if isSignedIn() && isOwner(userId);
-      allow delete: if isAdmin() && resource != null;
+      allow create: if isSignedIn() && isOwner(userId);
+      allow read, update, delete: if isAdmin() && isOwner(userId);
     }
     
     /**
@@ -219,5 +219,7 @@ service cloud.firestore {
     }
   }
 }
+
+    
 
     
