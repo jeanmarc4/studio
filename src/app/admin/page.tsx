@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -108,9 +109,11 @@ export default function AdminPage() {
     updateDocumentNonBlocking(doc(firestore, 'users', userId), { role });
     const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
     if (role === "Admin") {
-      setDoc(adminRoleDocRef, { userId, role: 'admin' });
+        setDocumentNonBlocking(adminRoleDocRef, { userId, role: 'admin' }, {});
     } else {
-      deleteDoc(adminRoleDocRef);
+        // Only delete the admin role if the user is being demoted FROM admin.
+        // This prevents accidental deletion if the user was never an admin.
+        deleteDocumentNonBlocking(adminRoleDocRef);
     }
   };
 
@@ -295,3 +298,5 @@ export default function AdminPage() {
     </>
   );
 }
+
+    

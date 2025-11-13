@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -108,9 +109,13 @@ export default function ProfilePage() {
 
     const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
     if (data.role === "Admin") {
-      setDocumentNonBlocking(adminRoleDocRef, { userId: user.uid, role: 'admin' }, {});
+        setDocumentNonBlocking(adminRoleDocRef, { userId: user.uid, role: 'admin' }, {});
     } else {
-      deleteDocumentNonBlocking(adminRoleDocRef);
+        // This check is important. Only delete the role if the user was an admin before.
+        // We can check the original userProfile state for this.
+        if(userProfile?.role === 'Admin') {
+            deleteDocumentNonBlocking(adminRoleDocRef);
+        }
     }
     
     await new Promise(resolve => setTimeout(resolve, 700));
@@ -373,3 +378,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
