@@ -12,5 +12,6 @@ export const ai = genkit({
       apiKey: geminiApiKey,
     }),
   ],
-  model: 'googleai/gemini-2.5-flash',
+  // Définir un modèle par défaut stable pour les tâches de conversation.
+  model: 'googleai/gemini-pro',
 });
