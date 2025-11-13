@@ -52,7 +52,7 @@ export default function MedicationsPage() {
   if (isLoading || !user) {
     return (
         <div className="container mx-auto px-4 py-8">
-            <header className="mb-8 flex flex-col sm:items-center sm:justify-between gap-4">
+            <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-2 text-center sm:text-left">
                     <Skeleton className="h-10 w-64 mx-auto sm:mx-0" />
                     <Skeleton className="h-6 w-96 mx-auto sm:mx-0" />
@@ -90,9 +90,10 @@ export default function MedicationsPage() {
             <HelpCircle className="h-4 w-4 text-blue-500" />
             <AlertTitle className="font-semibold text-blue-800 dark:text-blue-300">Comment fonctionnent les rappels ?</AlertTitle>
             <AlertDescription className="text-blue-700 dark:text-blue-400">
+                Vous pouvez tester les rappels sur chaque carte de médicament. Dans une future version, ces rappels seront automatiques.
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li><span className="font-semibold">Standard :</span> Vous recevrez une notification push à l'heure de la prise.</li>
-                    <li><span className="font-semibold">Premium & Admin :</span> Vous recevrez un rappel vocal intelligent de notre IA en plus de la notification.</li>
+                    <li><span className="font-semibold">Standard :</span> Une notification simple s'affichera.</li>
+                    <li><span className="font-semibold">Premium & Admin :</span> En plus de la notification, vous aurez un rappel vocal intelligent généré par notre IA.</li>
                 </ul>
             </AlertDescription>
         </Alert>

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Un flux Genkit pour générer des rappels vocaux pour la prise de médicaments.
@@ -68,7 +69,7 @@ const vocalReminderFlow = ai.defineFlow(
     outputSchema: VocalReminderOutputSchema,
   },
   async ({medicationName, dosage}) => {
-    const prompt = `Il est l'heure de prendre votre médicament : ${dosage} de ${medicationName}.`;
+    const prompt = `Petit rappel amical, il est temps de prendre votre médicament : ${dosage} de ${medicationName}. Prenez soin de vous !`;
 
     const {media} = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),

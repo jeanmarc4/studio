@@ -62,6 +62,7 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
     toast({
         title: `Rappel pour ${medication.name}`,
         description: `Il est l'heure de prendre votre ${medication.dosage}.`,
+        duration: 5000,
     })
   }
 
@@ -76,6 +77,7 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
     }
     
     if (audio) {
+      setIsVocalizing(true);
       audio.play();
       return;
     }
@@ -96,10 +98,17 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
 
       newAudio.onended = () => {
         setIsVocalizing(false);
-        // Do not setAudio(null) here to allow re-playing
       }
       newAudio.onpause = () => {
         setIsVocalizing(false);
+      }
+      newAudio.onerror = () => {
+        setIsVocalizing(false);
+         toast({
+           variant: "destructive",
+           title: "Erreur audio",
+           description: "Impossible de jouer le rappel vocal.",
+       });
       }
 
     } catch (error) {
@@ -111,6 +120,16 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
        });
        setIsVocalizing(false);
     }
+  }
+  
+  const getPremiumButtonIcon = () => {
+    if (isVocalizing) {
+        return <Loader2 className="mr-2 h-4 w-4 animate-spin" />;
+    }
+    if (audio) {
+        return <PlayCircle className="mr-2 h-4 w-4" />;
+    }
+    return <Volume2 className="mr-2 h-4 w-4" />;
   }
 
   return (
@@ -141,8 +160,8 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
             <Button size="sm" variant="outline" onClick={handleStandardReminder}>
                 <Bell className="mr-2 h-4 w-4" /> Test Standard
             </Button>
-            <Button size="sm" variant={isPremiumOrAdmin ? "default" : "outline"} onClick={handlePremiumReminder} disabled={isVocalizing && !audio}>
-                {isVocalizing && !audio ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (audio && !isVocalizing ? <PlayCircle className="mr-2 h-4 w-4" /> : <Volume2 className="mr-2 h-4 w-4" />)}
+            <Button size="sm" variant={isPremiumOrAdmin ? "default" : "secondary"} onClick={handlePremiumReminder} disabled={isVocalizing}>
+                {getPremiumButtonIcon()}
                 Test Premium
             </Button>
         </div>
