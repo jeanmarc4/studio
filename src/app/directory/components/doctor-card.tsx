@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Star, MapPin } from "lucide-react";
 
@@ -9,6 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import type { Doctor } from "@/lib/data";
 import { AppointmentDialog } from "./appointment-dialog";
+import { useFirebase } from "@/firebase";
 
 interface DoctorCardProps {
   doctor: Doctor;
@@ -16,6 +18,16 @@ interface DoctorCardProps {
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { user } = useFirebase();
+  const router = useRouter();
+
+  const handleBookAppointmentClick = () => {
+    if (!user) {
+      router.push("/auth/login?redirect=/directory");
+    } else {
+      setIsDialogOpen(true);
+    }
+  };
 
   return (
     <>
@@ -59,17 +71,19 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <CardFooter>
           <Button 
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
-            onClick={() => setIsDialogOpen(true)}
+            onClick={handleBookAppointmentClick}
           >
             Prendre Rendez-vous
           </Button>
         </CardFooter>
       </Card>
-      <AppointmentDialog 
-        doctor={doctor}
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-      />
+      {user && (
+        <AppointmentDialog 
+          doctor={doctor}
+          isOpen={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+        />
+      )}
     </>
   );
 }

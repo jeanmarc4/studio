@@ -31,6 +31,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import type { Doctor } from "@/lib/data";
+import { useFirebase } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
+import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import type { Appointment } from "@/docs/backend-documentation";
 
 interface AppointmentDialogProps {
   doctor: Doctor;
@@ -43,12 +47,23 @@ export function AppointmentDialog({
   isOpen,
   onOpenChange,
 }: AppointmentDialogProps) {
+  const { user, firestore } = useFirebase();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState<string>("");
+  const [reason, setReason] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleBooking = async () => {
+    if (!user || !firestore) {
+      toast({
+        variant: "destructive",
+        title: "Non authentifié",
+        description: "Vous devez être connecté pour prendre un rendez-vous.",
+      });
+      return;
+    }
+
     if (!date || !time) {
       toast({
         variant: "destructive",
@@ -59,8 +74,22 @@ export function AppointmentDialog({
     }
 
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const appointmentDateTime = new Date(date);
+    const [hours, minutes] = time.split(':').map(Number);
+    appointmentDateTime.setHours(hours, minutes);
+
+    const newAppointment: Omit<Appointment, 'id'> = {
+      userId: user.uid,
+      medicalProfessionalId: doctor.id,
+      dateTime: appointmentDateTime.toISOString(),
+      reason: reason,
+      status: "scheduled",
+    };
+
+    const appointmentsRef = collection(firestore, 'users', user.uid, 'appointments');
+    addDocumentNonBlocking(appointmentsRef, newAppointment);
+    
     setIsLoading(false);
     onOpenChange(false);
     toast({
@@ -71,6 +100,11 @@ export function AppointmentDialog({
         { locale: fr }
       )} à ${time} est confirmé.`,
     });
+
+    // Reset form
+    setDate(new Date());
+    setTime("");
+    setReason("");
   };
 
   return (
@@ -134,6 +168,8 @@ export function AppointmentDialog({
             </Label>
             <Textarea
               id="reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
               placeholder="Optionnel : Décrivez brièvement le motif de votre visite."
               className="col-span-3"
             />
