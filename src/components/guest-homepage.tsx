@@ -140,7 +140,7 @@ export function GuestHomepage() {
                 </CardContent>
                 <CardContent>
                     <Button asChild className="w-full">
-                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">Choisir Premium</a>
+                       <a href="https://www.paypal.com/donate/?hosted_button_id=NGF6CAZ43Z2G8" target="_blank" rel="noopener noreferrer">S'abonner via PayPal</a>
                     </Button>
                 </CardContent>
             </Card>
