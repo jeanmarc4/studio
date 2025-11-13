@@ -24,7 +24,7 @@
  * - /sosAlerts/{alertId}: SOS alerts triggered by users.
  *
  * Key Security Decisions:
- * - User data is strictly private; listing all users is disallowed.
+ * - User data is strictly private; listing all users is disallowed for non-admins.
  * - Admin privileges are granted based on the existence of a document in `/roles_admin/{userId}`.
  * - No custom claims are used.
  * - Data shape validation is relaxed to allow for rapid prototyping. Only critical authorization fields are validated.
@@ -48,8 +48,9 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      allow read, create, update, delete: if isSignedIn() && isOwner(userId);
-      allow list: if false; // Listing users is not permitted unless by an admin for management.
+      allow get, update: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn();
+      allow list, delete: if isAdmin();
 
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
@@ -57,8 +58,7 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
-        allow list, create: if isSignedIn() && isOwner(userId);
-        allow get, update, delete: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -67,7 +67,7 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on appointments.
        */
       match /appointments/{appointmentId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -76,7 +76,7 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on emergency contacts.
        */
       match /emergencyContacts/{contactId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -85,7 +85,7 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on medications.
        */
       match /medications/{medicationId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
 
        /**
@@ -94,7 +94,7 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on prescriptions.
        */
       match /prescriptions/{prescriptionId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
       
       /**
@@ -103,7 +103,7 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
-          allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+          allow read, write: if isSignedIn() && isOwner(userId);
       }
     }
 
@@ -135,9 +135,9 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      allow list: if false; // Disallow listing all admins
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update, delete: if isSignedIn() && isOwner(userId);
+      // Allow any signed-in user to make themselves an admin for demo purposes.
+      allow create: if isSignedIn() && isOwner(userId); 
+      allow list, update, delete: if isAdmin();
     }
     
     /**
@@ -148,17 +148,16 @@ service cloud.firestore {
         allow get, list: if true;
         allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
         allow update: if false; 
-        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+        allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
 
         /**
          * @description Secure forum posts/replies. Any authenticated user can create a post.
          * @path /forumThreads/{threadId}/posts/{postId}
          */
         match /posts/{postId} {
-            allow get, list: if true;
-            allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-            allow update: if false;
-            allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+            allow read: if true;
+            allow write: if isSignedIn();
+            allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
         }
     }
 
@@ -201,3 +200,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
