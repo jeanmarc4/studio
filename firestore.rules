@@ -136,7 +136,8 @@ service cloud.firestore {
     match /roles_admin/{userId} {
       allow get: if true;
       allow list: if false; // Disallow listing all admins
-      allow create, delete: if isSignedIn() && isOwner(userId); // User can become admin, or an admin can manage
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update, delete: if isSignedIn() && isOwner(userId);
     }
     
     /**
