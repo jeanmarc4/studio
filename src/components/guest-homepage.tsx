@@ -60,13 +60,26 @@ export function GuestHomepage() {
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground md:text-xl font-body">
             SanteConnect est votre partenaire de confiance pour gérer les rendez-vous, vérifier les symptômes et adopter un mode de vie holistique.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <div className="flex justify-center gap-4">
               <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
                 <Link href="/auth/signup">Créer un compte</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="#pricing">Voir les plans</Link>
               </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Merci de nous aider à soutenir notre site.{" "}
+              <a 
+                href="https://www.paypal.com/donate/?hosted_button_id=WTNC9Z978PCGS" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-semibold text-primary underline hover:no-underline"
+              >
+                Faire un don
+              </a>
+            </p>
           </div>
         </div>
       </section>
@@ -180,5 +193,3 @@ export function GuestHomepage() {
     </main>
   );
 }
-
-    
