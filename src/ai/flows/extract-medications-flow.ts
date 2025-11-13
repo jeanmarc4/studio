@@ -39,12 +39,17 @@ export async function extractMedicationsFromPrescription(input: MedicationExtrac
   return extractMedicationsFlow(input);
 }
 
-// Définition de l'invite Genkit
-const extractPrompt = ai.definePrompt({
-  name: 'extractMedicationsPrompt',
-  input: { schema: MedicationExtractionInputSchema },
-  output: { schema: MedicationExtractionOutputSchema },
-  prompt: `Vous êtes un assistant pharmaceutique expert en reconnaissance optique de caractères sur des ordonnances médicales. Votre tâche est d'analyser l'image d'ordonnance fournie et d'extraire TOUS les médicaments listés avec leurs détails.
+// Définition du flux Genkit
+const extractMedicationsFlow = ai.defineFlow(
+  {
+    name: 'extractMedicationsFlow',
+    inputSchema: MedicationExtractionInputSchema,
+    outputSchema: MedicationExtractionOutputSchema,
+  },
+  async ({ prescriptionImageUrl }) => {
+    const { output } = await ai.generate({
+      prompt: [
+        { text: `Vous êtes un assistant pharmaceutique expert en reconnaissance optique de caractères sur des ordonnances médicales. Votre tâche est d'analyser l'image d'ordonnance fournie et d'extraire TOUS les médicaments listés avec leurs détails.
 
 Pour chaque médicament, vous devez identifier :
 1.  **Le nom** (par exemple, "Amoxicilline", "Doliprane").
@@ -53,20 +58,12 @@ Pour chaque médicament, vous devez identifier :
 4.  **La posologie (intakeTimes)** : Comment et quand le prendre (par exemple, ["matin", "soir"], ["3 fois par jour pendant 7 jours"]).
 
 Analysez l'image suivante et renvoyez les informations sous forme de liste d'objets structurés. Si aucune information n'est trouvée pour un champ, omettez-le si possible. Si aucun médicament n'est détecté, renvoyez une liste vide.
+` },
+        { media: { url: prescriptionImageUrl } },
+      ],
+      output: { schema: MedicationExtractionOutputSchema },
+    });
 
-Image de l'ordonnance : {{media url=prescriptionImageUrl}}`,
-});
-
-
-// Définition du flux Genkit
-const extractMedicationsFlow = ai.defineFlow(
-  {
-    name: 'extractMedicationsFlow',
-    inputSchema: MedicationExtractionInputSchema,
-    outputSchema: MedicationExtractionOutputSchema,
-  },
-  async (input) => {
-    const { output } = await extractPrompt(input);
     if (!output) {
       // Si la sortie est nulle, cela signifie probablement que le modèle n'a rien pu générer.
       return { medications: [] };

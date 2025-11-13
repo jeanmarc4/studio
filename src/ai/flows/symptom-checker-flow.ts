@@ -30,11 +30,15 @@ export async function suggestNextSteps(input: SymptomCheckerInput): Promise<Symp
 
 const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un professionnel de la santé. Les informations que je fournis ne constituent pas un avis médical. Veuillez consulter un médecin qualifié pour tout problème de santé ou avant de prendre toute décision médicale.";
 
-const prompt = ai.definePrompt({
-  name: 'symptomCheckerPrompt',
-  input: { schema: SymptomCheckerInputSchema },
-  output: { schema: SymptomCheckerOutputSchema },
-  prompt: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
+const symptomCheckerFlow = ai.defineFlow(
+  {
+    name: 'symptomCheckerFlow',
+    inputSchema: SymptomCheckerInputSchema,
+    outputSchema: SymptomCheckerOutputSchema,
+  },
+  async ({ history }) => {
+    const { output } = await ai.generate({
+      system: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 
 Règles importantes :
 1.  Commencez TOUJOURS votre réponse par l'avertissement suivant, mot pour mot : "${disclaimer}"
@@ -44,16 +48,10 @@ Règles importantes :
 5.  Gardez vos réponses concises et faciles à comprendre.
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`,
-});
+      history: history,
+      output: { schema: SymptomCheckerOutputSchema },
+    });
 
-const symptomCheckerFlow = ai.defineFlow(
-  {
-    name: 'symptomCheckerFlow',
-    inputSchema: SymptomCheckerInputSchema,
-    outputSchema: SymptomCheckerOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
     if (!output) {
       return { analysis: `${disclaimer}\n\nDésolé, je ne suis pas en mesure de traiter votre demande pour le moment.` };
     }

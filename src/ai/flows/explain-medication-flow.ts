@@ -25,12 +25,16 @@ export async function explainMedication(input: MedicationExplanationInput): Prom
   return explainMedicationFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'explainMedicationPrompt',
-  input: { schema: MedicationExplanationInputSchema },
-  output: { schema: MedicationExplanationOutputSchema },
-  prompt: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
-Un patient te demande à quoi sert le médicament suivant : {{{medicationName}}}.
+const explainMedicationFlow = ai.defineFlow(
+  {
+    name: 'explainMedicationFlow',
+    inputSchema: MedicationExplanationInputSchema,
+    outputSchema: MedicationExplanationOutputSchema,
+  },
+  async ({ medicationName }) => {
+    const { output } = await ai.generate({
+      prompt: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
+Un patient te demande à quoi sert le médicament suivant : ${medicationName}.
 
 Ton objectif est de fournir une explication très simple, claire et rassurante en 2-3 phrases maximum. N'utilise pas de jargon médical.
 Commence ta réponse directement par l'explication.
@@ -38,17 +42,10 @@ Commence ta réponse directement par l'explication.
 Exemple de réponse pour "Doliprane":
 "Le Doliprane est utilisé pour soulager les douleurs légères à modérées comme les maux de tête, les douleurs dentaires ou les courbatures, et pour faire baisser la fièvre. C'est un antalgique et un antipyrétique courant qui aide votre corps à se sentir mieux lorsque vous êtes malade."
 
-Maintenant, fournis l'explication pour le médicament : {{{medicationName}}}.`,
-});
-
-const explainMedicationFlow = ai.defineFlow(
-  {
-    name: 'explainMedicationFlow',
-    inputSchema: MedicationExplanationInputSchema,
-    outputSchema: MedicationExplanationOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
+Maintenant, fournis l'explication pour le médicament : ${medicationName}.`,
+      output: { schema: MedicationExplanationOutputSchema },
+    });
+    
     if (!output) {
       return { explanation: "Désolé, je n'ai pas pu trouver d'informations pour ce médicament." };
     }
