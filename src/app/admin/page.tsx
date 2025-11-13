@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -70,6 +69,7 @@ export default function AdminPage() {
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
     deleteDocumentNonBlocking(doc(firestore, 'users', userId));
+    // Also try to delete admin role if it exists
     deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userId));
   };
   

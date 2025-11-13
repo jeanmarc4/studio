@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -184,5 +183,3 @@ export function AddHolisticContentDialog({ isOpen, onOpenChange, onArticleAdd }:
     </Dialog>
   );
 }
-
-    

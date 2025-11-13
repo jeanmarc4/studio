@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -181,5 +180,3 @@ export function HolisticContentManagement({ articles, onDeleteArticle, onUpdateA
     </>
   );
 }
-
-    

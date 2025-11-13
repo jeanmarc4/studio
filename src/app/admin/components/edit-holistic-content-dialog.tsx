@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -174,5 +173,3 @@ export function EditHolisticContentDialog({ isOpen, onOpenChange, article, onArt
     </Dialog>
   );
 }
-
-    
