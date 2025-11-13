@@ -24,7 +24,7 @@ export function SosButton() {
     toast({
       variant: "destructive",
       title: "Alerte SOS envoyée !",
-      description: "Vos contacts d'urgence et les secours ont été prévenus.",
+      description: "Vos contacts d'urgence ont été prévenus.",
       duration: 10000,
     });
   };
@@ -48,8 +48,8 @@ export function SosButton() {
             Confirmer l'alerte d'urgence ?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action enverra immédiatement votre position à vos contacts
-            d'urgence et aux services de secours. N'utilisez cette fonction
+            Cette action enverra immédiatement une alerte à vos contacts
+            d'urgence enregistrés. N'utilisez cette fonction
             qu'en cas de situation critique réelle.
           </AlertDialogDescription>
         </AlertDialogHeader>

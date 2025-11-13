@@ -11,7 +11,7 @@ export function SosAlert() {
     const handleSosClick = () => {
         toast({
             title: "Alerte SOS envoyée",
-            description: "Vos contacts prédéfinis et les services d'urgence ont été informés de votre emplacement.",
+            description: "Vos contacts d'urgence ont été informés.",
             variant: "destructive",
         })
     }
@@ -23,7 +23,7 @@ export function SosAlert() {
               Urgence SOS
             </AlertTitle>
             <AlertDescription className="text-red-700 dark:text-red-300 mt-2 text-base">
-              Dans une situation critique ? Appuyez sur le bouton ci-dessous pour envoyer une alerte immédiate.
+              Dans une situation critique ? Appuyez sur le bouton ci-dessous pour envoyer une alerte immédiate à vos contacts d'urgence.
             </AlertDescription>
             <Button 
                 size="lg" 
