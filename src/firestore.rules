@@ -61,8 +61,8 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      // Allow a user to create their OWN admin doc, or an existing admin to create one for others.
-      allow create: if isSignedIn() && (isOwner(userId) || isAdmin()); 
+      // Allow only specific UIDs to become admins.
+      allow create: if isSignedIn() && (request.auth.uid == 'k8pesCgwu5ewpR4S7IV36k3RG6w2' || request.auth.uid == 'LUCEMOUCHE3_UID_PLACEHOLDER');
       allow list, update, delete: if isAdmin();
     }
     
