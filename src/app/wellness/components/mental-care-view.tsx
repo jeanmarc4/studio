@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { mentalCareChat } from '@/ai/flows/chatbot-flow';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Message = {
     role: 'user' | 'model';
@@ -55,7 +56,8 @@ export function MentalCareView() {
         setIsLoading(true);
 
         try {
-            const result = await mentalCareChat(newMessages);
+            // Envoyer l'historique dans un objet avec la clé 'history'
+            const result = await mentalCareChat({ history: newMessages });
             const modelMessage: Message = { role: 'model', content: result.response };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error: any) {

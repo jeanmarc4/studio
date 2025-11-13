@@ -11,10 +11,13 @@
 import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const SymptomCheckerInputSchema = z.array(z.object({
-  role: z.enum(['user', 'model']),
-  content: z.string(),
-}));
+// Le schéma d'entrée est maintenant un objet avec une clé 'history'
+const SymptomCheckerInputSchema = z.object({
+  history: z.array(z.object({
+    role: z.enum(['user', 'model']),
+    content: z.string(),
+  })),
+});
 export type SymptomCheckerInput = z.infer<typeof SymptomCheckerInputSchema>;
 
 const SymptomCheckerOutputSchema = z.object({
@@ -22,8 +25,8 @@ const SymptomCheckerOutputSchema = z.object({
 });
 export type SymptomCheckerOutput = z.infer<typeof SymptomCheckerOutputSchema>;
 
-export async function suggestNextSteps(history: SymptomCheckerInput): Promise<SymptomCheckerOutput> {
-  return symptomCheckerFlow(history);
+export async function suggestNextSteps(input: SymptomCheckerInput): Promise<SymptomCheckerOutput> {
+  return symptomCheckerFlow(input);
 }
 
 const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un professionnel de la santé. Les informations que je fournis ne constituent pas un avis médical. Veuillez consulter un médecin qualifié pour tout problème de santé ou avant de prendre toute décision médicale.";
@@ -34,7 +37,7 @@ const symptomCheckerFlow = ai.defineFlow(
     inputSchema: SymptomCheckerInputSchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async (history) => {
+  async ({ history }) => { // On déstructure 'history' de l'objet d'entrée
     ensureApiKey(); // Vérifie la présence de la clé API
 
     const { text } = await ai.generate({

@@ -11,10 +11,13 @@
 import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const ChatInputSchema = z.array(z.object({
-  role: z.enum(['user', 'model']),
-  content: z.string(),
-}));
+// Le schéma d'entrée est maintenant un objet avec une clé 'history'
+const ChatInputSchema = z.object({
+  history: z.array(z.object({
+    role: z.enum(['user', 'model']),
+    content: z.string(),
+  })),
+});
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 const ChatOutputSchema = z.object({
@@ -22,8 +25,8 @@ const ChatOutputSchema = z.object({
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-export async function mentalCareChat(history: ChatInput): Promise<ChatOutput> {
-  return mentalCareChatFlow(history);
+export async function mentalCareChat(input: ChatInput): Promise<ChatOutput> {
+  return mentalCareChatFlow(input);
 }
 
 const mentalCareChatFlow = ai.defineFlow(
@@ -32,7 +35,7 @@ const mentalCareChatFlow = ai.defineFlow(
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async (history) => {
+  async ({ history }) => { // On déstructure 'history' de l'objet d'entrée
     ensureApiKey(); // Vérifie la présence de la clé API
 
     const { text } = await ai.generate({
