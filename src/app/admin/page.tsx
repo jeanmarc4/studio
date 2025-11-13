@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from 'next/navigation';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserManagement } from "./components/user-management";
 import { RoleConfiguration } from "./components/role-configuration";
 import { Dashboard } from "./components/dashboard";
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from '@/docs/backend-documentation';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
@@ -19,12 +19,30 @@ export default function AdminPage() {
   const router = useRouter();
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
 
+  // Check for admin role
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  const { data: adminRole, isLoading: isAdminRoleLoading } = useDoc(adminRoleRef);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/auth/login');
+    const isAuthenticating = isUserLoading || isAdminRoleLoading;
+    if (!isAuthenticating) {
+      if (!user) {
+        router.push('/auth/login');
+      } else if (!adminRole) {
+        // Not an admin, redirect
+        console.log("Accès non autorisé, redirection...");
+        router.push('/'); 
+      } else {
+        setIsAuthorized(true);
+      }
     }
-    // We will check for admin role later
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
   const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -37,15 +55,30 @@ export default function AdminPage() {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', userId);
     deleteDocumentNonBlocking(userDocRef);
+    
+    // Also delete admin role if it exists
+    const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
+    deleteDocumentNonBlocking(adminRoleDocRef);
   };
   
   const handleUpdateUserRole = (userId: string, role: "Admin" | "Standard" | "Premium") => {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', userId);
     updateDocumentNonBlocking(userDocRef, { role });
+
+    const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
+    if (role === "Admin") {
+      // Add to admin roles collection
+      setDoc(adminRoleDocRef, { userId, role: 'admin' });
+    } else {
+      // Remove from admin roles collection
+      deleteDoc(adminRoleDocRef);
+    }
   };
 
-  if (isUserLoading || !user) {
+  const isLoading = isUserLoading || isAdminRoleLoading;
+
+  if (isLoading || !isAuthorized) {
     return (
       <div className="flex min-h-screen w-full flex-col bg-muted/40 p-4 sm:p-6 md:p-8">
         <div className="flex items-center mb-8">
