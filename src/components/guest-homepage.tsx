@@ -147,7 +147,7 @@ export function GuestHomepage() {
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Standard</CardTitle>
                     <CardDescription>La tranquillité d'esprit avec des rappels automatisés.</CardDescription>
-                    <p className="text-4xl font-bold pt-2">4,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
+                    <p className="text-4xl font-bold pt-2">9,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
                     <p className="font-semibold">Fonctionnalités incluses :</p>
