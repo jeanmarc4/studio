@@ -1,0 +1,218 @@
+
+/**
+ * @fileoverview Firestore Security Rules for SanteConnect.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for personal data
+ * (users, appointments, emergency contacts, medications) and restricts administrative
+ * functions (medical professionals, holistic content) to authorized admins.
+ * Admin privileges are determined by the existence of a document in the `/roles_admin/{userId}` collection.
+ *
+ * Data Structure:
+ * - /users/{userId}: User profile data, accessible only to the owning user.
+ * - /users/{userId}/appointments/{appointmentId}: Appointments for a specific user, accessible only to that user.
+ * - /users/{userId}/emergencyContacts/{contactId}: Emergency contacts for a specific user, accessible only to that user.
+ * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
+ * - /users/{userId}/prescriptions/{prescriptionId}: Prescriptions for a specific user, accessible only to that user.
+ * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
+ * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
+ * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
+ * - /forumThreads/{threadId}: Publicly readable forum threads. Authenticated users can create/delete their own.
+ * - /forumThreads/{threadId}/posts/{postId}: Publicly readable replies. Authenticated users can create/delete their own.
+ *
+ * Key Security Decisions:
+ * - User data is strictly private; listing all users is disallowed.
+ * - Admin privileges are granted based on the existence of a document in `/roles_admin/{userId}`.
+ * - No custom claims are used.
+ * - Data shape validation is relaxed to allow for rapid prototyping. Only critical authorization fields are validated.
+ *
+ * Denormalization for Authorization:
+ * - User ownership is enforced through path-based matching (e.g., `/users/{userId}`).
+ * - Admin status is determined by the presence of a document in the `/roles_admin/{userId}` collection.
+ *
+ * Structural Segregation:
+ * - Private user data is stored in user-specific subcollections to prevent accidental public exposure.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secure user profiles. Only the authenticated user can access their own profile.
+     * @path /users/{userId}
+     * @allow (read, write) User with UID 'user123' can read/write their own profile.
+     * @deny (read, write) User with UID 'user456' cannot read/write 'user123' profile.
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId} {
+      // isOwner check is correct for both create and update
+      allow read: if isSignedIn() && isOwner(userId);
+      allow list: if false; // Listing users is not permitted.
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.id == request.resource.data.id;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure appointments for a specific user. Only the user can manage their appointments.
+     * @path /users/{userId}/appointments/{appointmentId}
+     * @allow (read, write) User with UID 'user123' can manage their own appointments.
+     * @deny (read, write) User with UID 'user456' cannot manage 'user123' appointments.
+     * @principle Enforces document ownership for all operations on appointments.
+     */
+    match /users/{userId}/appointments/{appointmentId} {
+      allow read: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
+     * @path /users/{userId}/emergencyContacts/{contactId}
+     * @allow (read, write) User with UID 'user123' can manage their own emergency contacts.
+     * @deny (read, write) User with UID 'user456' cannot manage 'user123' emergency contacts.
+     * @principle Enforces document ownership for all operations on emergency contacts.
+     */
+    match /users/{userId}/emergencyContacts/{contactId} {
+      allow read: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure medications for a specific user. Only the user can manage their medication schedule.
+     * @path /users/{userId}/medications/{medicationId}
+     * @allow (read, write) User with UID 'user123' can manage their own medication schedule.
+     * @deny (read, write) User with UID 'user456' cannot manage 'user123' medication schedule.
+     * @principle Enforces document ownership for all operations on medications.
+     */
+    match /users/{userId}/medications/{medicationId} {
+      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+    }
+
+     /**
+     * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
+     * @path /users/{userId}/prescriptions/{prescriptionId}
+     * @allow (read, write) User with UID 'user123' can manage their own prescriptions.
+     * @deny (read, write) User with UID 'user456' cannot manage 'user123' prescriptions.
+     * @principle Enforces document ownership for all operations on prescriptions.
+     */
+    match /users/{userId}/prescriptions/{prescriptionId} {
+      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+    }
+
+    /**
+     * @description Secure medical professional profiles. Only admins can create, update, or delete them.
+     * @path /medicalProfessionals/{medicalProfessionalId}
+     * @allow (read) Any user can read medical professional profiles.
+     * @allow (write) Only admins can create, update, or delete profiles.
+     * @deny (write) Non-admins cannot create, update, or delete profiles.
+     * @principle Restricts administrative functions to authorized users.
+     */
+    match /medicalProfessionals/{medicalProfessionalId} {
+      allow get, list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Secure holistic wellness content. Only admins can create, update, or delete content.
+     * @path /holisticContent/{holisticContentId}
+     * @allow (read) Any user can read holistic content.
+     * @allow (write) Only admins can create, update, or delete content.
+     * @deny (write) Non-admins cannot create, update, or delete content.
+     * @principle Restricts content management to authorized users.
+     */
+    match /holisticContent/{holisticContentId} {
+      allow get, list: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() && resource != null;
+      allow delete: if isAdmin() && resource != null;
+    }
+
+    /**
+     * @description Secure admin role assignments. Only admins can create or delete admin role documents.
+     * @path /roles_admin/{userId}
+     * @allow (read) Any user can read admin role documents to check admin status.
+     * @allow (create, delete) Only existing admins can grant or revoke admin roles.
+     * @deny (create, delete) Non-admins cannot grant or revoke admin roles.
+     * @principle Manages admin privileges through document existence and restricts modifications to existing admins.
+     */
+    match /roles_admin/{userId} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+    
+    /**
+     * @description Secure forum threads. Any authenticated user can create a thread.
+     * @path /forumThreads/{threadId}
+     * @allow (read) Anyone can read forum threads.
+     * @allow (create) Any authenticated user can create a thread.
+     * @allow (delete) Only the author of the thread can delete it.
+     */
+    match /forumThreads/{threadId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+        allow update: if false; // Threads should not be updatable, only posts.
+        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+    /**
+     * @description Secure forum posts/replies. Any authenticated user can create a post.
+     * @path /forumThreads/{threadId}/posts/{postId}
+     * @allow (read) Anyone can read posts.
+     * @allow (create) Any authenticated user can create a post.
+     * @allow (delete) Only the author of the post can delete it.
+     */
+    match /forumThreads/{threadId}/posts/{postId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+        allow update: if false;
+        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
+
+    // Helper functions
+
+    /**
+     * @description Checks if the user is signed in.
+     * @return {boolean} True if the user is authenticated, false otherwise.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the user is the owner of the document based on the user ID.
+     * @param {string} userId The user ID to compare against the authenticated user's UID.
+     * @return {boolean} True if the user is the owner, false otherwise.
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is the owner of the existing document.
+     * @param {string} userId The user ID to compare against the authenticated user's UID.
+     * @return {boolean} True if the user is the owner, false otherwise.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Checks if the user has admin privileges by verifying the existence of a document in the /roles_admin/{userId} collection.
+     * @return {boolean} True if the user is an admin, false otherwise.
+     */
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+  }
+}

@@ -317,7 +317,7 @@
             "type": "array",
             "description": "List of medications extracted from the prescription by the AI.",
             "items": {
-                "$ref": "#/backend/entities/ExtractedMedication"
+                "$ref": "#/entities/ExtractedMedication"
             }
         }
       },
@@ -374,7 +374,7 @@
         "definition": {
           "entityName": "User",
           "schema": {
-            "$ref": "#/backend/entities/User"
+            "$ref": "#/entities/User"
           },
           "description": "Stores user profiles. Path-based ownership enforces that only the authenticated user can access their profile data.",
           "params": [
@@ -390,7 +390,7 @@
         "definition": {
           "entityName": "Appointment",
           "schema": {
-            "$ref": "#/backend/entities/Appointment"
+            "$ref": "#/entities/Appointment"
           },
           "description": "Stores appointments for a specific user. Path-based ownership ensures only the user can manage their appointments.",
           "params": [
@@ -410,7 +410,7 @@
         "definition": {
           "entityName": "EmergencyContact",
           "schema": {
-            "$ref": "#/backend/entities/EmergencyContact"
+            "$ref": "#/entities/EmergencyContact"
           },
           "description": "Stores emergency contacts for a specific user. Path-based ownership guarantees only the user can manage their contacts.",
           "params": [
@@ -430,7 +430,7 @@
         "definition": {
           "entityName": "Medication",
           "schema": {
-            "$ref": "#/backend/entities/Medication"
+            "$ref": "#/entities/Medication"
           },
           "description": "Stores medications for a specific user. Path-based ownership ensures only the user can manage their medication schedule.",
           "params": [
@@ -450,7 +450,7 @@
         "definition": {
           "entityName": "Prescription",
           "schema": {
-            "$ref": "#/backend/entities/Prescription"
+            "$ref": "#/entities/Prescription"
           },
           "description": "Stores prescriptions for a specific user. Path-based ownership ensures only the user can manage their prescriptions.",
           "params": [
@@ -470,7 +470,7 @@
         "definition": {
           "entityName": "MedicalProfessional",
           "schema": {
-            "$ref": "#/backend/entities/MedicalProfessional"
+            "$ref": "#/entities/MedicalProfessional"
           },
           "description": "Stores profiles of medical professionals.  Admin roles control creation/modification.",
           "params": [
@@ -486,7 +486,7 @@
         "definition": {
           "entityName": "HolisticContent",
           "schema": {
-            "$ref": "#/backend/entities/HolisticContent"
+            "$ref": "#/entities/HolisticContent"
           },
           "description": "Stores holistic wellness content. Admin roles control creation/modification.",
           "params": [
@@ -502,7 +502,7 @@
         "definition": {
           "entityName": "Admin",
           "schema": {
-            "$ref": "#/backend/entities/Admin"
+            "$ref": "#/entities/Admin"
           },
           "description": "Marks a user as an admin.  The *existence* of a document at this path grants admin privileges.",
           "params": [
@@ -517,7 +517,7 @@
         "path": "/forumThreads/{threadId}",
         "definition": {
           "entityName": "ForumThread",
-          "schema": { "$ref": "#/backend/entities/ForumThread" },
+          "schema": { "$ref": "#/entities/ForumThread" },
           "description": "Stores wellness forum discussion threads. Publicly readable, but only authenticated users can create.",
           "params": [
             {
@@ -531,7 +531,7 @@
         "path": "/forumThreads/{threadId}/posts/{postId}",
         "definition": {
           "entityName": "ForumPost",
-          "schema": { "$ref": "#/backend/entities/ForumPost" },
+          "schema": { "$ref": "#/entities/ForumPost" },
           "description": "Stores replies within a specific forum thread. Publicly readable, but only authenticated users can post replies.",
           "params": [
             {

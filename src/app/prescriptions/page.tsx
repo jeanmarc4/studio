@@ -49,17 +49,17 @@ export default function PrescriptionsPage() {
   const handleAnalyzePrescription = async (prescription: Prescription) => {
     if (!firestore || !user) return;
     const prescriptionRef = doc(firestore, 'users', user.uid, 'prescriptions', prescription.id);
-    updateDocumentNonBlocking(prescriptionRef, { status: 'processing' }, {});
+    updateDocumentNonBlocking(prescriptionRef, { status: 'processing' });
     
     try {
       const result = await extractMedicationsFromPrescription({ prescriptionImageUrl: prescription.imageUrl });
       updateDocumentNonBlocking(prescriptionRef, { 
         status: 'processed',
         extractedMedications: result.medications 
-      }, { merge: true });
+      });
     } catch (error) {
       console.error("Erreur lors de l'analyse de l'ordonnance:", error);
-      updateDocumentNonBlocking(prescriptionRef, { status: 'error' }, { merge: true });
+      updateDocumentNonBlocking(prescriptionRef, { status: 'error' });
     }
   };
 

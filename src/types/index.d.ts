@@ -22,7 +22,10 @@ export type User = UserSchema;
 
 export type Medication = Omit<MedicationSchema, 'userId'> & { id: string };
 
-export type Prescription = Omit<PrescriptionSchema, 'userId'> & { id: string };
+export type Prescription = Omit<PrescriptionSchema, 'userId' | 'extractedMedications'> & { 
+  id: string;
+  extractedMedications?: ExtractedMedication[];
+};
 
 export type Appointment = Omit<AppointmentSchema, 'userId'> & { id: string };
 
