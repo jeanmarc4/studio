@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Menu } from "lucide-react";
 import { AppLogo } from "../app-logo";
+import { SosButton } from "./sos-button";
 
 export function Header() {
   return (
@@ -13,7 +14,8 @@ export function Header() {
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <MainNav items={mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-1">
+          <nav className="flex items-center space-x-2">
+            <SosButton />
             <UserNav />
             <Sheet>
               <SheetTrigger asChild>
