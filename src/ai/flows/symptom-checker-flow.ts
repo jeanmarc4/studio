@@ -11,17 +11,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-function ensureApiKey() {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    throw new Error(
-      "La variable d'environnement GEMINI_API_KEY est manquante. " +
-      "Veuillez l'ajouter à votre fichier .env et redémarrer le serveur. " +
-      "Vous pouvez obtenir une clé depuis Google AI Studio."
-    );
-  }
-}
-
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
   content: z.string(),
@@ -50,7 +39,6 @@ const symptomCheckerFlow = ai.defineFlow(
     outputSchema: SymptomCheckerOutputSchema,
   },
   async ({ history }) => {
-    ensureApiKey(); // Vérifie la présence de la clé API
     
     const { text } = await ai.generate({
       system: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
@@ -63,7 +51,7 @@ Règles importantes :
 5.  Gardez vos réponses concises et faciles à comprendre.
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`,
-      history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
+      prompt: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
     });
 
     let analysis = text;

@@ -11,17 +11,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-function ensureApiKey() {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    throw new Error(
-      "La variable d'environnement GEMINI_API_KEY est manquante. " +
-      "Veuillez l'ajouter à votre fichier .env et redémarrer le serveur. " +
-      "Vous pouvez obtenir une clé depuis Google AI Studio."
-    );
-  }
-}
-
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
   content: z.string(),
@@ -49,7 +38,6 @@ const mentalCareChatFlow = ai.defineFlow(
     outputSchema: ChatOutputSchema,
   },
   async ({ history }) => {
-    ensureApiKey(); // Vérifie la présence de la clé API
     
     const { text } = await ai.generate({
       system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
@@ -63,7 +51,7 @@ Règles de conversation :
 6. Le but n'est pas de "résoudre" les problèmes, mais d'offrir un espace sûr pour que l'utilisateur puisse s'exprimer.
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`,
-      history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
+      prompt: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
     });
 
     if (!text) {

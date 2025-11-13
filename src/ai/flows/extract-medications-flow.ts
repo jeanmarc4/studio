@@ -11,17 +11,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-function ensureApiKey() {
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  if (!geminiApiKey) {
-    throw new Error(
-      "La variable d'environnement GEMINI_API_KEY est manquante. " +
-      "Veuillez l'ajouter à votre fichier .env et redémarrer le serveur. " +
-      "Vous pouvez obtenir une clé depuis Google AI Studio."
-    );
-  }
-}
-
 // Schéma pour un seul médicament extrait
 const ExtractedMedicationSchema = z.object({
   name: z.string().describe("Le nom du médicament, par exemple 'Doliprane'."),
@@ -58,7 +47,6 @@ const extractMedicationsFlow = ai.defineFlow(
     outputSchema: MedicationExtractionOutputSchema,
   },
   async ({ prescriptionImageUrl }) => {
-    ensureApiKey(); // Vérifie la présence de la clé API
     
     const { output } = await ai.generate({
       prompt: [
