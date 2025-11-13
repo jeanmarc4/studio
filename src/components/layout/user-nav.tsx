@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CreditCard, LogOut, PlusCircle, Settings, User as UserIcon } from "lucide-react";
+import { CreditCard, LogOut, PlusCircle, Settings, User as UserIcon, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,17 +16,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getImage } from "@/lib/placeholder-images";
-import { useFirebase } from "@/firebase/provider";
+import { useFirebase, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { User } from '@/docs/backend-documentation';
+import { doc } from "firebase/firestore";
 
 
 export function UserNav() {
   const userAvatar = getImage("user-avatar");
-  const { user, auth, isUserLoading } = useFirebase();
+  const { user, auth, firestore, isUserLoading } = useFirebase();
   const router = useRouter();
   const { toast } = useToast();
+
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+
+  const { data: adminRole } = useDoc(adminRoleRef);
+  const isAdmin = !!adminRole;
 
   const handleSignOut = async () => {
     try {
@@ -88,17 +98,24 @@ export function UserNav() {
               <span>Profil</span>
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem>
+          <DropdownMenuItem disabled>
             <Settings className="mr-2 h-4 w-4" />
             <span>Paramètres</span>
           </DropdownMenuItem>
-          <Link href="/my-appointments">
-            <DropdownMenuItem>
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Mes rendez-vous</span>
-            </DropdownMenuItem>
-          </Link>
         </DropdownMenuGroup>
+        {isAdmin && (
+            <>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                     <Link href="/admin">
+                        <DropdownMenuItem>
+                            <Shield className="mr-2 h-4 w-4" />
+                            <span>Panneau d'administration</span>
+                        </DropdownMenuItem>
+                    </Link>
+                </DropdownMenuGroup>
+            </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />

@@ -83,10 +83,6 @@ export const mainNav: NavItem[] = [
     title: "Mes Rendez-vous",
     href: "/my-appointments",
   },
-    {
-    title: "Profil",
-    href: "/profile",
-  },
   {
     title: "Ordonnances",
     href: "/prescriptions",
