@@ -45,7 +45,7 @@ export function TodaysMedications({ medications }: TodaysMedicationsProps) {
         <CardDescription>
           {isFreePlan 
             ? "Confirmez manuellement chaque prise ci-dessous." 
-            : "Vos rappels sont automatiques. Voici votre programme."
+            : "Vos rappels sont gérés par l'IA. Voici votre programme pour aujourd'hui."
           }
         </CardDescription>
       </CardHeader>
