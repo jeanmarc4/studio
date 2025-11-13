@@ -1,6 +1,6 @@
 'use client';
 
-import { Stethoscope, Sparkles, Leaf, ArrowRight, Pill, FileText, Calendar } from "lucide-react";
+import { Stethoscope, Sparkles, Leaf, ArrowRight, Pill, FileText, Calendar, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,22 @@ const featureCards = [
   },
 ];
 
+const standardFeatures = [
+    "Gestion des rendez-vous",
+    "Suivi du traitement (ajout manuel)",
+    "Rappels par notification push",
+    "Accès au forum communautaire"
+];
+
+const premiumFeatures = [
+    "Toutes les fonctionnalités Standard",
+    "Vérificateur de symptômes par l'IA",
+    "Analyse d'ordonnances par l'IA",
+    "Rappels vocaux intelligents par l'IA",
+    "Support prioritaire"
+];
+
+
 export default function Home() {
   const { user, isUserLoading } = useFirebase();
 
@@ -65,33 +81,86 @@ export default function Home() {
 
   const renderGuestHomepage = () => (
     <section className="container w-full max-w-6xl py-12 md:py-16">
-        <div className="grid gap-10 md:gap-16">
-          {/* Feature Cards Section */}
+        <div className="grid gap-12 md:gap-20">
+          
+          {/* Feature Highlight Section */}
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight font-headline">Une plateforme unique pour tous vos besoins de santé</h2>
+            <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+                De la prise de rendez-vous à l'analyse intelligente de vos symptômes, SanteConnect centralise votre parcours de soins.
+            </p>
+          </div>
+          
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featureCards.map((feature) => (
-              <Card key={feature.title} className="flex flex-col transition-transform transform hover:-translate-y-1 hover:shadow-xl">
+            {featureCards.slice(0,3).map((feature) => (
+              <Card key={feature.title} className="bg-muted/30 border-none shadow-none">
                   <CardHeader className="flex flex-row items-start gap-4 pb-4">
                     <div className={`p-3 rounded-full ${feature.bgColor}`}>
                       <feature.icon className={`h-6 w-6 ${feature.iconColor}`} />
                     </div>
-                    <div className="flex-1">
-                      <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
+                    <div>
+                      <CardTitle className="font-headline text-lg">{feature.title}</CardTitle>
+                       <CardDescription className="text-base font-body pt-1">
+                         {feature.description}
+                       </CardDescription>
                     </div>
                   </CardHeader>
-                  <CardContent className="flex-grow">
-                    <CardDescription className="text-base font-body">
-                      {feature.description}
-                    </CardDescription>
-                  </CardContent>
-                  <CardContent>
-                    <Button asChild variant="link" className="p-0 text-accent font-semibold">
-                      <Link href={feature.href}>
-                        Explorer <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
               </Card>
             ))}
+          </div>
+
+           {/* Pricing/Subscription Section */}
+          <div className="grid md:grid-cols-2 gap-8 items-start">
+            {/* Standard Plan */}
+            <Card className="flex flex-col h-full border-2">
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Standard</CardTitle>
+                    <CardDescription>Pour organiser votre santé au quotidien.</CardDescription>
+                    <p className="text-4xl font-bold pt-2">Gratuit</p>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-3">
+                    <p className="font-semibold">Fonctionnalités incluses :</p>
+                    <ul className="space-y-2">
+                       {standardFeatures.map(feat => (
+                        <li key={feat} className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-accent" />
+                            <span>{feat}</span>
+                        </li>
+                       ))}
+                    </ul>
+                </CardContent>
+                <CardContent>
+                    <Button asChild className="w-full" variant="outline">
+                        <Link href="/auth/signup">Commencer</Link>
+                    </Button>
+                </CardContent>
+            </Card>
+
+            {/* Premium Plan */}
+            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">RECOMMANDÉ</div>
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
+                    <CardDescription>L'assistance de l'IA pour une santé proactive.</CardDescription>
+                    <p className="text-4xl font-bold pt-2">12,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-3">
+                    <p className="font-semibold">Fonctionnalités incluses :</p>
+                    <ul className="space-y-2">
+                       {premiumFeatures.map(feat => (
+                        <li key={feat} className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-primary" />
+                            <span>{feat}</span>
+                        </li>
+                       ))}
+                    </ul>
+                </CardContent>
+                <CardContent>
+                    <Button asChild className="w-full">
+                        <Link href="/auth/signup">Choisir Premium</Link>
+                    </Button>
+                </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -116,7 +185,7 @@ export default function Home() {
                 <Link href="/auth/signup">Créer un compte</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/auth/login">Se connecter</Link>
+                <Link href="#pricing">Voir les plans</Link>
               </Button>
             </div>
           )}
