@@ -37,7 +37,15 @@ export function UserNav() {
   }, [firestore, user]);
 
   const { data: userProfile } = useDoc<User>(userProfileRef);
-  const isAdmin = userProfile?.role === 'Admin';
+
+  const adminRoleRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'roles_admin', user.uid);
+  }, [firestore, user]);
+  
+  const { data: adminRole, isLoading: isAdminRoleLoading } = useDoc(adminRoleRef);
+  const isAdmin = !!adminRole;
+
 
   const handleSignOut = async () => {
     try {
@@ -56,7 +64,7 @@ export function UserNav() {
     }
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isAdminRoleLoading) {
     return <Skeleton className="h-9 w-9 rounded-full" />;
   }
   
