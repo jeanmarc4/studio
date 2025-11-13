@@ -36,7 +36,7 @@ import Image from 'next/image';
 const prescriptionSchema = z.object({
   doctorName: z.string().min(2, 'Le nom du médecin est requis.'),
   issueDate: z.date({ required_error: "La date d'émission est requise." }),
-  imageFile: z.instanceof(File, { message: 'Veuillez sélectionner une image.' })
+  imageFile: z.any().refine((file) => file instanceof File, 'Veuillez sélectionner une image.')
 });
 
 interface UploadPrescriptionDialogProps {
