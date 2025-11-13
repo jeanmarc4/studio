@@ -80,7 +80,7 @@ export const wellnessArticles = [
 
 export const mainNav: NavItem[] = [
   {
-    title: "Mon Espace Santé",
+    title: "Mes Médecins",
     href: "/my-health",
   },
     {
