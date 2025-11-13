@@ -73,21 +73,49 @@ export default function PrescriptionsPage() {
 
   const handleAddMedicationToTreatment = (medication: ExtractedMedication) => {
     if (!user || !firestore || !activeProfile) return;
+    
+    // Default times if none are provided
+    const defaultTimes = ['08:00', '20:00'];
+
+    // More robust time conversion
+    const convertIntakeTimes = (times: string[] | undefined): string[] => {
+        if (!times || times.length === 0) return defaultTimes;
+
+        const timeMap: { [key: string]: string } = {
+            'matin': '08:00',
+            'midi': '12:00',
+            'soir': '20:00',
+        };
+
+        const converted = times.map(t => {
+            const timeStr = t.toLowerCase();
+            // Check for direct mapping
+            if (timeMap[timeStr]) return timeMap[timeStr];
+            // Check for "fois par jour"
+            if (timeStr.includes('1 fois par jour')) return ['12:00'];
+            if (timeStr.includes('2 fois par jour')) return ['08:00', '20:00'];
+            if (timeStr.includes('3 fois par jour')) return ['08:00', '12:00', '20:00'];
+            // If it's already in HH:mm format
+            if (/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeStr)) return [timeStr];
+            return null; // Return null for unhandled cases
+        }).flat().filter((t): t is string => t !== null);
+
+        // Remove duplicates and return, or default if conversion failed
+        return converted.length > 0 ? [...new Set(converted)] : defaultTimes;
+    };
+
+
     const medicationsRef = collection(firestore, 'users', user.uid, 'medications');
     const newMed = {
       userId: user.uid,
       profileId: activeProfile.id,
       name: medication.name,
       dosage: medication.dosage,
-      quantity: medication.quantity || 1,
-      intakeTimes: medication.intakeTimes.map(time => {
-          if (time.toLowerCase() === 'matin') return '08:00';
-          if (time.toLowerCase() === 'midi') return '12:00';
-          if (time.toLowerCase() === 'soir') return '20:00';
-          return time;
-      })
+      quantity: medication.quantity || 1, // Default to 1 if not provided
+      intakeTimes: convertIntakeTimes(medication.intakeTimes),
     };
     addDocumentNonBlocking(medicationsRef, newMed);
+    
     toast({
       title: "Médicament ajouté",
       description: `${medication.name} a été ajouté au traitement de ${activeProfile.name}.`,
@@ -133,7 +161,7 @@ export default function PrescriptionsPage() {
 
         {prescriptions && prescriptions.length > 0 ? (
           <div className="space-y-6">
-            {prescriptions.map((p) => (
+            {prescriptions.sort((a,b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime()).map((p) => (
               <PrescriptionCard 
                 key={p.id} 
                 prescription={p} 
@@ -168,3 +196,4 @@ export default function PrescriptionsPage() {
     </>
   );
 }
+

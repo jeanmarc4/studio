@@ -16,7 +16,7 @@ const ExtractedMedicationSchema = z.object({
   name: z.string().describe("Le nom du médicament, par exemple 'Doliprane'."),
   dosage: z.string().describe("Le dosage par prise, par exemple '1g' ou '1 comprimé'."),
   quantity: z.number().optional().describe("La quantité totale dans la boîte, par exemple 30."),
-  intakeTimes: z.array(z.string()).describe("Une liste des moments de la journée pour la prise, par exemple ['matin', 'midi', 'soir'] ou une description comme '3 fois par jour'."),
+  intakeTimes: z.array(z.string()).describe("Une liste des moments de la journée pour la prise, par exemple ['matin', 'midi', 'soir'] ou une description comme '3 fois par jour'.").optional(),
 }).describe("Un seul médicament extrait de l'ordonnance.");
 
 // Type pour un seul médicament, pour l'exportation

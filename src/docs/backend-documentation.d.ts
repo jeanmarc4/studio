@@ -289,7 +289,7 @@ export interface Prescription {
             type: "array";
             description: "List of medications extracted from the prescription by the AI.";
             items: {
-                $ref: "#/backend/entities/ExtractedMedication";
+                "$ref": "#/backend/entities/ExtractedMedication";
             };
         };
     };
@@ -423,3 +423,4 @@ export interface Backend {
     auth: Auth;
     firestore: Firestore;
 }
+
