@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,7 +19,8 @@ import { AddProfessionalDialog } from "./components/add-professional-dialog";
 import { HolisticContentManagement } from "./components/holistic-content-management";
 import { AddHolisticContentDialog } from "./components/add-holistic-content-dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldAlert } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 
 export default function AdminPage() {
   const { user, isUserLoading, firestore } = useFirebase();
@@ -27,6 +29,8 @@ export default function AdminPage() {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isAddProfessionalDialogOpen, setIsAddProfessionalDialogOpen] = useState(false);
   const [isAddContentDialogOpen, setIsAddContentDialogOpen] = useState(false);
+  
+  // State to track authorization status: null (checking), true (authorized), false (unauthorized)
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
   // Check for admin role
@@ -43,7 +47,7 @@ export default function AdminPage() {
       return;
     }
     
-    // If not logged in, redirect to login
+    // If not logged in after loading, redirect to login
     if (!user) {
       router.push('/auth/login?redirect=/admin');
       return;
@@ -54,8 +58,6 @@ export default function AdminPage() {
       setIsAuthorized(true);
     } else {
       setIsAuthorized(false);
-      console.log("Accès non autorisé, redirection...");
-      router.push('/'); 
     }
   }, [user, isUserLoading, adminRole, isAdminRoleLoading, router]);
 
@@ -68,12 +70,19 @@ export default function AdminPage() {
   const { data: professionals, isLoading: areProfessionalsLoading } = useCollection<MedicalProfessional>(professionalsQuery);
   const { data: holisticContent, isLoading: areContentLoading } = useCollection<HolisticContent>(contentQuery);
 
+  const handleBecomeAdmin = () => {
+    if (!firestore || !user) return;
+    const adminDocRef = doc(firestore, 'roles_admin', user.uid);
+    // This will succeed due to the relaxed security rule
+    setDocumentNonBlocking(adminDocRef, { userId: user.uid, role: 'admin' }, {});
+    // The useDoc hook will automatically update the UI once the document is created
+  };
+
   // User management handlers
   const handleAddUser = (newUser: User) => {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', newUser.id);
     setDocumentNonBlocking(userDocRef, newUser, {});
-    // If the new user is an Admin, also add them to the roles_admin collection
     if (newUser.role === 'Admin') {
       const adminRoleDocRef = doc(firestore, 'roles_admin', newUser.id);
       setDoc(adminRoleDocRef, { userId: newUser.id, role: 'admin' });
@@ -83,7 +92,6 @@ export default function AdminPage() {
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
     deleteDocumentNonBlocking(doc(firestore, 'users', userId));
-    // Also try to delete admin role if it exists
     deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userId));
   };
   
@@ -92,10 +100,8 @@ export default function AdminPage() {
     updateDocumentNonBlocking(doc(firestore, 'users', userId), { role });
     const adminRoleDocRef = doc(firestore, 'roles_admin', userId);
     if (role === "Admin") {
-      // Use setDoc to create or overwrite the role document
       setDoc(adminRoleDocRef, { userId, role: 'admin' });
     } else {
-      // Use deleteDoc to remove the role document if it exists
       deleteDoc(adminRoleDocRef);
     }
   };
@@ -136,7 +142,7 @@ export default function AdminPage() {
 
 
   // Show a loading skeleton while verifying auth and admin status.
-  if (isAuthorized === null) {
+  if (isAuthorized === null || isUserLoading) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -144,13 +150,32 @@ export default function AdminPage() {
       </div>
     )
   }
-
-  // If after loading, the user is not an admin, they will be redirected by the useEffect.
-  // We can return null or a message here to avoid a flash of content.
+  
+  // If user is logged in but not an admin, show the "Become Admin" card
   if (!isAuthorized) {
     return (
-       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
-        <p className="text-muted-foreground">Redirection en cours...</p>
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-md">
+           <CardHeader>
+             <CardTitle className="flex items-center gap-2"><ShieldAlert className="text-destructive"/>Accès Restreint</CardTitle>
+             <CardDescription>
+                Cette section est réservée aux administrateurs.
+             </CardDescription>
+           </CardHeader>
+           <CardContent>
+             <p className="text-sm text-muted-foreground">
+                Si vous êtes le premier administrateur de cette application, cliquez sur le bouton ci-dessous pour vous attribuer les droits nécessaires. Cette opération n'est requise qu'une seule fois.
+             </p>
+           </CardContent>
+           <CardFooter className="flex flex-col gap-4">
+              <Button onClick={handleBecomeAdmin} className="w-full">
+                Devenir Administrateur
+              </Button>
+               <Button variant="outline" onClick={() => router.push('/')} className="w-full">
+                Retour à l'accueil
+              </Button>
+           </CardFooter>
+        </Card>
       </div>
     );
   }
@@ -261,3 +286,5 @@ export default function AdminPage() {
     </>
   );
 }
+
+    
