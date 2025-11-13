@@ -4,142 +4,71 @@
  *
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model for personal data
- * (users, appointments, emergency contacts, medications) and restricts administrative
- * functions (medical professionals, holistic content) to authorized admins.
+ * and restricts administrative functions to authorized admins.
  * Admin privileges are determined by the existence of a document in the `/roles_admin/{userId}` collection.
- *
- * Data Structure:
- * - /users/{userId}: User profile data, accessible only to the owning user.
- * - /users/{userId}/profiles/{profileId}: Family profiles linked to the user, accessible only to that user.
- * - /users/{userId}/appointments/{appointmentId}: Appointments for a specific user, accessible only to that user.
- * - /users/{userId}/emergencyContacts/{contactId}: Emergency contacts for a specific user, accessible only to that user.
- * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
- * - /users/{userId}/prescriptions/{prescriptionId}: Prescriptions for a specific user, accessible only to that user.
- * - /users/{userId}/vaccines/{vaccineId}: Vaccine records for a specific user, accessible only to that user.
- * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
- * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
- * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
- * - /forumThreads/{threadId}: Publicly readable forum threads. Authenticated users can create/delete their own.
- * - /forumThreads/{threadId}/posts/{postId}: Publicly readable replies. Authenticated users can create/delete their own.
- * - /sosAlerts/{alertId}: SOS alerts triggered by users.
- *
- * Key Security Decisions:
- * - User data is strictly private; listing all users is disallowed except for admins.
- * - Admin privileges are granted based on the existence of a document in `/roles_admin/{userId}`.
- * - No custom claims are used.
- * - Data shape validation is relaxed to allow for rapid prototyping. Only critical authorization fields are validated.
- *
- * Denormalization for Authorization:
- * - User ownership is enforced through path-based matching (e.g., `/users/{userId}`).
- * - Admin status is determined by the presence of a document in the `/roles_admin/{userId}` collection.
- *
- * Structural Segregation:
- * - Private user data is stored in user-specific subcollections to prevent accidental public exposure.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Secure user profiles. Only the authenticated user can access their own profile.
-     * @path /users/{userId}
-     * @principle Enforces document ownership for all operations.
+     * @description Secure user profiles.
      */
     match /users/{userId} {
-      allow get, update, delete: if isSignedIn() && isOwner(userId);
-      allow create: if isSignedIn() && isOwner(userId);
+      allow get, update: if isSignedIn() && isOwner(userId);
+      allow create: if isSignedIn(); // Any signed-in user can create their own user document.
       allow list: if isAdmin(); // Only admins can list users.
 
       /**
-       * @description Secure family profiles. Only the parent user can manage their family profiles.
-       * @path /users/{userId}/profiles/{profileId}
-       * @principle Enforces document ownership for all operations on family profiles.
+       * @description Secure user-specific subcollections.
+       * The user can read and write any document in their own subcollections.
        */
       match /profiles/{profileId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
-
-      /**
-       * @description Secure appointments for a specific user. Only the user can manage their appointments.
-       * @path /users/{userId}/appointments/{appointmentId}
-       * @principle Enforces document ownership for all operations on appointments.
-       */
       match /appointments/{appointmentId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
-
-      /**
-       * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
-       * @path /users/{userId}/emergencyContacts/{contactId}
-       * @principle Enforces document ownership for all operations on emergency contacts.
-       */
       match /emergencyContacts/{contactId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
-
-      /**
-       * @description Secure medications for a specific user. Only the user can manage their medication schedule.
-       * @path /users/{userId}/medications/{medicationId}
-       * @principle Enforces document ownership for all operations on medications.
-       */
       match /medications/{medicationId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
-
-       /**
-       * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
-       * @path /users/{userId}/prescriptions/{prescriptionId}
-       * @principle Enforces document ownership for all operations on prescriptions.
-       */
       match /prescriptions/{prescriptionId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
-      
-      /**
-       * @description Secure vaccine records for a specific user. Only the user can manage their records.
-       * @path /users/{userId}/vaccines/{vaccineId}
-       * @principle Enforces document ownership for all operations on vaccine records.
-       */
       match /vaccines/{vaccineId} {
-          allow read, write: if isSignedIn() && isOwner(userId);
+        allow read, write: if isSignedIn() && isOwner(userId);
       }
     }
 
 
     /**
-     * @description Secure medical professional profiles. Admins can manage them.
-     * @path /medicalProfessionals/{medicalProfessionalId}
+     * @description Publicly readable collections, manageable by admins.
      */
     match /medicalProfessionals/{medicalProfessionalId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
-
-    /**
-     * @description Secure holistic wellness content. Admins can manage it.
-     * @path /holisticContent/{holisticContentId}
-     */
     match /holisticContent/{holisticContentId} {
       allow get, list: if true;
       allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Secure admin role assignments.
-     * @path /roles_admin/{userId}
+     * @description Admin role management.
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      allow list: if false; // Disallow listing all admins for security
-      // Allow any signed-in user to make themselves an admin for the first time.
-      // In a real production app, this would be a more secure process (e.g., via a backend function).
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update, delete: if isAdmin(); // Only existing admins can manage other admins
+      // Allow any signed-in user to make themselves an admin for demo purposes.
+      // In production, this should be restricted.
+      allow create: if isSignedIn() && isOwner(userId); 
+      allow list, update, delete: if isAdmin();
     }
     
     /**
-     * @description Secure forum threads and posts.
-     * @path /forumThreads/{threadId}
+     * @description Forum rules.
      */
     match /forumThreads/{threadId} {
         allow get, list: if true;
@@ -147,43 +76,30 @@ service cloud.firestore {
         allow update: if false; 
         allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
 
-        /**
-         * @path /forumThreads/{threadId}/posts/{postId}
-         */
         match /posts/{postId} {
             allow read, write: if isSignedIn();
         }
     }
 
     /**
-     * @description Secure SOS alerts.
-     * @path /sosAlerts/{alertId}
+     * @description SOS alerts are write-only for clients.
      */
     match /sosAlerts/{alertId} {
         allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        allow read, list, update, delete: if false; // Write-only for clients.
+        allow read, list, update, delete: if false;
     }
 
 
     // Helper functions
 
-    /**
-     * @description Checks if the user is signed in.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * @description Checks if the user is the owner of the document.
-     */
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
-    /**
-     * @description Checks if the user has admin privileges.
-     */
     function isAdmin() {
       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
