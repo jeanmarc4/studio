@@ -2,14 +2,15 @@
 'use client';
 
 import Link from "next/link";
-import { CheckCircle2, UserCheck, BotIcon, MessageSquare, Search } from "lucide-react";
+import { CheckCircle2, UserCheck, BotIcon, Search, Bell, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PayPalSubscriptionButton } from "./paypal-subscription-button";
 
 const gratuitFeatures = [
-    "Gestion des rendez-vous",
+    "Gestion des rendez-vous et médecins",
     "Suivi manuel du traitement",
+    "Carnet de vaccination",
     "Accès au forum communautaire",
     "Annuaire des professionnels",
 ];
@@ -23,26 +24,27 @@ const standardFeatures = [
 
 const premiumFeatures = [
     "Toutes les fonctionnalités Standard",
-    "IA illimitée (symptômes & ordonnances)",
+    "Analyse d'ordonnances par l'IA",
     "Rappels vocaux intelligents par l'IA",
+    "Soutien moral IA illimité",
     "Support prioritaire",
 ];
 
 const howItWorksSteps = [
     {
         icon: Search,
-        title: "1. Trouvez un professionnel",
-        description: "Explorez notre annuaire complet pour trouver des médecins, pharmacies et spécialistes près de chez vous. Filtrez par spécialité pour affiner votre recherche."
+        title: "1. Organisez votre santé",
+        description: "Regroupez vos rendez-vous, médicaments, vaccins et ordonnances en un seul endroit. Fini les oublis et les papiers perdus."
     },
     {
-        icon: UserCheck,
-        title: "2. Organisez votre santé",
-        description: "Regroupez vos rendez-vous, vos ordonnances et vos médicaments en un seul endroit. Fini les oublis et les papiers perdus."
+        icon: Bell,
+        title: "2. Recevez des rappels (Standard)",
+        description: "Bénéficiez de rappels automatiques par notification pour ne jamais manquer une prise de médicament ou un rendez-vous important."
     },
     {
-        icon: BotIcon,
-        title: "3. Obtenez des conseils IA (Premium)",
-        description: "Utilisez notre assistant IA pour analyser vos symptômes ou extraire les informations de vos ordonnances. Une aide précieuse à portée de main."
+        icon: Sparkles,
+        title: "3. Libérez la puissance de l'IA (Premium)",
+        description: "Utilisez nos assistants IA pour analyser vos symptômes, lire vos ordonnances et obtenir des rappels vocaux intelligents."
     }
 ];
 
@@ -69,7 +71,7 @@ export function GuestHomepage() {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              Merci de nous aider à soutenir notre site.{" "}
+              Soutenez notre mission avec un don.{" "}
               <a 
                 href="https://www.paypal.com/donate/?hosted_button_id=WTNC9Z978PCGS" 
                 target="_blank" 
@@ -110,7 +112,7 @@ export function GuestHomepage() {
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tight font-headline">Choisissez le plan qui vous convient</h2>
                 <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-                    Commencez gratuitement ou débloquez plus de fonctionnalités avec nos plans payants.
+                    Commencez gratuitement ou débloquez la puissance de l'IA avec nos plans payants.
                 </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 items-start">
@@ -125,8 +127,8 @@ export function GuestHomepage() {
                     <p className="font-semibold">Fonctionnalités incluses :</p>
                     <ul className="space-y-2">
                        {gratuitFeatures.map(feat => (
-                        <li key={feat} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-accent" />
+                        <li key={feat} className="flex items-start gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
                             <span>{feat}</span>
                         </li>
                        ))}
@@ -140,10 +142,9 @@ export function GuestHomepage() {
             </Card>
 
             {/* Standard Plan */}
-            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">RECOMMANDÉ</div>
+            <Card className="flex flex-col h-full">
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl text-primary">Standard</CardTitle>
+                    <CardTitle className="font-headline text-2xl">Standard</CardTitle>
                     <CardDescription>Pour une tranquillité d'esprit avec des rappels automatisés.</CardDescription>
                     <p className="text-4xl font-bold pt-2">9,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
@@ -151,8 +152,8 @@ export function GuestHomepage() {
                     <p className="font-semibold">Fonctionnalités incluses :</p>
                     <ul className="space-y-2">
                        {standardFeatures.map(feat => (
-                        <li key={feat} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-primary" />
+                        <li key={feat} className="flex items-start gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
                             <span>{feat}</span>
                         </li>
                        ))}
@@ -164,18 +165,19 @@ export function GuestHomepage() {
             </Card>
 
             {/* Premium Plan */}
-            <Card className="flex flex-col h-full">
+            <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">LE PLUS COMPLET</div>
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Premium</CardTitle>
-                    <CardDescription>L'assistance de l'IA pour une santé proactive.</CardDescription>
+                    <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
+                    <CardDescription>L'assistance complète de l'IA pour une santé proactive.</CardDescription>
                     <p className="text-4xl font-bold pt-2">19,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
                     <p className="font-semibold">Fonctionnalités incluses :</p>
                     <ul className="space-y-2">
                        {premiumFeatures.map(feat => (
-                        <li key={feat} className="flex items-center gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-accent" />
+                        <li key={feat} className="flex items-start gap-2">
+                            <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                             <span>{feat}</span>
                         </li>
                        ))}
