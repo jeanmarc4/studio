@@ -52,12 +52,12 @@ export default function MedicationsPage() {
   if (isLoading || !user) {
     return (
         <div className="container mx-auto px-4 py-8">
-            <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="space-y-2">
-                    <Skeleton className="h-10 w-64" />
-                    <Skeleton className="h-6 w-96" />
+            <header className="mb-8 flex flex-col sm:items-center sm:justify-between gap-4">
+                <div className="space-y-2 text-center sm:text-left">
+                    <Skeleton className="h-10 w-64 mx-auto sm:mx-0" />
+                    <Skeleton className="h-6 w-96 mx-auto sm:mx-0" />
                 </div>
-                <Skeleton className="h-12 w-52" />
+                <Skeleton className="h-12 w-52 hidden sm:block" />
             </header>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <Skeleton className="h-48 w-full" />
@@ -71,7 +71,7 @@ export default function MedicationsPage() {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <header className="mb-8 text-center sm:text-left">
           <div>
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
               Mon Traitement
@@ -80,7 +80,7 @@ export default function MedicationsPage() {
               Gérez vos médicaments et ne manquez jamais une prise.
             </p>
           </div>
-          <Button onClick={() => setIsAddDialogOpen(true)} size="lg">
+           <Button onClick={() => setIsAddDialogOpen(true)} size="lg" className="hidden sm:inline-flex mt-4">
             <PlusCircle className="mr-2" />
             Ajouter un médicament
           </Button>
@@ -113,6 +113,12 @@ export default function MedicationsPage() {
             </Button>
           </div>
         )}
+      </div>
+
+       <div className="sm:hidden fixed bottom-4 right-4 z-50">
+        <Button size="lg" className="rounded-full h-16 w-16 shadow-lg flex items-center justify-center" onClick={() => setIsAddDialogOpen(true)}>
+          <PlusCircle className="h-8 w-8" />
+        </Button>
       </div>
 
       <AddMedicationDialog

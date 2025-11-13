@@ -91,7 +91,7 @@ export default function PrescriptionsPage() {
                     <Skeleton className="h-10 w-64" />
                     <Skeleton className="h-6 w-96" />
                 </div>
-                <Skeleton className="h-12 w-56" />
+                <Skeleton className="h-12 w-56 hidden sm:block" />
             </header>
             <div className="space-y-6">
                 <Skeleton className="h-64 w-full" />
@@ -105,7 +105,7 @@ export default function PrescriptionsPage() {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <header className="mb-8 text-center sm:text-left">
           <div>
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
               Mes Ordonnances
@@ -114,7 +114,7 @@ export default function PrescriptionsPage() {
               Gérez vos ordonnances et ajoutez vos médicaments facilement.
             </p>
           </div>
-          <Button onClick={() => setIsUploadDialogOpen(true)} size="lg">
+          <Button onClick={() => setIsUploadDialogOpen(true)} size="lg" className="hidden sm:inline-flex mt-4">
             <PlusCircle className="mr-2" />
             Ajouter une ordonnance
           </Button>
@@ -141,6 +141,12 @@ export default function PrescriptionsPage() {
             </Button>
           </div>
         )}
+      </div>
+
+       <div className="sm:hidden fixed bottom-4 right-4 z-50">
+        <Button size="lg" className="rounded-full h-16 w-16 shadow-lg flex items-center justify-center" onClick={() => setIsUploadDialogOpen(true)}>
+          <PlusCircle className="h-8 w-8" />
+        </Button>
       </div>
 
       <UploadPrescriptionDialog

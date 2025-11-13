@@ -116,7 +116,7 @@ export default function MyAppointmentsPage() {
   if (isUserLoading || !user) {
     return (
        <div className="container mx-auto px-4 py-8">
-         <Skeleton className="h-12 w-1/3 mb-8" />
+         <Skeleton className="h-12 w-full sm:w-1/3 mb-8" />
          <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-4">
                 <Skeleton className="h-24 w-full" />
@@ -134,7 +134,7 @@ export default function MyAppointmentsPage() {
   return (
     <>
         <div className="container mx-auto px-4 py-8">
-        <header className="mb-8">
+        <header className="mb-8 text-center sm:text-left">
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
             Mes Rendez-vous et Médecins
             </h1>
@@ -172,7 +172,7 @@ export default function MyAppointmentsPage() {
                 <aside className="lg:col-span-1">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold font-headline text-gray-800 dark:text-gray-200">Mes Médecins</h2>
-                        <Button variant="outline" onClick={() => setIsAddDoctorDialogOpen(true)}>
+                        <Button variant="outline" onClick={() => setIsAddDoctorDialogOpen(true)} className="hidden sm:flex">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Ajouter
                         </Button>
@@ -183,6 +183,13 @@ export default function MyAppointmentsPage() {
                 </aside>
             </div>
         </div>
+
+        <div className="sm:hidden fixed bottom-4 right-4 z-50">
+            <Button size="lg" className="rounded-full h-16 w-16 shadow-lg flex items-center justify-center" onClick={() => setIsAddDoctorDialogOpen(true)}>
+                <PlusCircle className="h-8 w-8" />
+            </Button>
+        </div>
+
         <AddDoctorDialog 
             isOpen={isAddDoctorDialogOpen}
             onOpenChange={setIsAddDoctorDialogOpen}

@@ -17,6 +17,7 @@ import { ProfessionalManagement } from "./components/professional-management";
 import { AddProfessionalDialog } from "./components/add-professional-dialog";
 import { HolisticContentManagement } from "./components/holistic-content-management";
 import { AddHolisticContentDialog } from "./components/add-holistic-content-dialog";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function AdminPage() {
   const { user, isUserLoading, firestore } = useFirebase();
@@ -139,14 +140,17 @@ export default function AdminPage() {
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
             <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
               <div className="flex items-center">
-                <TabsList>
-                  <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
-                  <TabsTrigger value="users">Utilisateurs</TabsTrigger>
-                  <TabsTrigger value="professionals">Professionnels</TabsTrigger>
-                  <TabsTrigger value="articles">Articles</TabsTrigger>
-                  <TabsTrigger value="roles">Rôles</TabsTrigger>
-                </TabsList>
-                <div className="ml-auto flex items-center gap-2">
+                <ScrollArea className="w-full whitespace-nowrap">
+                    <TabsList className="w-max">
+                        <TabsTrigger value="dashboard">Tableau de bord</TabsTrigger>
+                        <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+                        <TabsTrigger value="professionals">Professionnels</TabsTrigger>
+                        <TabsTrigger value="articles">Articles</TabsTrigger>
+                        <TabsTrigger value="roles">Rôles</TabsTrigger>
+                    </TabsList>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+                <div className="ml-auto hidden sm:flex items-center gap-2">
                    {activeTab === 'users' && (
                     <Button size="sm" onClick={() => setIsAddUserDialogOpen(true)}>
                       Ajouter un utilisateur
@@ -195,6 +199,25 @@ export default function AdminPage() {
                 <RoleConfiguration />
               </TabsContent>
             </Tabs>
+
+            <div className="sm:hidden fixed bottom-4 right-4 z-50">
+                {activeTab === 'users' && (
+                <Button size="lg" className="rounded-full h-14 w-14 shadow-lg" onClick={() => setIsAddUserDialogOpen(true)}>
+                    +
+                </Button>
+                )}
+                {activeTab === 'professionals' && (
+                <Button size="lg" className="rounded-full h-14 w-14 shadow-lg" onClick={() => setIsAddProfessionalDialogOpen(true)}>
+                    +
+                </Button>
+                )}
+                {activeTab === 'articles' && (
+                <Button size="lg" className="rounded-full h-14 w-14 shadow-lg" onClick={() => setIsAddContentDialogOpen(true)}>
+                    +
+                </Button>
+                )}
+            </div>
+
           </main>
         </div>
       </div>
