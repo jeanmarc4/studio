@@ -61,7 +61,8 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations on family profiles.
      */
     match /users/{userId}/profiles/{profileId} {
-      allow read, write: if isSignedIn() && isOwner(userId);
+      allow list, create: if isSignedIn() && isOwner(userId);
+      allow get, update, delete: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
     }
 
     /**
