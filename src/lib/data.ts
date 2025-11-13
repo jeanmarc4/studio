@@ -79,6 +79,10 @@ export const wellnessArticles = [
 ];
 
 export const mainNav: NavItem[] = [
+    {
+    title: "Mon Espace Santé",
+    href: "/",
+  },
   {
     title: "Mes Rendez-vous",
     href: "/my-appointments",
