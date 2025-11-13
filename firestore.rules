@@ -13,6 +13,7 @@
  * - /users/{userId}/appointments/{appointmentId}: Appointments for a specific user, accessible only to that user.
  * - /users/{userId}/emergencyContacts/{contactId}: Emergency contacts for a specific user, accessible only to that user.
  * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
+ * - /users/{userId}/prescriptions/{prescriptionId}: Prescriptions for a specific user, accessible only to that user.
  * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
  * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
  * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
@@ -88,6 +89,17 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations on medications.
      */
     match /users/{userId}/medications/{medicationId} {
+      allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+    }
+
+     /**
+     * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
+     * @path /users/{userId}/prescriptions/{prescriptionId}
+     * @allow (read, write) User with UID 'user123' can manage their own prescriptions.
+     * @deny (read, write) User with UID 'user456' cannot manage 'user123' prescriptions.
+     * @principle Enforces document ownership for all operations on prescriptions.
+     */
+    match /users/{userId}/prescriptions/{prescriptionId} {
       allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
     }
 

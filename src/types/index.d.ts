@@ -1,4 +1,5 @@
-import type { MedicalProfessional, Medication as MedicationSchema } from "@/docs/backend-documentation";
+import type { MedicalProfessional, Medication as MedicationSchema, Prescription as PrescriptionSchema } from "@/docs/backend-documentation";
+import type { ExtractedMedication as ExtractedMedicationSchema } from "@/ai/flows/extract-medications-flow";
 
 export type NavItem = {
   title: string;
@@ -17,3 +18,7 @@ export type PopulatedMedicalProfessional = MedicalProfessional & {
 };
 
 export type Medication = Omit<MedicationSchema, 'userId'> & { id: string };
+
+export type Prescription = Omit<PrescriptionSchema, 'userId'> & { id: string };
+
+export type ExtractedMedication = ExtractedMedicationSchema;
