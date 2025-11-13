@@ -9,49 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const featureCards = [
-   {
-    icon: Calendar,
-    title: "Mes Rendez-vous",
-    description: "Consultez, planifiez et gérez tous vos rendez-vous médicaux en un seul endroit.",
-    href: "/my-appointments",
-    bgColor: "bg-red-100 dark:bg-red-900/50",
-    iconColor: "text-red-500",
-  },
-  {
-    icon: FileText,
-    title: "Gestion d'Ordonnances",
-    description: "Ajoutez vos ordonnances et laissez l'IA extraire les informations pour un suivi facile.",
-    href: "/prescriptions",
-    bgColor: "bg-yellow-100 dark:bg-yellow-900/50",
-    iconColor: "text-yellow-500",
-  },
-  {
-    icon: Pill,
-    title: "Suivi de Traitement",
-    description: "Organisez votre plan de médication, recevez des rappels et ne manquez plus jamais une prise.",
-    href: "/medications",
-    bgColor: "bg-purple-100 dark:bg-purple-900/50",
-    iconColor: "text-purple-500",
-  },
-   {
-    icon: Sparkles,
-    title: "Vérificateur de Symptômes IA",
-    description: "Décrivez vos symptômes à notre assistant IA pour obtenir des conseils et une orientation.",
-    href: "/symptom-checker",
-    bgColor: "bg-blue-100 dark:bg-blue-900/50",
-    iconColor: "text-blue-500",
-  },
-  {
-    icon: Leaf,
-    title: "Soins Holistiques & Forum",
-    description: "Explorez des articles sur le bien-être et échangez avec la communauté sur notre forum.",
-    href: "/wellness",
-    bgColor: "bg-green-100 dark:bg-green-900/50",
-    iconColor: "text-green-500",
-  },
-];
-
 const standardFeatures = [
     "Gestion des rendez-vous",
     "Suivi du traitement (ajout manuel)",
@@ -223,5 +180,3 @@ export default function Home() {
     </main>
   );
 }
-
-    
