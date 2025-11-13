@@ -24,7 +24,7 @@
  * - /sosAlerts/{alertId}: SOS alerts triggered by users.
  *
  * Key Security Decisions:
- * - User data is strictly private; listing all users is disallowed.
+ * - User data is strictly private; listing all users is disallowed except for admins.
  * - Admin privileges are granted based on the existence of a document in `/roles_admin/{userId}`.
  * - No custom claims are used.
  * - Data shape validation is relaxed to allow for rapid prototyping. Only critical authorization fields are validated.
@@ -48,7 +48,7 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      allow read, update, delete: if isSignedIn() && isOwner(userId);
+      allow get, update, delete: if isSignedIn() && isOwner(userId);
       allow create: if isSignedIn() && isOwner(userId);
       allow list: if isAdmin(); // Only admins can list users.
 
@@ -58,8 +58,10 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
-        allow list, create: if isSignedIn() && isOwner(userId);
         allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /profiles {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -67,9 +69,11 @@ service cloud.firestore {
        * @path /users/{userId}/appointments
        * @principle Enforces document ownership for all operations on appointments.
        */
-      match /appointments/{appointmentId} {
-        allow list, create: if isSignedIn() && isOwner(userId);
+       match /appointments/{appointmentId} {
         allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /appointments {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -77,9 +81,11 @@ service cloud.firestore {
        * @path /users/{userId}/emergencyContacts
        * @principle Enforces document ownership for all operations on emergency contacts.
        */
-      match /emergencyContacts/{contactId} {
-        allow list, create: if isSignedIn() && isOwner(userId);
+       match /emergencyContacts/{contactId} {
         allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /emergencyContacts {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -87,9 +93,11 @@ service cloud.firestore {
        * @path /users/{userId}/medications
        * @principle Enforces document ownership for all operations on medications.
        */
-      match /medications/{medicationId} {
-        allow list, create: if isSignedIn() && isOwner(userId);
+       match /medications/{medicationId} {
         allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /medications {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
 
        /**
@@ -97,9 +105,11 @@ service cloud.firestore {
        * @path /users/{userId}/prescriptions
        * @principle Enforces document ownership for all operations on prescriptions.
        */
-      match /prescriptions/{prescriptionId} {
-        allow list, create: if isSignedIn() && isOwner(userId);
+       match /prescriptions/{prescriptionId} {
         allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /prescriptions {
+        allow list, create: if isSignedIn() && isOwner(userId);
       }
       
       /**
@@ -108,8 +118,10 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
-          allow list, create: if isSignedIn() && isOwner(userId);
           allow get, update, delete: if isSignedIn() && isOwner(userId);
+      }
+      match /vaccines {
+          allow list, create: if isSignedIn() && isOwner(userId);
       }
     }
 
