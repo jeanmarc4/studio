@@ -50,6 +50,17 @@ export function TodaysMedications() {
   const isFreePlan = userProfile?.role === 'Gratuit';
   const isLoading = areMedicationsLoading || isProfileLoading;
 
+  const getDescription = () => {
+      const profileName = activeProfile?.relationship === 'self' ? "vous" : activeProfile?.name;
+      if (todaysTakes.length > 0) {
+        if (isFreePlan) {
+          return `Confirmez manuellement chaque prise pour ${profileName} ci-dessous.`;
+        }
+        return `Le programme du jour pour ${profileName}. Les rappels IA sont actifs.`;
+      }
+      return `Aucun médicament programmé pour ${profileName} aujourd'hui.`;
+  }
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -57,10 +68,7 @@ export function TodaysMedications() {
           Prises du Jour pour {activeProfile?.relationship === 'self' ? "Moi" : activeProfile?.name}
         </CardTitle>
         <CardDescription>
-          {isFreePlan 
-            ? "Confirmez manuellement chaque prise ci-dessous." 
-            : `Le programme de ${activeProfile?.name} pour aujourd'hui. Les rappels sont gérés par l'IA.`
-          }
+          {isLoading ? <Skeleton className="h-4 w-3/4" /> : getDescription()}
         </CardDescription>
       </CardHeader>
       <CardContent>
