@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -11,16 +12,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { User } from '@/docs/backend-documentation';
 import { User as UserIcon, Mail, Shield, Save } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function ProfilePage() {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
 
   // Redirect if user is not logged in
-  if (!isUserLoading && !user) {
-    router.push('/auth/login?redirect=/profile');
-    return null; 
-  }
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/auth/login?redirect=/profile');
+    }
+  }, [isUserLoading, user, router]);
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;

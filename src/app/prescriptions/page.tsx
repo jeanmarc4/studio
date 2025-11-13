@@ -1,6 +1,6 @@
 
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
@@ -19,10 +19,11 @@ export default function PrescriptionsPage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   // Redirect if user is not logged in
-  if (!isUserLoading && !user) {
-    router.push('/auth/login?redirect=/prescriptions');
-    return null;
-  }
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/auth/login?redirect=/prescriptions');
+    }
+  }, [isUserLoading, user, router]);
 
   const prescriptionsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -82,6 +83,24 @@ export default function PrescriptionsPage() {
     addDocumentNonBlocking(medicationsRef, newMed);
   };
 
+  if (isLoading || !user) {
+    return (
+         <div className="container mx-auto px-4 py-8">
+            <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="space-y-2">
+                    <Skeleton className="h-10 w-64" />
+                    <Skeleton className="h-6 w-96" />
+                </div>
+                <Skeleton className="h-12 w-56" />
+            </header>
+            <div className="space-y-6">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-64 w-full" />
+            </div>
+        </div>
+    )
+  }
+
 
   return (
     <>
@@ -101,12 +120,7 @@ export default function PrescriptionsPage() {
           </Button>
         </header>
 
-        {isLoading ? (
-          <div className="space-y-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-        ) : prescriptions && prescriptions.length > 0 ? (
+        {prescriptions && prescriptions.length > 0 ? (
           <div className="space-y-6">
             {prescriptions.map((p) => (
               <PrescriptionCard 

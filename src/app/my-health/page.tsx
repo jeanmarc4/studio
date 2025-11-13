@@ -8,7 +8,7 @@ import { MyDoctorsList } from './components/my-doctors-list';
 import { UpcomingAppointments } from './components/upcoming-appointments';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AddDoctorDialog } from './components/add-doctor-dialog';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { collection } from 'firebase/firestore';
@@ -21,10 +21,11 @@ export default function MyHealthPage() {
   const [isAddDoctorDialogOpen, setIsAddDoctorDialogOpen] = useState(false);
 
   // Redirect if user is not logged in
-  if (!isUserLoading && !user) {
-    router.push('/auth/login?redirect=/my-health');
-    return null; 
-  }
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/auth/login?redirect=/my-health');
+    }
+  }, [isUserLoading, user, router]);
   
   const handleAddDoctor = (values: { name: string; specialty: string; address: string; phone: string; }) => {
     if (!firestore || !user) return;
@@ -52,7 +53,7 @@ export default function MyHealthPage() {
   };
 
 
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return (
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8">
