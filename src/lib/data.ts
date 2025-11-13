@@ -111,3 +111,4 @@ export const mainNav: NavItem[] = [
 ];
 
 export type WellnessArticle = typeof wellnessArticles[0];
+

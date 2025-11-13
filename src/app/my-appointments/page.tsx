@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -34,7 +35,7 @@ export default function MyAppointmentsPage() {
   // Redirect if user is not logged in
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/auth/login?redirect=/my-appointments');
+      router.push('/auth/login?redirect=/my-health');
     }
   }, [user, isUserLoading, router]);
   
@@ -198,3 +199,4 @@ export default function MyAppointmentsPage() {
     </>
   );
 }
+

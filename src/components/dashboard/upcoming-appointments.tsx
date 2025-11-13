@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import type { Appointment } from '@/types';
 import { useFirebase } from '@/firebase';
+import { Skeleton } from '../ui/skeleton';
 
 type AppointmentWithProfessional = Appointment & {
   professionalName?: string;
@@ -23,11 +25,16 @@ export function UpcomingAppointments({ appointments }: UpcomingAppointmentsProps
   const { firestore } = useFirebase();
   const router = useRouter();
   const [upcomingAppointments, setUpcomingAppointments] = useState<AppointmentWithProfessional[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!firestore || !appointments) return;
+    if (!firestore || !appointments) {
+        setIsLoading(false);
+        return;
+    }
 
     const fetchUpcoming = async () => {
+      setIsLoading(true);
       const upcoming = appointments
         .filter(apt => new Date(apt.dateTime) >= new Date() && apt.status === 'scheduled')
         .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
@@ -44,10 +51,26 @@ export function UpcomingAppointments({ appointments }: UpcomingAppointmentsProps
         })
       );
       setUpcomingAppointments(enrichedAppointments);
+      setIsLoading(false);
     };
 
     fetchUpcoming();
   }, [appointments, firestore]);
+
+    if (isLoading) {
+    return (
+       <Card>
+        <CardHeader>
+          <CardTitle>Rappels de Rendez-vous</CardTitle>
+          <CardDescription>Vos prochains rendez-vous.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className="h-full bg-muted/30 dark:bg-card">
@@ -81,10 +104,11 @@ export function UpcomingAppointments({ appointments }: UpcomingAppointmentsProps
             Aucun rendez-vous à venir.
           </p>
         )}
-         <Button className="w-full mt-6" variant="outline" onClick={() => router.push('/my-appointments')}>
-            Voir tous les rendez-vous
+         <Button className="w-full mt-6" variant="outline" onClick={() => router.push('/my-health')}>
+            Gérer mes rendez-vous
         </Button>
       </CardContent>
     </Card>
   );
 }
+
