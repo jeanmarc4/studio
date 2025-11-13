@@ -10,14 +10,14 @@ export default {
   theme: {
     extend: {
       fontSize: {
-        'base': '1rem', 
-        'lg': '1.125rem',
-        'xl': '1.25rem',
-        '2xl': '1.5rem',
-        '3xl': '1.875rem',
-        '4xl': '2.25rem',
-        '5xl': '3rem',
-        '6xl': '4rem',
+        'base': '1.0625rem', // 17px
+        'lg': '1.1875rem',  // 19px
+        'xl': '1.3125rem',  // 21px
+        '2xl': '1.625rem',  // 26px
+        '3xl': '2rem',    // 32px
+        '4xl': '2.5rem',   // 40px
+        '5xl': '3.25rem',  // 52px
+        '6xl': '4.25rem',  // 68px
       },
       fontFamily: {
         body: ['"PT Sans"', 'sans-serif'],
