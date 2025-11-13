@@ -27,9 +27,10 @@ import { getVocalReminder } from '@/ai/flows/get-vocal-reminder-flow';
 
 interface MedicationCardProps {
   medication: Medication;
+  onEdit: () => void;
 }
 
-export function MedicationCard({ medication }: MedicationCardProps) {
+export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
   const { user, firestore } = useFirebase();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -146,7 +147,7 @@ export function MedicationCard({ medication }: MedicationCardProps) {
             </Button>
         </div>
         <div className="flex gap-2">
-            <Button variant="ghost" size="icon" disabled>
+            <Button variant="ghost" size="icon" onClick={onEdit}>
                 <Edit className="h-4 w-4" />
             </Button>
             <AlertDialog>

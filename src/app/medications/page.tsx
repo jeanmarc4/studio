@@ -7,16 +7,20 @@ import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import type { Medication } from '@/types';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Pill, Bell, ListChecks, HelpCircle } from 'lucide-react';
+import { PlusCircle, Pill, HelpCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MedicationCard } from './components/medication-card';
 import { AddMedicationDialog } from './components/add-medication-dialog';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { EditMedicationDialog } from './components/edit-medication-dialog';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function MedicationsPage() {
   const { user, isUserLoading, firestore } = useFirebase();
   const router = useRouter();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [medicationToEdit, setMedicationToEdit] = useState<Medication | null>(null);
 
   // Redirect if user is not logged in
   useEffect(() => {
@@ -31,6 +35,17 @@ export default function MedicationsPage() {
   }, [firestore, user]);
 
   const { data: medications, isLoading: areMedicationsLoading } = useCollection<Medication>(medicationsQuery);
+
+  const handleEditClick = (medication: Medication) => {
+    setMedicationToEdit(medication);
+    setIsEditDialogOpen(true);
+  }
+
+  const handleUpdateMedication = (data: Partial<Medication>) => {
+    if (!user || !firestore || !medicationToEdit) return;
+    const medRef = doc(firestore, 'users', user.uid, 'medications', medicationToEdit.id);
+    updateDocumentNonBlocking(medRef, data);
+  };
 
   const isLoading = isUserLoading || areMedicationsLoading;
   
@@ -85,7 +100,7 @@ export default function MedicationsPage() {
         {medications && medications.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {medications.map((med) => (
-              <MedicationCard key={med.id} medication={med} />
+              <MedicationCard key={med.id} medication={med} onEdit={() => handleEditClick(med)} />
             ))}
           </div>
         ) : (
@@ -104,6 +119,14 @@ export default function MedicationsPage() {
         isOpen={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
       />
+      {medicationToEdit && (
+        <EditMedicationDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          medication={medicationToEdit}
+          onUpdate={handleUpdateMedication}
+        />
+      )}
     </>
   );
 }
