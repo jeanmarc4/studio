@@ -11,7 +11,6 @@
 import { ai, ensureApiKey } from '@/ai/genkit';
 import { z } from 'genkit';
 
-// Le schéma d'entrée est maintenant un objet avec une clé 'history'
 const SymptomCheckerInputSchema = z.object({
   history: z.array(z.object({
     role: z.enum(['user', 'model']),
@@ -37,7 +36,7 @@ const symptomCheckerFlow = ai.defineFlow(
     inputSchema: SymptomCheckerInputSchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async ({ history }) => { // On déstructure 'history' de l'objet d'entrée
+  async ({ history }) => {
     ensureApiKey(); // Vérifie la présence de la clé API
 
     const { text } = await ai.generate({

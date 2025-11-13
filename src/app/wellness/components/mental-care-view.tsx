@@ -56,7 +56,6 @@ export function MentalCareView() {
         setIsLoading(true);
 
         try {
-            // Envoyer l'historique dans un objet avec la clé 'history'
             const result = await mentalCareChat({ history: newMessages });
             const modelMessage: Message = { role: 'model', content: result.response };
             setMessages(prev => [...prev, modelMessage]);

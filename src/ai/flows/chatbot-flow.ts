@@ -35,7 +35,7 @@ const mentalCareChatFlow = ai.defineFlow(
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async ({ history }) => { // On déstructure 'history' de l'objet d'entrée
+  async ({ history }) => {
     ensureApiKey(); // Vérifie la présence de la clé API
 
     const { text } = await ai.generate({

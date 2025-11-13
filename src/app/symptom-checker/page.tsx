@@ -47,7 +47,6 @@ export default function SymptomCheckerPage() {
         setIsLoading(true);
 
         try {
-            // Envoyer l'historique dans un objet avec la clé 'history'
             const result = await suggestNextSteps({ history: newMessages });
             const modelMessage: Message = { role: 'model', content: result.analysis };
             setMessages(prev => [...prev, modelMessage]);
