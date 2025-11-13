@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, doc, getDoc } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
 import type { FamilyProfile, User } from '@/types';
 
 // The shape of the data returned by the hook
@@ -58,23 +58,30 @@ export function useProfile(): UseProfileReturn {
 
   // 4. Initialize active profile from localStorage or default to self
   useEffect(() => {
-    if (isUserLoading || isCurrentUserProfileLoading || areFamilyProfilesLoading) {
-      return;
+    const dataIsLoading = isUserLoading || isCurrentUserProfileLoading || areFamilyProfilesLoading;
+    if (dataIsLoading) {
+      return; // Wait until all data is loaded
     }
-
-    if (!user || allProfiles.length === 0) {
-      setActiveProfile(null);
+  
+    // Only run this logic on the client side
+    if (typeof window !== 'undefined') {
+      if (!user || allProfiles.length === 0) {
+        setActiveProfile(null);
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      } else {
+        const storedProfileId = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const profileToActivate = allProfiles.find(p => p.id === storedProfileId) || allProfiles[0];
+        
+        setActiveProfile(profileToActivate);
+        // Ensure localStorage is in sync
+        if (profileToActivate) {
+          localStorage.setItem(LOCAL_STORAGE_KEY, profileToActivate.id);
+        }
+      }
       setIsInitializing(false);
-      return;
     }
-    
-    const storedProfileId = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const profileToActivate = allProfiles.find(p => p.id === storedProfileId) || allProfiles[0];
-    
-    setActiveProfile(profileToActivate);
-    setIsInitializing(false);
-
   }, [user, allProfiles, isUserLoading, isCurrentUserProfileLoading, areFamilyProfilesLoading]);
+
 
   // 5. Create a stable function to set the active profile
   const handleSetActiveProfile = useCallback((profileId: string) => {
