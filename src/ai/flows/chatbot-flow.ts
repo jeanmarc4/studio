@@ -27,8 +27,10 @@ const MessageSchema = z.object({
   content: z.string(),
 });
 
-const ChatHistorySchema = z.array(MessageSchema);
-export type ChatHistory = z.infer<typeof ChatHistorySchema>;
+const ChatHistoryInputSchema = z.object({
+  history: z.array(MessageSchema),
+});
+export type ChatHistory = z.infer<typeof ChatHistoryInputSchema>;
 
 
 const ChatOutputSchema = z.object({
@@ -36,17 +38,17 @@ const ChatOutputSchema = z.object({
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-export async function mentalCareChat(history: ChatHistory): Promise<ChatOutput> {
-  return mentalCareChatFlow(history);
+export async function mentalCareChat(input: ChatHistory): Promise<ChatOutput> {
+  return mentalCareChatFlow(input);
 }
 
 const mentalCareChatFlow = ai.defineFlow(
   {
     name: 'mentalCareChatFlow',
-    inputSchema: ChatHistorySchema,
+    inputSchema: ChatHistoryInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async (history) => {
+  async ({ history }) => {
     ensureApiKey(); // Vérifie la présence de la clé API
     
     const { text } = await ai.generate({

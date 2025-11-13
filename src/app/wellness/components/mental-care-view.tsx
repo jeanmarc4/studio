@@ -56,7 +56,7 @@ export function MentalCareView() {
         setIsLoading(true);
 
         try {
-            const result = await mentalCareChat(newMessages);
+            const result = await mentalCareChat({ history: newMessages });
             const modelMessage: Message = { role: 'model', content: result.response };
             setMessages(prev => [...prev, modelMessage]);
         } catch (error: any) {
