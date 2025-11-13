@@ -169,7 +169,7 @@
         },
         "status": {
           "type": "string",
-          "description": "The status of the appointment (e.g., scheduled, completed, canceled)."
+          "description": "The status of the appointment (e.g., scheduled, completed, canceled, archived)."
         }
       },
       "required": [
@@ -246,6 +246,29 @@
         "name",
         "phone"
       ]
+    },
+    "SOSAlert": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SOSAlert",
+      "type": "object",
+      "description": "Represents an SOS alert triggered by a user.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the SOS alert." },
+        "userId": { "type": "string", "description": "The ID of the user who triggered the alert." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "The timestamp when the alert was triggered." },
+        "contactsNotified": {
+          "type": "array",
+          "description": "A snapshot of the emergency contacts who were notified.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "phone": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["id", "userId", "createdAt", "contactsNotified"]
     },
     "Medication": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -612,6 +635,17 @@
               "name": "postId",
               "description": "The unique identifier of the post/reply."
             }
+          ]
+        }
+      },
+      {
+        "path": "/sosAlerts/{alertId}",
+        "definition": {
+          "entityName": "SOSAlert",
+          "schema": { "$ref": "#/backend/entities/SOSAlert" },
+          "description": "Logs SOS alerts triggered by users. A backend function would then process these alerts.",
+          "params": [
+            { "name": "alertId", "description": "The unique identifier of the SOS alert." }
           ]
         }
       }

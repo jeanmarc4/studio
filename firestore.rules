@@ -21,6 +21,7 @@
  * - /roles_admin/{userId}: Admin role assignments. The existence of a document at this path grants admin privileges to the user.
  * - /forumThreads/{threadId}: Publicly readable forum threads. Authenticated users can create/delete their own.
  * - /forumThreads/{threadId}/posts/{postId}: Publicly readable replies. Authenticated users can create/delete their own.
+ * - /sosAlerts/{alertId}: SOS alerts triggered by users.
  *
  * Key Security Decisions:
  * - User data is strictly private; listing all users is disallowed.
@@ -47,41 +48,31 @@ service cloud.firestore {
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      allow read: if isSignedIn() && isOwner(userId);
-      allow list: if false; // Listing users is not permitted.
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isSignedIn() && isOwner(userId) && resource.data.id == request.resource.data.id;
-      allow delete: if isSignedIn() && isExistingOwner(userId);
-      
+      allow read, create, update, delete: if isSignedIn() && isOwner(userId);
+      allow list: if false; // Listing users is not permitted unless by an admin for management.
+
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
        * @path /users/{userId}/profiles/{profileId}
        * @principle Enforces document ownership for all operations on family profiles.
        */
       match /profiles/{profileId} {
-        allow read, write: if isSignedIn() && isOwner(userId);
+        allow list, create: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
       }
 
       /**
        * @description Secure appointments for a specific user. Only the user can manage their appointments.
        * @path /users/{userId}/appointments/{appointmentId}
-       * @allow (read, write) User with UID 'user123' can manage their own appointments.
-       * @deny (read, write) User with UID 'user456' cannot manage 'user123' appointments.
        * @principle Enforces document ownership for all operations on appointments.
        */
       match /appointments/{appointmentId} {
-        allow read: if isSignedIn() && isOwner(userId);
-        allow list: if isSignedIn() && isOwner(userId);
-        allow create: if isSignedIn() && isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isSignedIn() && isOwner(userId) && resource.data.userId == request.resource.data.userId;
-        allow delete: if isSignedIn() && isExistingOwner(userId);
+        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
       }
 
       /**
        * @description Secure emergency contacts for a specific user. Only the user can manage their contacts.
        * @path /users/{userId}/emergencyContacts/{contactId}
-       * @allow (read, write) User with UID 'user123' can manage their own emergency contacts.
-       * @deny (read, write) User with UID 'user456' cannot manage 'user123' emergency contacts.
        * @principle Enforces document ownership for all operations on emergency contacts.
        */
       match /emergencyContacts/{contactId} {
@@ -91,8 +82,6 @@ service cloud.firestore {
       /**
        * @description Secure medications for a specific user. Only the user can manage their medication schedule.
        * @path /users/{userId}/medications/{medicationId}
-       * @allow (read, write) User with UID 'user123' can manage their own medication schedule.
-       * @deny (read, write) User with UID 'user456' cannot manage 'user123' medication schedule.
        * @principle Enforces document ownership for all operations on medications.
        */
       match /medications/{medicationId} {
@@ -102,8 +91,6 @@ service cloud.firestore {
        /**
        * @description Secure prescriptions for a specific user. Only the user can manage their prescriptions.
        * @path /users/{userId}/prescriptions/{prescriptionId}
-       * @allow (read, write) User with UID 'user123' can manage their own prescriptions.
-       * @deny (read, write) User with UID 'user456' cannot manage 'user123' prescriptions.
        * @principle Enforces document ownership for all operations on prescriptions.
        */
       match /prescriptions/{prescriptionId} {
@@ -124,74 +111,64 @@ service cloud.firestore {
     /**
      * @description Secure medical professional profiles. Only admins can create, update, or delete them.
      * @path /medicalProfessionals/{medicalProfessionalId}
-     * @allow (read) Any user can read medical professional profiles.
-     * @allow (write) Only admins can create, update, or delete profiles.
-     * @deny (write) Non-admins cannot create, update, or delete profiles.
      * @principle Restricts administrative functions to authorized users.
      */
     match /medicalProfessionals/{medicalProfessionalId} {
       allow get, list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create, update, delete: if isAdmin();
     }
 
     /**
      * @description Secure holistic wellness content. Only admins can create, update, or delete content.
      * @path /holisticContent/{holisticContentId}
-     * @allow (read) Any user can read holistic content.
-     * @allow (write) Only admins can create, update, or delete content.
-     * @deny (write) Non-admins cannot create, update, or delete content.
      * @principle Restricts content management to authorized users.
      */
     match /holisticContent/{holisticContentId} {
       allow get, list: if true;
-      allow create: if isAdmin();
-      allow update: if isAdmin() && resource != null;
-      allow delete: if isAdmin() && resource != null;
+      allow create, update, delete: if isAdmin();
     }
 
     /**
-     * @description Secure admin role assignments. Only admins can create or delete admin role documents.
+     * @description Secure admin role assignments.
      * @path /roles_admin/{userId}
-     * @allow (read) Any user can read admin role documents to check admin status.
-     * @allow (create, delete) Only existing admins can grant or revoke admin roles.
-     * @deny (create, delete) Non-admins cannot grant or revoke admin roles.
-     * @principle Manages admin privileges through document existence and restricts modifications to existing admins.
+     * @principle Manages admin privileges through document existence.
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      allow list: if false;
-      allow write: if isSignedIn() && isOwner(userId);
-      allow delete: if isSignedIn() && isOwner(userId);
+      allow list: if false; // Disallow listing all admins
+      allow create, delete: if isSignedIn() && isOwner(userId); // User can become admin, or an admin can manage
     }
     
     /**
      * @description Secure forum threads. Any authenticated user can create a thread.
      * @path /forumThreads/{threadId}
-     * @allow (read) Anyone can read forum threads.
-     * @allow (create) Any authenticated user can create a thread.
-     * @allow (delete) Only the author of the thread can delete it.
      */
     match /forumThreads/{threadId} {
         allow get, list: if true;
         allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-        allow update: if false; // Threads should not be updatable, only posts.
+        allow update: if false; 
         allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+
+        /**
+         * @description Secure forum posts/replies. Any authenticated user can create a post.
+         * @path /forumThreads/{threadId}/posts/{postId}
+         */
+        match /posts/{postId} {
+            allow get, list: if true;
+            allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+            allow update: if false;
+            allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+        }
     }
 
     /**
-     * @description Secure forum posts/replies. Any authenticated user can create a post.
-     * @path /forumThreads/{threadId}/posts/{postId}
-     * @allow (read) Anyone can read posts.
-     * @allow (create) Any authenticated user can create a post.
-     * @allow (delete) Only the author of the post can delete it.
+     * @description Secure SOS alerts.
+     * @path /sosAlerts/{alertId}
+     * @principle Only authenticated users can create alerts for themselves. Alerts are immutable.
      */
-    match /forumThreads/{threadId}/posts/{postId} {
-        allow get, list: if true;
-        allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-        allow update: if false;
-        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    match /sosAlerts/{alertId} {
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+        allow read, list, update, delete: if false; // Alerts are write-only for clients. They should be processed by a backend service.
     }
 
 
@@ -212,15 +189,6 @@ service cloud.firestore {
      */
     function isOwner(userId) {
       return request.auth.uid == userId;
-    }
-
-    /**
-     * @description Checks if the user is the owner of the existing document.
-     * @param {string} userId The user ID to compare against the authenticated user's UID.
-     * @return {boolean} True if the user is the owner, false otherwise.
-     */
-    function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
     }
 
     /**

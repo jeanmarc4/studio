@@ -128,7 +128,7 @@ export interface Appointment {
         };
         status: {
             type: "string";
-            description: "The status of the appointment (e.g., scheduled, completed, canceled).";
+            description: "The status of the appointment (e.g., scheduled, completed, canceled, archived).";
         };
     };
     required: ["id", "userId", "medicalProfessionalId", "dateTime", "status"];
@@ -367,173 +367,42 @@ export interface ForumPost {
     };
     required: ["id", "threadId", "content", "authorId", "authorName", "createdAt"];
 }
-export interface Auth {
-    providers: "password"[];
-}
-export interface Firestore {
-    structure: ({
-        path: "/users/{userId}";
-        definition: {
-            entityName: "User";
-            schema: {
-                $ref: "#/entities/User";
-            };
-            description: "Stores user profiles. Path-based ownership enforces that only the authenticated user can access their profile data.";
-            params: {
-                name: "userId";
-                description: "The unique identifier of the user.  Corresponds to the Firebase Auth UID.";
-            }[];
+export interface SOSAlert {
+    "$schema": "http://json-schema.org/draft-07/schema#";
+    title: "SOSAlert";
+    type: "object";
+    description: "Represents an SOS alert triggered by a user.";
+    properties: {
+        id: {
+            type: "string";
+            description: "Unique identifier for the SOS alert.";
         };
-    } | {
-        path: "/users/{userId}/appointments/{appointmentId}";
-        definition: {
-            entityName: "Appointment";
-            schema: {
-                $ref: "#/entities/Appointment";
-            };
-            description: "Stores appointments for a specific user. Path-based ownership ensures only the user can manage their appointments.";
-            params: ({
-                name: "userId";
-                description: "The unique identifier of the user.";
-            } | {
-                name: "appointmentId";
-                description: "The unique identifier of the appointment.";
-            })[];
+        userId: {
+            type: "string";
+            description: "The ID of the user who triggered the alert.";
         };
-    } | {
-        path: "/users/{userId}/emergencyContacts/{contactId}";
-        definition: {
-            entityName: "EmergencyContact";
-            schema: {
-                $ref: "#/entities/EmergencyContact";
-            };
-            description: "Stores emergency contacts for a specific user. Path-based ownership guarantees only the user can manage their contacts.";
-            params: ({
-                name: "userId";
-                description: "The unique identifier of the user.";
-            } | {
-                name: "contactId";
-                description: "The unique identifier of the emergency contact.";
-            })[];
+        createdAt: {
+            type: "string";
+            format: "date-time";
+            description: "The timestamp when the alert was triggered.";
         };
-    } | {
-        path: "/users/{userId}/medications/{medicationId}";
-        definition: {
-            entityName: "Medication";
-            schema: {
-                $ref: "#/entities/Medication";
+        contactsNotified: {
+            type: "array";
+            description: "A snapshot of the emergency contacts who were notified.";
+            items: {
+                type: "object";
+                properties: {
+                    name: {
+                        type: "string";
+                    };
+                    phone: {
+                        type: "string";
+                    };
+                };
             };
-            description: "Stores medications for a specific user. Path-based ownership ensures only the user can manage their medication schedule.";
-            params: ({
-                name: "userId";
-                description: "The unique identifier of the user.";
-            } | {
-                name: "medicationId";
-                description: "The unique identifier of the medication.";
-            })[];
         };
-    } | {
-        path: "/users/{userId}/prescriptions/{prescriptionId}";
-        definition: {
-            entityName: "Prescription";
-            schema: {
-                $ref: "#/entities/Prescription";
-            };
-            description: "Stores prescriptions for a specific user. Path-based ownership ensures only the user can manage their prescriptions.";
-            params: ({
-                name: "userId";
-                description: "The unique identifier of the user.";
-            } | {
-                name: "prescriptionId";
-                description: "The unique identifier of the prescription.";
-            })[];
-        };
-    } | {
-        path: "/users/{userId}/vaccines/{vaccineId}";
-        definition: {
-            entityName: "Vaccine";
-            schema: {
-                $ref: "#/entities/Vaccine";
-            };
-            description: "Stores vaccination records for a specific user. Path-based ownership ensures only the user can manage their vaccination booklet.";
-            params: ({
-                name: "userId";
-                description: "The unique identifier of the user.";
-            } | {
-                name: "vaccineId";
-                description: "The unique identifier of the vaccine record.";
-            })[];
-        };
-    } | {
-        path: "/medicalProfessionals/{medicalProfessionalId}";
-        definition: {
-            entityName: "MedicalProfessional";
-            schema: {
-                $ref: "#/entities/MedicalProfessional";
-            };
-            description: "Stores profiles of medical professionals.  Admin roles control creation/modification.";
-            params: {
-                name: "medicalProfessionalId";
-                description: "The unique identifier of the medical professional.";
-            }[];
-        };
-    } | {
-        path: "/holisticContent/{holisticContentId}";
-        definition: {
-            entityName: "HolisticContent";
-            schema: {
-                $ref: "#/entities/HolisticContent";
-            };
-            description: "Stores holistic wellness content. Admin roles control creation/modification.";
-            params: {
-                name: "holisticContentId";
-                description: "The unique identifier of the holistic content.";
-            }[];
-        };
-    } | {
-        path: "/roles_admin/{userId}";
-        definition: {
-            entityName: "Admin";
-            schema: {
-                $ref: "#/entities/Admin";
-            };
-            description: "Marks a user as an admin.  The *existence* of a document at this path grants admin privileges.";
-            params: {
-                name: "userId";
-                description: "The unique identifier of the user who is an admin.";
-            }[];
-        };
-    } | {
-        path: "/forumThreads/{threadId}";
-        definition: {
-            entityName: "ForumThread";
-            schema: {
-                $ref: "#/entities/ForumThread";
-            };
-            description: "Stores wellness forum discussion threads. Publicly readable, but only authenticated users can create.";
-            params: {
-                name: "threadId";
-                description: "The unique identifier of the forum thread.";
-            }[];
-        };
-    } | {
-        path: "/forumThreads/{threadId}/posts/{postId}";
-        definition: {
-            entityName: "ForumPost";
-            schema: {
-                $ref: "#/entities/ForumPost";
-            };
-            description: "Stores replies within a specific forum thread. Publicly readable, but only authenticated users can post replies.";
-            params: ({
-                name: "threadId";
-                description: "The unique identifier of the parent forum thread.";
-            } | {
-                name: "postId";
-                description: "The unique identifier of the post/reply.";
-            })[];
-        };
-    })[];
-    reasoning: "This Firestore structure is designed to support the SanteConnect application, emphasizing secure access control, scalability, and maintainability. It leverages path-based ownership and denormalization to ensure Authorization Independence. The structure facilitates simple, robust, and easily debuggable security rules by adhering to the principles outlined in the prompt.\n\n**Authorization Independence and QAPs:**\n\n*   **Users Collection (`/users/{userId}`):**  User data is stored in a dedicated collection, enabling straightforward read/write rules based on `request.auth.uid`. The `userId` parameter in the path directly corresponds to the authenticated user's ID, providing clear ownership.\n*   **Appointments Subcollection (`/users/{userId}/appointments/{appointmentId}`):** Appointments are stored as a subcollection of users. This structure enforces that only the user can access their appointments.  This eliminates the need for complex `get()` calls in security rules.\n*   **Emergency Contacts Subcollection (`/users/{userId}/emergencyContacts/{contactId}`):** Storing emergency contacts as subcollections of users makes ownership explicit and ensures that only the user can manage their contacts.\n*   **Medical Professionals Collection (`/medicalProfessionals/{medicalProfessionalId}`):** Medical professionals are stored in a top-level collection, allowing easy listing and querying.  Security rules can control who can create/modify medical professional data (e.g., only admins).\n*   **Holistic Content Collection (`/holisticContent/{holisticContentId}`):** Holistic content is stored in a top-level collection, enabling listing and querying.  Security rules can control who can create/modify content (e.g., only admins).\n*   **Admin Roles Collection (`/roles_admin/{userId}`):** Administrative privileges are managed through the existence of documents in this collection. This 'existence over content' approach simplifies security rules for admin-only operations. The absence of custom claims reduces complexity and improves security.\n*   **Forum Collections:** The `/forumThreads` collection is top-level to allow all users to browse discussions. Replies are in a subcollection (`/posts/{postId}`) to keep threads organized. Security rules will allow any authenticated user to create content, but only the original author to delete it, promoting community interaction.";
+    };
+    required: ["id", "userId", "createdAt", "contactsNotified"];
 }
 export interface Backend {
     entities: {
@@ -549,9 +418,8 @@ export interface Backend {
         ForumThread: ForumThread;
         ForumPost: ForumPost;
         Vaccine: Vaccine;
+        SOSAlert: SOSAlert;
     };
     auth: Auth;
     firestore: Firestore;
 }
-
-    
