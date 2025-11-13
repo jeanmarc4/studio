@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { FileText, Pill, Calendar, Heart, ArrowRight } from 'lucide-react';
+import { FileText, Pill, Calendar, Heart, ArrowRight, Shield } from 'lucide-react';
 
 const quickLinks = [
   {
@@ -18,9 +18,9 @@ const quickLinks = [
     icon: Pill,
   },
   {
-    title: 'Mon Espace Santé',
-    href: '/my-appointments',
-    icon: Calendar,
+    title: 'Consulter mes Vaccins',
+    href: '/vaccinations',
+    icon: Shield,
   },
   {
     title: 'Explorer le Bien-être',

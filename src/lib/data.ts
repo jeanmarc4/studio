@@ -105,6 +105,10 @@ export const mainNav: NavItem[] = [
     href: "/medications",
   },
   {
+    title: "Mes Vaccins",
+    href: "/vaccinations",
+  },
+  {
     title: "Bien-être",
     href: "/wellness",
   },

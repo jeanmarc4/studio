@@ -367,6 +367,41 @@ export interface ForumPost {
     };
     required: ["id", "threadId", "content", "authorId", "authorName", "createdAt"];
 }
+export interface Vaccine {
+    "$schema": "http://json-schema.org/draft-07/schema#";
+    title: "Vaccine";
+    type: "object";
+    description: "Represents a vaccine record in the user's vaccination booklet.";
+    properties: {
+        id: {
+            type: "string";
+            description: "Unique identifier for the vaccine record.";
+        };
+        userId: {
+            type: "string";
+            description: "Reference to User. (Relationship: User 1:N Vaccine)";
+        };
+        name: {
+            type: "string";
+            description: "The name of the vaccine (e.g., 'Tétanos, Diphtérie, Poliomyélite').";
+        };
+        date: {
+            type: "string";
+            format: "date-time";
+            description: "The date the vaccine was administered.";
+        };
+        lotNumber: {
+            type: "string";
+            description: "The lot number of the vaccine administered.";
+        };
+        nextBooster: {
+            type: "string";
+            format: "date-time";
+            description: "The date for the next scheduled booster shot.";
+        };
+    };
+    required: ["id", "userId", "name", "date"];
+}
 export interface Auth {
     providers: "password"[];
 }
@@ -446,6 +481,22 @@ export interface Firestore {
             } | {
                 name: "prescriptionId";
                 description: "The unique identifier of the prescription.";
+            })[];
+        };
+    } | {
+        path: "/users/{userId}/vaccines/{vaccineId}";
+        definition: {
+            entityName: "Vaccine";
+            schema: {
+                $ref: "#/entities/Vaccine";
+            };
+            description: "Stores vaccination records for a specific user. Path-based ownership ensures only the user can manage their vaccination booklet.";
+            params: ({
+                name: "userId";
+                description: "The unique identifier of the user.";
+            } | {
+                name: "vaccineId";
+                description: "The unique identifier of the vaccine record.";
             })[];
         };
     } | {
@@ -532,7 +583,10 @@ export interface Backend {
         Prescription: Prescription;
         ForumThread: ForumThread;
         ForumPost: ForumPost;
+        Vaccine: Vaccine;
     };
     auth: Auth;
     firestore: Firestore;
 }
+
+    
