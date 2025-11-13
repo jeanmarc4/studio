@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc, getDoc, DocumentReference } from 'firebase/firestore';
+import { collection, doc, getDoc, DocumentReference, query, where } from 'firebase/firestore';
 import type { Appointment, MedicalProfessional } from '@/docs/backend-documentation';
 import { AppointmentCard } from './components/appointment-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +15,7 @@ import { MyDoctorsList } from './components/my-doctors-list';
 import { AddDoctorDialog } from './components/add-doctor-dialog';
 import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { v4 as uuidv4 } from 'uuid';
+import { useProfile } from '@/hooks/use-profile';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
@@ -23,6 +24,7 @@ type AppointmentWithProfessional = Appointment & {
 
 export default function MyAppointmentsPage() {
   const { user, isUserLoading, firestore } = useFirebase();
+  const { activeProfile } = useProfile();
   const router = useRouter();
 
   // State to hold combined appointment data
@@ -39,7 +41,7 @@ export default function MyAppointmentsPage() {
   }, [user, isUserLoading, router]);
   
   const handleAddDoctor = (values: { name: string; specialty: string; address?: string; phone?: string; }) => {
-    if (!firestore || !user) return;
+    if (!firestore || !user || !activeProfile) return;
 
     // 1. Create the new medical professional
     const newProfessional: MedicalProfessional = {
@@ -55,6 +57,7 @@ export default function MyAppointmentsPage() {
     const appointmentRef = collection(firestore, 'users', user.uid, 'appointments');
     const dummyAppointment = {
       userId: user.uid,
+      profileId: activeProfile.id,
       medicalProfessionalId: newProfessional.id,
       dateTime: new Date().toISOString(),
       reason: 'Ajout initial du médecin par le patient',
@@ -65,9 +68,12 @@ export default function MyAppointmentsPage() {
 
   // Memoize the query to fetch user's appointments
   const appointmentsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'appointments');
-  }, [firestore, user]);
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+        collection(firestore, 'users', user.uid, 'appointments'),
+        where('profileId', '==', activeProfile.id)
+    );
+  }, [firestore, user, activeProfile]);
 
   // Fetch the appointments collection
   const { data: appointments, isLoading: areAppointmentsLoading } = useCollection<Appointment>(appointmentsQuery);
@@ -75,7 +81,6 @@ export default function MyAppointmentsPage() {
   // Effect to fetch professional details for each appointment
   useEffect(() => {
     if (!appointments || !firestore) {
-      // If there are no appointments or firestore is not ready, we might be done loading.
       if (!areAppointmentsLoading) {
         setIsDataLoading(false);
         setAppointmentsWithProf([]);
@@ -89,7 +94,7 @@ export default function MyAppointmentsPage() {
         // We filter out archived appointments from the main display list
         appointments.filter(apt => apt.status !== 'archived').map(async (apt) => {
           if (!apt.medicalProfessionalId) {
-            return apt; // Return appointment as is if no professional ID
+            return apt; 
           }
           const profRef = doc(firestore, 'medicalProfessionals', apt.medicalProfessionalId) as DocumentReference<MedicalProfessional>;
           try {
@@ -100,10 +105,9 @@ export default function MyAppointmentsPage() {
           } catch (error) {
             console.error(`Failed to fetch professional ${apt.medicalProfessionalId}:`, error);
           }
-          return apt; // Return original appointment if fetch fails or doc doesn't exist
+          return apt; 
         })
       );
-      // Sort appointments by date, most recent first
       enrichedAppointments.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
       setAppointmentsWithProf(enrichedAppointments);
       setIsDataLoading(false);
@@ -113,7 +117,7 @@ export default function MyAppointmentsPage() {
   }, [appointments, firestore, areAppointmentsLoading]);
 
 
-  if (isUserLoading || !user) {
+  if (isUserLoading || !user || !activeProfile) {
     return (
        <div className="container mx-auto px-4 py-8">
          <Skeleton className="h-12 w-full sm:w-1/3 mb-8" />
@@ -136,7 +140,7 @@ export default function MyAppointmentsPage() {
         <div className="container mx-auto px-4 py-8">
         <header className="mb-8 text-center sm:text-left">
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-            Mon Espace Santé
+              Espace Santé de {activeProfile.name}
             </h1>
             <p className="mt-2 text-lg text-muted-foreground font-body">
             Consultez vos rendez-vous et la liste de vos professionnels de santé.

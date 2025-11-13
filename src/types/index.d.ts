@@ -47,6 +47,3 @@ export type ForumPost = ForumPostSchema & { id:string };
 export type Vaccine = Omit<VaccineSchema, 'userId'> & { id: string, profileId: string };
 
 export type EmergencyContact = EmergencyContactSchema;
-    
-
-    

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 import type { Vaccine } from '@/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Shield } from 'lucide-react';
@@ -13,9 +13,11 @@ import { AddVaccineDialog } from './components/add-vaccine-dialog';
 import { VaccineCard } from './components/vaccine-card';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useProfile } from '@/hooks/use-profile';
 
 export default function VaccinationsPage() {
   const { user, isUserLoading, firestore } = useFirebase();
+  const { activeProfile } = useProfile();
   const router = useRouter();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -26,16 +28,21 @@ export default function VaccinationsPage() {
   }, [isUserLoading, user, router]);
 
   const vaccinesQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'users', user.uid, 'vaccines'), orderBy('date', 'desc'));
-  }, [firestore, user]);
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+      collection(firestore, 'users', user.uid, 'vaccines'),
+      where('profileId', '==', activeProfile.id),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, user, activeProfile]);
 
   const { data: vaccines, isLoading: areVaccinesLoading } = useCollection<Vaccine>(vaccinesQuery);
 
-  const handleAddVaccine = (values: Omit<Vaccine, 'id' | 'userId'>) => {
-    if (!user || !firestore) return;
+  const handleAddVaccine = (values: Omit<Vaccine, 'id' | 'userId' | 'profileId'>) => {
+    if (!user || !firestore || !activeProfile) return;
     const newVaccine = {
       userId: user.uid,
+      profileId: activeProfile.id,
       ...values,
       date: values.date.toISOString(),
       nextBooster: values.nextBooster?.toISOString() || null,
@@ -46,7 +53,7 @@ export default function VaccinationsPage() {
 
   const isLoading = isUserLoading || areVaccinesLoading;
 
-  if (isLoading || !user) {
+  if (isLoading || !user || !activeProfile) {
     return (
       <div className="container mx-auto px-4 py-8">
         <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -70,7 +77,7 @@ export default function VaccinationsPage() {
         <header className="mb-8 text-center sm:text-left">
           <div>
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-              Mon Carnet de Vaccination
+              Carnet de Vaccination de {activeProfile.name}
             </h1>
             <p className="mt-2 text-lg text-muted-foreground font-body">
               Suivez vos vaccins et ne manquez jamais un rappel.
@@ -122,5 +129,3 @@ export default function VaccinationsPage() {
     </>
   );
 }
-
-    

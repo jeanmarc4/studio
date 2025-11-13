@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, query, where } from 'firebase/firestore';
 import type { Prescription } from '@/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, FileText } from 'lucide-react';
@@ -12,11 +12,15 @@ import { UploadPrescriptionDialog } from './components/upload-prescription-dialo
 import { PrescriptionCard } from './components/prescription-card';
 import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { extractMedicationsFromPrescription, ExtractedMedication } from '@/ai/flows/extract-medications-flow';
+import { useProfile } from '@/hooks/use-profile';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PrescriptionsPage() {
   const { user, isUserLoading, firestore } = useFirebase();
+  const { activeProfile } = useProfile();
   const router = useRouter();
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   // Redirect if user is not logged in
   useEffect(() => {
@@ -26,17 +30,21 @@ export default function PrescriptionsPage() {
   }, [isUserLoading, user, router]);
 
   const prescriptionsQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'prescriptions');
-  }, [firestore, user]);
+    if (!firestore || !user || !activeProfile) return null;
+    return query(
+      collection(firestore, 'users', user.uid, 'prescriptions'),
+      where('profileId', '==', activeProfile.id)
+    );
+  }, [firestore, user, activeProfile]);
 
   const { data: prescriptions, isLoading: arePrescriptionsLoading } = useCollection<Prescription>(prescriptionsQuery);
   const isLoading = isUserLoading || arePrescriptionsLoading;
 
   const handleAddPrescription = (values: { doctorName: string; issueDate: Date; imageUrl: string; }) => {
-    if (!user || !firestore) return;
+    if (!user || !firestore || !activeProfile) return;
     const newPrescription = {
       userId: user.uid,
+      profileId: activeProfile.id,
       ...values,
       issueDate: values.issueDate.toISOString(),
       status: 'new' as const,
@@ -64,26 +72,29 @@ export default function PrescriptionsPage() {
   };
 
   const handleAddMedicationToTreatment = (medication: ExtractedMedication) => {
-    if (!user || !firestore) return;
+    if (!user || !firestore || !activeProfile) return;
     const medicationsRef = collection(firestore, 'users', user.uid, 'medications');
     const newMed = {
       userId: user.uid,
+      profileId: activeProfile.id,
       name: medication.name,
       dosage: medication.dosage,
-      quantity: medication.quantity || 1, // Default to 1 if not present
-      // Map string times like 'matin', 'soir' to HH:mm, or keep as is if format is different
+      quantity: medication.quantity || 1,
       intakeTimes: medication.intakeTimes.map(time => {
           if (time.toLowerCase() === 'matin') return '08:00';
           if (time.toLowerCase() === 'midi') return '12:00';
           if (time.toLowerCase() === 'soir') return '20:00';
-          // If it's already a time format or something else, keep it. Validation on the medication form is stricter.
           return time;
       })
     };
     addDocumentNonBlocking(medicationsRef, newMed);
+    toast({
+      title: "Médicament ajouté",
+      description: `${medication.name} a été ajouté au traitement de ${activeProfile.name}.`,
+    });
   };
 
-  if (isLoading || !user) {
+  if (isLoading || !user || !activeProfile) {
     return (
          <div className="container mx-auto px-4 py-8">
             <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -108,7 +119,7 @@ export default function PrescriptionsPage() {
         <header className="mb-8 text-center sm:text-left">
           <div>
             <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">
-              Mes Ordonnances
+              Ordonnances de {activeProfile.name}
             </h1>
             <p className="mt-2 text-lg text-muted-foreground font-body">
               Gérez vos ordonnances et ajoutez vos médicaments facilement.
@@ -157,5 +168,3 @@ export default function PrescriptionsPage() {
     </>
   );
 }
-
-    

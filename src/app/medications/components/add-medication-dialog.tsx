@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useProfile } from '@/hooks/use-profile';
 
 const medicationSchema = z.object({
   name: z.string().min(2, 'Le nom doit comporter au moins 2 caractères.'),
@@ -43,6 +44,7 @@ interface AddMedicationDialogProps {
 
 export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialogProps) {
   const { user, firestore } = useFirebase();
+  const { activeProfile } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
@@ -74,14 +76,15 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
   }
 
   const onSubmit = async (values: z.infer<typeof medicationSchema>) => {
-    if (!user || !firestore) {
-      toast({ variant: 'destructive', title: 'Erreur', description: 'Vous devez être connecté.' });
+    if (!user || !firestore || !activeProfile) {
+      toast({ variant: 'destructive', title: 'Erreur', description: 'Vous devez être connecté et un profil doit être actif.' });
       return;
     }
     setIsLoading(true);
 
     const newMedication = {
       userId: user.uid,
+      profileId: activeProfile.id,
       ...values,
     };
     
@@ -90,7 +93,7 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
 
     toast({
       title: 'Médicament ajouté',
-      description: `${values.name} a été ajouté à votre traitement.`,
+      description: `${values.name} a été ajouté au traitement de ${activeProfile.name}.`,
     });
     
     setIsLoading(false);
@@ -103,7 +106,7 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
         <DialogHeader>
           <DialogTitle>Ajouter un médicament</DialogTitle>
           <DialogDescription>
-            Remplissez les détails de votre nouveau médicament.
+            Remplissez les détails du nouveau médicament pour <span className="font-bold">{activeProfile?.name}</span>.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
