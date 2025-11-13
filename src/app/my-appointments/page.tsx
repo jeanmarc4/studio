@@ -17,7 +17,7 @@ import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-b
 import { v4 as uuidv4 } from 'uuid';
 import { useProfile } from '@/hooks/use-profile';
 import { AddAppointmentDialog } from './components/add-appointment-dialog';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
