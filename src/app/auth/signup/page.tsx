@@ -55,6 +55,7 @@ export default function SignupPage() {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
+        phone: "",
         role: "Gratuit",
       };
 

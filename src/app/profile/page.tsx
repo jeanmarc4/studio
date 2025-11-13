@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from '@/docs/backend-documentation';
-import { Mail, Shield, Save, Loader2 } from 'lucide-react';
+import { Mail, Shield, Save, Loader2, Phone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { EmergencyContacts } from './components/emergency-contacts';
 import { useForm } from 'react-hook-form';
@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 const profileSchema = z.object({
   firstName: z.string().min(2, "Le prénom est requis."),
   lastName: z.string().min(2, "Le nom de famille est requis."),
+  phone: z.string().optional(),
   role: z.enum(["Gratuit", "Standard", "Premium", "Admin"]),
 });
 
@@ -53,6 +54,7 @@ export default function ProfilePage() {
     defaultValues: {
       firstName: '',
       lastName: '',
+      phone: '',
       role: 'Gratuit',
     }
   });
@@ -62,6 +64,7 @@ export default function ProfilePage() {
       form.reset({
         firstName: userProfile.firstName,
         lastName: userProfile.lastName,
+        phone: userProfile.phone || '',
         role: userProfile.role,
       });
     }
@@ -162,12 +165,30 @@ export default function ProfilePage() {
                   )}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Adresse e-mail</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="email">Adresse e-mail</Label>
+                    <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="email" type="email" value={userProfile.email} disabled className="pl-10" />
+                    </div>
                 </div>
+                 <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Téléphone</FormLabel>
+                       <div className="relative">
+                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                         <FormControl>
+                            <Input type="tel" placeholder="Non défini" {...field} className="pl-10"/>
+                         </FormControl>
+                       </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
                <FormField
                   control={form.control}

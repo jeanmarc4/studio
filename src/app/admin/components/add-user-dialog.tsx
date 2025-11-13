@@ -42,7 +42,7 @@ const userSchema = z.object({
   role: z.enum(["Admin", "Gratuit", "Standard", "Premium"]),
 });
 
-type NewUser = Omit<User, "id" | 'phone'> & { id: string };
+type NewUser = Omit<User, "id"> & { id: string };
 
 interface AddUserDialogProps {
   isOpen: boolean;
@@ -72,7 +72,7 @@ export function AddUserDialog({ isOpen, onOpenChange, onUserAdd }: AddUserDialog
     // Pour cet exemple, nous allons générer un ID aléatoire car nous ne créons pas
     // un utilisateur d'authentification réel qui nous fournirait un UID.
     // L'utilisateur devra s'inscrire séparément pour créer un compte d'authentification.
-    const newUser: NewUser = { ...values, id: uuidv4() };
+    const newUser: NewUser = { ...values, id: uuidv4(), phone: '' };
     
     onUserAdd(newUser);
     
