@@ -22,7 +22,7 @@ type EnrichedProfessional = MedicalProfessional & {
 };
 
 export function MyDoctorsList() {
-  const { user, firestore } = useFirebase();
+  const { user, firestore, isUserLoading } = useFirebase();
   const router = useRouter();
   const [doctors, setDoctors] = useState<EnrichedProfessional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,14 +35,19 @@ export function MyDoctorsList() {
   const { data: appointments, isLoading: areAppointmentsLoading } = useCollection<Appointment>(appointmentsQuery);
 
   useEffect(() => {
-    if (areAppointmentsLoading || !firestore) return;
+    const isDataReady = !isUserLoading && !areAppointmentsLoading && firestore;
+    if (!isDataReady) return;
+    
     if (!appointments) {
+        setDoctors([]);
         setIsLoading(false);
         return;
     }
 
     const fetchDoctors = async () => {
-      const professionalIds = [...new Set(appointments.map(apt => apt.medicalProfessionalId))];
+      // Filter out dummy/archived appointments before processing
+      const realAppointments = appointments.filter(apt => apt.status !== 'archived');
+      const professionalIds = [...new Set(realAppointments.map(apt => apt.medicalProfessionalId))];
       
       const uniqueDoctors: EnrichedProfessional[] = [];
       const fetchedIds = new Set();
@@ -57,8 +62,8 @@ export function MyDoctorsList() {
           const professional = profSnap.data();
           const staticData = staticDoctorImages.find(d => d.id === professional.id);
 
-          // Find the next upcoming appointment for this doctor
-          const nextAppointment = appointments
+          // Find the next upcoming appointment for this doctor from the real appointments
+          const nextAppointment = realAppointments
             .filter(apt => apt.medicalProfessionalId === id && new Date(apt.dateTime) > new Date() && apt.status === 'scheduled')
             .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())[0];
 
@@ -77,27 +82,24 @@ export function MyDoctorsList() {
     };
 
     fetchDoctors();
-  }, [appointments, areAppointmentsLoading, firestore]);
+  }, [appointments, areAppointmentsLoading, isUserLoading, firestore]);
 
   const handleBookAppointmentClick = () => {
-    router.push('/directory');
+    // This could eventually link to a specific doctor's booking page
+    // For now, it's a general action.
   }
 
   if (isLoading) {
     return (
-      <div>
-        <h2 className="text-2xl font-bold font-headline mb-4">Mes Médecins</h2>
         <div className="space-y-4">
             <Skeleton className="h-48 w-full" />
             <Skeleton className="h-48 w-full" />
         </div>
-      </div>
     );
   }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold font-headline mb-4 text-gray-800 dark:text-gray-200">Mes Médecins</h2>
+    <>
       {doctors.length > 0 ? (
         <div className="space-y-4">
           {doctors.map(doctor => (
@@ -139,7 +141,7 @@ export function MyDoctorsList() {
                     </div>
                   )}
                 </div>
-                 <Button onClick={handleBookAppointmentClick} className="w-full mt-4 sm:w-auto sm:mt-0 self-center sm:self-end">
+                 <Button onClick={handleBookAppointmentClick} className="w-full mt-4 sm:w-auto sm:mt-0 self-center sm:self-end" disabled>
                     Prendre RDV
                 </Button>
               </CardContent>
@@ -150,12 +152,9 @@ export function MyDoctorsList() {
         <div className="text-center py-12 border-2 border-dashed rounded-lg">
             <Stethoscope className="mx-auto h-12 w-12 text-muted-foreground" />
             <h3 className="mt-4 text-lg font-medium text-muted-foreground">Aucun médecin trouvé</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Prenez votre premier rendez-vous pour ajouter un médecin.</p>
-            <Button className="mt-6" onClick={handleBookAppointmentClick}>
-                Trouver un médecin
-            </Button>
+            <p className="mt-2 text-sm text-muted-foreground">Commencez par ajouter un médecin à votre liste.</p>
         </div>
       )}
-    </div>
+    </>
   );
 }
