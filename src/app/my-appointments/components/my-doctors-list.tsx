@@ -140,9 +140,6 @@ export function MyDoctorsList() {
                     </div>
                   )}
                 </div>
-                 <Button onClick={handleBookAppointmentClick} className="w-full mt-4 sm:w-auto sm:mt-0 self-center sm:self-end" disabled>
-                    Prendre RDV
-                </Button>
               </CardContent>
             </Card>
           ))}

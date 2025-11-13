@@ -17,6 +17,7 @@ import { addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-b
 import { v4 as uuidv4 } from 'uuid';
 import { useProfile } from '@/hooks/use-profile';
 import { AddAppointmentDialog } from './components/add-appointment-dialog';
+import { Card } from '@/components/ui/card';
 
 // Define a type for the combined appointment and professional data
 type AppointmentWithProfessional = Appointment & {
@@ -206,8 +207,19 @@ export default function MyAppointmentsPage() {
                             Ajouter
                         </Button>
                     </div>
-                    <div className="sticky top-24">
+                    <div className="sticky top-24 space-y-4">
                         <MyDoctorsList />
+                        <Card>
+                            <CardContent className="p-4">
+                                <h3 className="font-semibold text-center mb-2">RDV Imprévu ?</h3>
+                                <p className="text-sm text-muted-foreground text-center mb-4">
+                                    Ajoutez un médecin qui n'est pas dans votre liste.
+                                </p>
+                                <Button className="w-full" onClick={() => setIsAddDoctorDialogOpen(true)}>
+                                    Ajouter un médecin
+                                </Button>
+                            </CardContent>
+                        </Card>
                     </div>
                 </aside>
             </div>
