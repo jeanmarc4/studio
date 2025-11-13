@@ -18,7 +18,7 @@ const gratuitFeatures = [
 const standardFeatures = [
     "Toutes les fonctionnalités du plan Gratuit",
     "Rappels automatiques par notification",
-    "Vérificateur de symptômes IA (limité)",
+    "Historique complet des prises",
     "Support par email"
 ];
 
@@ -27,7 +27,8 @@ const premiumFeatures = [
     "Analyse d'ordonnances par l'IA",
     "Rappels vocaux intelligents par l'IA",
     "Soutien moral IA illimité",
-    "Support prioritaire",
+    "Vérificateur de symptômes IA illimité",
+    "Explication des médicaments par l'IA",
 ];
 
 const howItWorksSteps = [
@@ -38,12 +39,12 @@ const howItWorksSteps = [
     },
     {
         icon: Bell,
-        title: "2. Recevez des rappels (Standard)",
+        title: "2. Mettez votre santé en pilote automatique",
         description: "Bénéficiez de rappels automatiques par notification pour ne jamais manquer une prise de médicament ou un rendez-vous important."
     },
     {
         icon: Sparkles,
-        title: "3. Libérez la puissance de l'IA (Premium)",
+        title: "3. Libérez la puissance de l'IA",
         description: "Utilisez nos assistants IA pour analyser vos symptômes, lire vos ordonnances et obtenir des rappels vocaux intelligents."
     }
 ];
@@ -145,8 +146,8 @@ export function GuestHomepage() {
             <Card className="flex flex-col h-full">
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl">Standard</CardTitle>
-                    <CardDescription>Pour une tranquillité d'esprit avec des rappels automatisés.</CardDescription>
-                    <p className="text-4xl font-bold pt-2">9,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
+                    <CardDescription>La tranquillité d'esprit avec des rappels automatisés.</CardDescription>
+                    <p className="text-4xl font-bold pt-2">4,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
                     <p className="font-semibold">Fonctionnalités incluses :</p>
@@ -166,16 +167,16 @@ export function GuestHomepage() {
 
             {/* Premium Plan */}
             <Card className="flex flex-col h-full border-2 border-primary relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">LE PLUS COMPLET</div>
+                <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold py-1 px-3 rounded-bl-lg">ASSISTANT IA</div>
                 <CardHeader>
                     <CardTitle className="font-headline text-2xl text-primary">Premium</CardTitle>
                     <CardDescription>L'assistance complète de l'IA pour une santé proactive.</CardDescription>
                     <p className="text-4xl font-bold pt-2">19,99 € <span className="text-lg font-normal text-muted-foreground">/ mois</span></p>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-3">
-                    <p className="font-semibold">Fonctionnalités incluses :</p>
+                    <p className="font-semibold">Toutes les fonctionnalités Standard, plus :</p>
                     <ul className="space-y-2">
-                       {premiumFeatures.map(feat => (
+                       {premiumFeatures.slice(1).map(feat => ( // Slice to exclude the "All of standard" line
                         <li key={feat} className="flex items-start gap-2">
                             <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                             <span>{feat}</span>
