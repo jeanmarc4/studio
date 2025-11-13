@@ -50,7 +50,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, update, delete: if isSignedIn() && isOwner(userId);
       allow create: if isSignedIn() && isOwner(userId);
-      allow list: if false; // Listing users is not permitted unless by an admin for management.
+      allow list: if isAdmin(); // Only admins can list users.
 
       /**
        * @description Secure family profiles. Only the parent user can manage their family profiles.
@@ -59,7 +59,7 @@ service cloud.firestore {
        */
       match /profiles/{profileId} {
         allow list, create: if isSignedIn() && isOwner(userId);
-        allow get, update, delete: if isSignedIn() && isOwner(userId) && resource.data.userId == userId;
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -68,7 +68,8 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on appointments.
        */
       match /appointments/{appointmentId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow list, create: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -77,7 +78,8 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on emergency contacts.
        */
       match /emergencyContacts/{contactId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow list, create: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
       }
 
       /**
@@ -86,7 +88,8 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on medications.
        */
       match /medications/{medicationId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow list, create: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
       }
 
        /**
@@ -95,7 +98,8 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on prescriptions.
        */
       match /prescriptions/{prescriptionId} {
-        allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+        allow list, create: if isSignedIn() && isOwner(userId);
+        allow get, update, delete: if isSignedIn() && isOwner(userId);
       }
       
       /**
@@ -104,7 +108,8 @@ service cloud.firestore {
        * @principle Enforces document ownership for all operations on vaccine records.
        */
       match /vaccines/{vaccineId} {
-          allow read, list, create, update, delete: if isSignedIn() && isOwner(userId);
+          allow list, create: if isSignedIn() && isOwner(userId);
+          allow get, update, delete: if isSignedIn() && isOwner(userId);
       }
     }
 
@@ -136,9 +141,9 @@ service cloud.firestore {
      */
     match /roles_admin/{userId} {
       allow get: if true;
-      allow list: if false; // Disallow listing all admins
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update, delete: if isSignedIn() && isOwner(userId);
+      allow list: if false; // Disallow listing all admins for security
+      allow create: if isSignedIn() && isOwner(userId); // Allow first-time admin self-promotion
+      allow update, delete: if isAdmin(); // Only existing admins can manage other admins
     }
     
     /**
