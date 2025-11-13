@@ -22,6 +22,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import type { User } from '@/docs/backend-documentation';
+import { useDoc, useMemoFirebase } from '@/firebase/firestore/use-doc';
 
 interface MedicationCardProps {
   medication: Medication;
@@ -31,8 +33,16 @@ export function MedicationCard({ medication }: MedicationCardProps) {
   const { user, firestore } = useFirebase();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isVocalizing, setIsVocalizing] = useState(false);
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile } = useDoc<User>(userProfileRef);
+  const isPremiumOrAdmin = userProfile?.role === 'Premium' || userProfile?.role === 'Admin';
+
 
   const handleDelete = () => {
     if (!user || !firestore) return;
@@ -43,7 +53,7 @@ export function MedicationCard({ medication }: MedicationCardProps) {
       title: 'Médicament supprimé',
       description: `${medication.name} a été retiré de votre traitement.`,
     });
-    setIsDeleting(false);
+    // setIsDeleting is not set to false to let the component unmount naturally
   };
 
   const handleStandardReminder = () => {
@@ -54,15 +64,28 @@ export function MedicationCard({ medication }: MedicationCardProps) {
   }
 
   const handlePremiumReminder = async () => {
-    setIsPlaying(true);
-    // Simulate AI voice generation
+    if (!isPremiumOrAdmin) {
+        toast({
+            variant: "destructive",
+            title: "Fonctionnalité Premium",
+            description: "Passez à Premium pour utiliser les rappels vocaux IA."
+        })
+        return;
+    }
+    setIsVocalizing(true);
+    // Here you would call your AI TTS flow
+    // const response = await getVocalReminder({ medicationName: medication.name, dosage: medication.dosage });
+    // const audio = new Audio(response.audioUrl);
+    // audio.play();
+    
+    // Simulating AI voice generation
     await new Promise(resolve => setTimeout(resolve, 1500));
-    // This would be replaced with a real call to a TTS service
+    
     toast({
         title: `Rappel vocal pour ${medication.name}`,
-        description: `L'assistant IA joue le rappel vocal.`,
+        description: `L'assistant IA joue le rappel : "Il est temps de prendre ${medication.dosage} de ${medication.name}"`,
     })
-    setIsPlaying(false);
+    setIsVocalizing(false);
   }
 
   return (
@@ -81,8 +104,8 @@ export function MedicationCard({ medication }: MedicationCardProps) {
           <Clock className="mr-2 h-4 w-4" />
           <span>Prises à : {medication.intakeTimes.join(', ')}</span>
         </div>
-        {medication.quantity && (
-            <div className="flex items-center text-sm text-muted-foreground">
+        {medication.quantity != null && (
+            <div className={`flex items-center text-sm ${medication.quantity < 10 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
                 <AlertCircle className="mr-2 h-4 w-4" />
                 <span>Quantité restante : {medication.quantity}</span>
             </div>
@@ -93,8 +116,8 @@ export function MedicationCard({ medication }: MedicationCardProps) {
             <Button size="sm" variant="outline" onClick={handleStandardReminder}>
                 <Bell className="mr-2 h-4 w-4" /> Test Standard
             </Button>
-            <Button size="sm" variant="outline" onClick={handlePremiumReminder} disabled={isPlaying}>
-                {isPlaying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="mr-2 h-4 w-4" />}
+            <Button size="sm" variant={isPremiumOrAdmin ? "default" : "outline"} onClick={handlePremiumReminder} disabled={isVocalizing}>
+                {isVocalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="mr-2 h-4 w-4" />}
                 Test Premium
             </Button>
         </div>

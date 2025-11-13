@@ -45,28 +45,32 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
   const { user, firestore } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const [timeFields, setTimeFields] = useState(['']);
-
+  
   const form = useForm<z.infer<typeof medicationSchema>>({
     resolver: zodResolver(medicationSchema),
     defaultValues: {
       name: '',
       dosage: '',
       quantity: 1,
-      intakeTimes: [''],
+      intakeTimes: ['08:00'],
     },
   });
 
+  const intakeTimes = form.watch('intakeTimes');
+
   const handleAddTimeField = () => {
-    const newTimeFields = [...form.getValues('intakeTimes'), ''];
-    form.setValue('intakeTimes', newTimeFields);
-    setTimeFields(newTimeFields);
+    form.setValue('intakeTimes', [...intakeTimes, '']);
   }
 
   const handleRemoveTimeField = (index: number) => {
-    const newTimeFields = form.getValues('intakeTimes').filter((_, i) => i !== index);
-    form.setValue('intakeTimes', newTimeFields);
-    setTimeFields(newTimeFields);
+    form.setValue('intakeTimes', intakeTimes.filter((_, i) => i !== index));
+  }
+  
+  const handleDialogChange = (open: boolean) => {
+    if (!open) {
+        form.reset();
+    }
+    onOpenChange(open);
   }
 
   const onSubmit = async (values: z.infer<typeof medicationSchema>) => {
@@ -90,13 +94,11 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
     });
     
     setIsLoading(false);
-    onOpenChange(false);
-    form.reset();
-    setTimeFields(['']);
+    handleDialogChange(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Ajouter un médicament</DialogTitle>
@@ -150,33 +152,36 @@ export function AddMedicationDialog({ isOpen, onOpenChange }: AddMedicationDialo
             
             <div>
               <FormLabel>Heures de prise</FormLabel>
-              {form.getValues('intakeTimes').map((_, index) => (
-                <FormField
-                  key={index}
-                  control={form.control}
-                  name={`intakeTimes.${index}`}
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 mt-2">
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      {form.getValues('intakeTimes').length > 1 && (
-                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveTimeField(index)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
+              <div className="space-y-2 mt-2">
+                {intakeTimes.map((_, index) => (
+                  <FormField
+                    key={index}
+                    control={form.control}
+                    name={`intakeTimes.${index}`}
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2">
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        {intakeTimes.length > 1 && (
+                          <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveTimeField(index)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
+              </div>
               <Button type="button" variant="outline" size="sm" className="mt-2" onClick={handleAddTimeField}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Ajouter une heure
               </Button>
+               <FormMessage>{form.formState.errors.intakeTimes?.message}</FormMessage>
             </div>
 
             <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
+              <Button type="button" variant="outline" onClick={() => handleDialogChange(false)}>Annuler</Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? <Loader2 className="animate-spin" /> : 'Ajouter'}
               </Button>

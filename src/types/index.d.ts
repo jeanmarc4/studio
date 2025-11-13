@@ -16,4 +16,4 @@ export type PopulatedMedicalProfessional = MedicalProfessional & {
   imageHint: string | undefined;
 };
 
-export type Medication = MedicationSchema;
+export type Medication = Omit<MedicationSchema, 'userId'> & { id: string };
