@@ -52,7 +52,7 @@ Règles importantes :
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
 
     const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash-latest',
+      model: 'googleai/gemini-1.5-flash',
       system: systemPrompt,
       history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] }))
     });
