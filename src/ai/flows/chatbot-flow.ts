@@ -40,7 +40,7 @@ const mentalCareChatFlow = ai.defineFlow(
   async ({ history }) => {
     
     const { text } = await ai.generate({
-      system: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
+      prompt: `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 
 Règles de conversation :
 1. Écoute activement : Valide toujours les sentiments de l'utilisateur (par ex., "Je comprends que cela doit être difficile", "Merci de partager cela avec moi").
@@ -51,8 +51,7 @@ Règles de conversation :
 6. Le but n'est pas de "résoudre" les problèmes, mais d'offrir un espace sûr pour que l'utilisateur puisse s'exprimer.
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`,
-      history: history.slice(0, -1).map(m => ({ role: m.role, parts: [{ text: m.content }] })),
-      prompt: history[history.length - 1].content,
+      history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
     });
 
     if (!text) {
