@@ -19,7 +19,6 @@ export const ai = genkit({
   plugins: [
     googleAI({
       apiKey: geminiApiKey, // Passez la clé, même si elle est undefined, pour que Genkit gère l'erreur.
-      apiVersion: 'v1beta', // Utiliser la v1beta pour accéder aux derniers modèles
     }),
   ],
   // Le modèle par défaut est maintenant défini dans le plugin,
