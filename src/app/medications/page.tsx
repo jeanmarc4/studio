@@ -95,11 +95,8 @@ export default function MedicationsPage() {
             <HelpCircle className="h-4 w-4 text-blue-500" />
             <AlertTitle className="font-semibold text-blue-800 dark:text-blue-300">Comment fonctionnent les rappels ?</AlertTitle>
             <AlertDescription className="text-blue-700 dark:text-blue-400">
-                Vous pouvez tester les rappels sur chaque carte de médicament. Dans une future version, ces rappels seront automatiques.
-                <ul className="list-disc pl-5 mt-2 space-y-1">
-                    <li><span className="font-semibold">Standard :</span> Une notification simple s'affichera.</li>
-                    <li><span className="font-semibold">Premium & Admin :</span> En plus de la notification, vous aurez un rappel vocal intelligent généré par notre IA.</li>
-                </ul>
+                Vous pouvez tester les rappels sur chaque carte de médicament. Dans une future version, ces rappels seront automatiques et envoyés via notification push.
+                 Les fonctionnalités d'explication par IA restent disponibles pour les abonnés Premium.
             </AlertDescription>
         </Alert>
 
