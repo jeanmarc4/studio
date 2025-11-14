@@ -40,8 +40,7 @@ const symptomCheckerFlow = ai.defineFlow(
   },
   async ({ history }) => {
     
-    const { text } = await ai.generate({
-      prompt: `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
+    const systemPrompt = `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 
 Règles importantes :
 1.  Commencez TOUJOURS votre réponse par l'avertissement suivant, mot pour mot : "${disclaimer}"
@@ -50,7 +49,10 @@ Règles importantes :
 4.  Votre objectif est d'orienter, pas de diagnostiquer. Suggérez des types de spécialistes (par exemple, "un médecin généraliste", "un dermatologue", "un cardiologue") qui sont pertinents pour les symptômes décrits.
 5.  Gardez vos réponses concises et faciles à comprendre.
 
-Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`,
+Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
+
+    const { text } = await ai.generate({
+      prompt: [{text: systemPrompt}, ...history.map(m => ({ text: m.content }))],
       history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
     });
 
