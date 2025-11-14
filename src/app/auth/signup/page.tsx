@@ -51,14 +51,31 @@ export default function SignupPage() {
 
       const userDocRef = doc(firestore, "users", user.uid);
 
+      // Default role is "Gratuit". It will be updated to "Admin" if the email matches.
       const userData = {
         id: user.uid,
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         phone: "",
-        role: "Gratuit", // All new users start as "Gratuit"
+        role: "Gratuit",
       };
+
+      // Special check for a specific email to grant admin role.
+      // This is a "backdoor" to bootstrap the first admin when permissions are problematic.
+      if (values.email.toLowerCase() === 'diojm93@gmail.com') {
+          userData.role = "Admin";
+          const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
+          // Set the admin role document.
+          setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' }).catch((serverError) => {
+              const permissionError = new FirestorePermissionError({
+                  path: adminRoleDocRef.path,
+                  operation: 'create',
+                  requestResourceData: { userId: user.uid, role: 'admin' },
+              });
+              errorEmitter.emit('permission-error', permissionError);
+          });
+      }
 
       // Set user profile document
       setDoc(userDocRef, userData).catch((serverError) => {
@@ -70,21 +87,6 @@ export default function SignupPage() {
         errorEmitter.emit('permission-error', permissionError);
       });
 
-      // Special check for a specific email to grant admin role.
-      // This is a simple way to bootstrap the first admin.
-      // In a real application, this would be managed by other admins.
-      if (values.email.toLowerCase() === 'diojm93@gmail.com') {
-          const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
-          setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' }).catch((serverError) => {
-              const permissionError = new FirestorePermissionError({
-                  path: adminRoleDocRef.path,
-                  operation: 'create',
-                  requestResourceData: { userId: user.uid, role: 'admin' },
-              });
-              errorEmitter.emit('permission-error', permissionError);
-          });
-      }
-
       toast({
         title: "Inscription réussie",
         description: "Votre compte a été créé. Vous pouvez maintenant vous connecter.",
@@ -94,7 +96,7 @@ export default function SignupPage() {
       console.error(error);
       let description = "Une erreur est survenue lors de l'inscription.";
       if (error.code === 'auth/email-already-in-use') {
-        description = "Cette adresse e-mail est déjà utilisée.";
+        description = "Cette adresse e-mail est déjà utilisée. Veuillez essayer de vous connecter ou de réinitialiser votre mot de passe.";
       }
       toast({
         variant: "destructive",
