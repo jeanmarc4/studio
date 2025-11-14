@@ -31,26 +31,17 @@ export default function AdminPage() {
   const [isAddContentDialogOpen, setIsAddContentDialogOpen] = useState(false);
   
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [isAuthorizing, setIsAuthorizing] = useState(false);
 
-  // Check for the user's main profile to know their role
-  const userProfileRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
-  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
-
-  // Check for admin role document
+  // Check for admin role document existence. This is the single source of truth.
   const adminRoleRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'roles_admin', user.uid);
   }, [firestore, user]);
-  const { data: adminRole, isLoading: isAdminRoleLoading } = useDoc(adminRoleRef);
+  const { data: adminRoleDoc, isLoading: isAdminRoleLoading } = useDoc(adminRoleRef);
   
   useEffect(() => {
-    const dataLoading = isUserLoading || isAdminRoleLoading || isProfileLoading;
-    if (dataLoading) {
-      return;
+    if (isUserLoading || isAdminRoleLoading) {
+      return; // Wait for auth state and role doc to load
     }
     
     if (!user) {
@@ -58,30 +49,22 @@ export default function AdminPage() {
       return;
     }
 
-    const hasAdminRoleDoc = !!adminRole;
-    const hasAdminRoleInProfile = userProfile?.role === 'Admin';
-    
-    if (hasAdminRoleDoc) {
-      setIsAuthorized(true);
-    } else if (hasAdminRoleInProfile) {
-      // If profile says admin but doc is missing, create it.
-      handleBecomeAdmin(true); // silent creation
-    } else {
-      setIsAuthorized(false);
-    }
-  }, [user, isUserLoading, adminRole, isAdminRoleLoading, userProfile, isProfileLoading, router]);
+    // Authorization is determined SOLELY by the existence of the admin role document.
+    setIsAuthorized(!!adminRoleDoc);
 
-  const handleBecomeAdmin = async (silent = false) => {
+  }, [user, isUserLoading, adminRoleDoc, isAdminRoleLoading, router]);
+
+
+  const handleBecomeAdmin = async () => {
     if (!firestore || !user) return;
-    if (!silent) setIsAuthorizing(true);
     const adminDocRef = doc(firestore, 'roles_admin', user.uid);
     try {
+      // Use blocking setDoc for this critical action to ensure immediate effect
       await setDoc(adminDocRef, { userId: user.uid, role: 'admin' });
-      setIsAuthorized(true);
+      // No need to set isAuthorized here, the useDoc hook will trigger a re-render
+      // which will re-evaluate authorization in the useEffect.
     } catch (e) {
        console.error("Failed to become admin", e);
-    } finally {
-       if (!silent) setIsAuthorizing(false);
     }
   };
 
@@ -157,7 +140,7 @@ export default function AdminPage() {
     updateDocumentNonBlocking(doc(firestore, 'holisticContent', contentId), data);
   };
 
-  if (isAuthorized === null || isUserLoading || isProfileLoading) {
+  if (isAuthorized === null || isUserLoading || isAdminRoleLoading) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-muted/40 p-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
@@ -178,12 +161,11 @@ export default function AdminPage() {
            </CardHeader>
            <CardContent>
              <p className="text-sm text-muted-foreground">
-                Cliquez sur le bouton ci-dessous pour vous attribuer les droits d'administrateur. Si vous n'êtes pas un administrateur, veuillez retourner à l'accueil.
+                Si vous devriez avoir accès, cliquez sur le bouton ci-dessous pour créer votre document d'administrateur. Si vous n'êtes pas un administrateur, veuillez retourner à l'accueil.
              </p>
            </CardContent>
            <CardFooter className="flex flex-col gap-4">
-              <Button onClick={() => handleBecomeAdmin(false)} className="w-full" disabled={isAuthorizing}>
-                {isAuthorizing ? <Loader2 className="h-4 w-4 animate-spin"/> : null}
+              <Button onClick={handleBecomeAdmin} className="w-full">
                 Devenir Administrateur
               </Button>
                <Button variant="outline" onClick={() => router.push('/')} className="w-full">
