@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Un flux Genkit pour expliquer l'utilité d'un médicament, avec un cache en mémoire.
@@ -37,14 +36,6 @@ Exemple de réponse pour "Doliprane":
 
 Maintenant, fournis l'explication pour le médicament demandé.`;
 
-const explainMedicationPrompt = ai.definePrompt({
-    name: 'explainMedicationPrompt',
-    input: { schema: MedicationExplanationInputSchema },
-    output: { schema: MedicationExplanationOutputSchema },
-    prompt: `${systemPrompt}\n\nMédicament : {{{medicationName}}}`,
-    model: 'googleai/gemini-1.5-flash',
-});
-
 
 const explainMedicationFlow = ai.defineFlow(
   {
@@ -61,14 +52,20 @@ const explainMedicationFlow = ai.defineFlow(
     }
 
     try {
-      // 2. Si ce n'est pas dans le cache, appeler l'IA via le prompt défini.
-      const { output } = await explainMedicationPrompt({ medicationName });
+      // 2. Construire un prompt simple sous forme de chaîne de caractères
+      const fullPrompt = `${systemPrompt}\n\nMédicament : ${medicationName}`;
 
-      if (!output || !output.explanation) {
+      const { text } = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
+        prompt: fullPrompt,
+      });
+
+
+      if (!text) {
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      const explanation = output.explanation;
+      const explanation = text;
 
       // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
       explanationCache.set(cacheKey, explanation);
