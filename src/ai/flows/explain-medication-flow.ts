@@ -37,6 +37,14 @@ Exemple de réponse pour "Doliprane":
 
 Maintenant, fournis l'explication pour le médicament demandé.`;
 
+const explainMedicationPrompt = ai.definePrompt({
+    name: 'explainMedicationPrompt',
+    input: { schema: MedicationExplanationInputSchema },
+    output: { schema: MedicationExplanationOutputSchema },
+    prompt: `${systemPrompt}\n\nMédicament : {{{medicationName}}}`,
+    model: 'googleai/gemini-1.5-flash',
+});
+
 
 const explainMedicationFlow = ai.defineFlow(
   {
@@ -52,20 +60,15 @@ const explainMedicationFlow = ai.defineFlow(
       return { explanation: explanationCache.get(cacheKey)! };
     }
 
-    // 2. Si ce n'est pas dans le cache, appeler l'IA.
-    const fullPrompt = `${systemPrompt}\n\nMédicament : ${medicationName}`;
-
     try {
-      const { text } = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: fullPrompt,
-      });
-      
-      if (!text) {
+      // 2. Si ce n'est pas dans le cache, appeler l'IA via le prompt défini.
+      const { output } = await explainMedicationPrompt({ medicationName });
+
+      if (!output || !output.explanation) {
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      const explanation = text;
+      const explanation = output.explanation;
 
       // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
       explanationCache.set(cacheKey, explanation);
