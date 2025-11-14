@@ -35,6 +35,7 @@ export default function SymptomCheckerPage() {
   
   const speak = (text: string) => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel(); // Annule la lecture précédente
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'fr-FR';
       window.speechSynthesis.speak(utterance);
@@ -58,7 +59,7 @@ export default function SymptomCheckerPage() {
       const result = await suggestNextSteps(history);
       const modelResponse: Message = { role: 'model', content: result.analysis };
       setMessages(prev => [...prev, modelResponse]);
-      speak(result.analysis); // <-- Lecture de la réponse
+      speak(result.analysis); // Lecture de la réponse
 
     } catch (error) {
       console.error("Symptom checker error:", error);
@@ -82,7 +83,6 @@ export default function SymptomCheckerPage() {
       role: 'model',
       content: initialMessage
     }]);
-    // Ne pas lire le message d'accueil initial
   }, []);
 
   return (

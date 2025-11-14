@@ -46,7 +46,7 @@ export function MentalCareView() {
 
   const speak = (text: string) => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel(); // Annule la lecture précédente s'il y en a une
+      window.speechSynthesis.cancel(); // Annule la lecture précédente
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'fr-FR';
       window.speechSynthesis.speak(utterance);
