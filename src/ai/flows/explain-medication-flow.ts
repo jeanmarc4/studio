@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 // Cache simple en mémoire pour stocker les explications déjà générées.
@@ -41,7 +42,7 @@ const prompt = ai.definePrompt({
     input: { schema: MedicationExplanationInputSchema },
     output: { schema: MedicationExplanationOutputSchema },
     prompt: `${systemPrompt}\n\nMédicament : {{{medicationName}}}`,
-    model: 'googleai/gemini-1.5-flash',
+    model: googleAI.model('gemini-1.5-flash'),
 });
 
 

@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const MessageSchema = z.object({
@@ -47,7 +48,7 @@ const prompt = ai.definePrompt(
         name: 'mentalCareChatPrompt',
         input: { schema: ChatHistoryInputSchema },
         output: { schema: ChatOutputSchema },
-        model: 'googleai/gemini-1.5-flash',
+        model: googleAI.model('gemini-1.5-flash'),
     },
     async ({ history }) => {
         return {

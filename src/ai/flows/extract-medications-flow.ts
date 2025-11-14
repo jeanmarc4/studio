@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 // Schéma pour un seul médicament extrait
@@ -54,11 +55,11 @@ const extractionPrompt = ai.definePrompt({
     name: 'extractMedicationPrompt',
     input: { schema: MedicationExtractionInputSchema },
     output: { schema: MedicationExtractionOutputSchema },
+    model: googleAI.model('gemini-1.5-flash'),
     prompt: [
         { text: systemPrompt },
         { media: { url: '{{prescriptionImageUrl}}' } },
     ],
-    model: 'googleai/gemini-1.5-flash' // Specify model here
 });
 
 

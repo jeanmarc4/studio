@@ -18,9 +18,6 @@ if (!geminiApiKey || geminiApiKey === 'YOUR_API_KEY') {
 
 export const ai = genkit({
   plugins: [
-    googleAI({
-      apiKey: geminiApiKey, // Passez la clé, même si elle est invalide, Genkit gérera l'erreur lors de l'appel.
-    }),
+    googleAI({ apiKey: geminiApiKey }), // Correction: passer la clé API dans un objet de configuration
   ],
-  // Ne pas définir le modèle ici, car il est géré par chaque flux individuellement.
 });
