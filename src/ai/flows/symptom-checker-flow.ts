@@ -43,13 +43,6 @@ Règles importantes :
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
 
-const symptomPrompt = ai.definePrompt({
-    name: 'symptomCheckerPrompt',
-    input: { schema: SymptomCheckerHistorySchema },
-    system: systemPrompt,
-});
-
-
 const symptomCheckerFlow = ai.defineFlow(
   {
     name: 'symptomCheckerFlow',

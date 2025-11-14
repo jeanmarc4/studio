@@ -37,13 +37,6 @@ Exemple de réponse pour "Doliprane":
 
 Maintenant, fournis l'explication pour le médicament demandé.`;
 
-const explainPrompt = ai.definePrompt({
-    name: 'explainMedicationPrompt',
-    input: { schema: MedicationExplanationInputSchema },
-    system: systemPrompt,
-    prompt: `Médicament : {{{medicationName}}}`
-});
-
 
 const explainMedicationFlow = ai.defineFlow(
   {
@@ -60,9 +53,11 @@ const explainMedicationFlow = ai.defineFlow(
     }
 
     // 2. Si ce n'est pas dans le cache, appeler l'IA.
+    const fullPrompt = `${systemPrompt}\n\nMédicament : ${medicationName}`;
+
     const { text } = await ai.generate({
       model: 'googleai/gemini-1.5-flash',
-      prompt: `${systemPrompt}\n\nMaintenant, fournis l'explication pour le médicament : ${medicationName}.`
+      prompt: fullPrompt,
     });
     
     if (!text) {

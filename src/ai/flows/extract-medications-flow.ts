@@ -56,6 +56,7 @@ const extractionPrompt = ai.definePrompt({
     output: { schema: MedicationExtractionOutputSchema },
     system: systemPrompt,
     prompt: `Image de l'ordonnance : {{media url=prescriptionImageUrl}}`,
+    model: 'googleai/gemini-1.5-flash' // Specify model here
 });
 
 

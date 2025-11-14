@@ -43,14 +43,6 @@ Règles de conversation :
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
-const chatPrompt = ai.definePrompt({
-    name: 'mentalCarePrompt',
-    input: { schema: ChatHistoryInputSchema },
-    system: systemPrompt,
-    // Note: The history from input is automatically added by Genkit
-});
-
-
 const mentalCareChatFlow = ai.defineFlow(
   {
     name: 'mentalCareChatFlow',
