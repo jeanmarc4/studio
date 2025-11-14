@@ -62,11 +62,10 @@ export default function SignupPage() {
       };
 
       // Special check for a specific email to grant admin role.
-      // This is a "backdoor" to bootstrap the first admin when permissions are problematic.
       if (values.email.toLowerCase() === 'admin@jmdigitalapp.com') {
           userData.role = "Admin";
+          // We also create the admin role document for rules that check existence
           const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
-          // Set the admin role document.
           setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' }).catch((serverError) => {
               const permissionError = new FirestorePermissionError({
                   path: adminRoleDocRef.path,
@@ -93,7 +92,6 @@ export default function SignupPage() {
       });
       router.push("/auth/login");
     } catch (error: any) {
-      console.error(error);
       let description = "Une erreur est survenue lors de l'inscription.";
       if (error.code === 'auth/email-already-in-use') {
         description = "Cette adresse e-mail est déjà utilisée. Veuillez essayer de vous connecter ou de réinitialiser votre mot de passe.";
