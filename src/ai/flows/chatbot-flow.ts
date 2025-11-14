@@ -31,15 +31,7 @@ export async function mentalCareChat(input: ChatHistory): Promise<ChatOutput> {
   return mentalCareChatFlow(input);
 }
 
-const mentalCareChatFlow = ai.defineFlow(
-  {
-    name: 'mentalCareChatFlow',
-    inputSchema: ChatHistoryInputSchema,
-    outputSchema: ChatOutputSchema,
-  },
-  async ({ history }) => {
-    
-    const systemPrompt = `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
+const systemPrompt = `Tu es un chatbot de soutien émotionnel nommé 'SanteConnect Moral'. Ton rôle est d'être un auditeur empathique, bienveillant et sans jugement. Ta personnalité est douce, calme et rassurante.
 
 Règles de conversation :
 1. Écoute activement : Valide toujours les sentiments de l'utilisateur (par ex., "Je comprends que cela doit être difficile", "Merci de partager cela avec moi").
@@ -51,11 +43,31 @@ Règles de conversation :
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
-    const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
+const chatPrompt = ai.definePrompt({
+    name: 'mentalCarePrompt',
+    input: { schema: ChatHistoryInputSchema },
+    system: systemPrompt,
+    // Note: The history from input is automatically added by Genkit
+});
 
+
+const mentalCareChatFlow = ai.defineFlow(
+  {
+    name: 'mentalCareChatFlow',
+    inputSchema: ChatHistoryInputSchema,
+    outputSchema: ChatOutputSchema,
+  },
+  async ({ history }) => {
+    
     const { text } = await ai.generate({
       model: 'googleai/gemini-1.5-flash',
-      prompt: fullPrompt,
+      prompt: {
+        system: systemPrompt,
+        messages: history.map(m => ({
+          role: m.role,
+          content: [{ text: m.content }],
+        }))
+      }
     });
 
     if (!text) {

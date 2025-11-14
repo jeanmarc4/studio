@@ -32,15 +32,7 @@ export async function suggestNextSteps(input: SymptomCheckerHistory): Promise<Sy
 
 const disclaimer = "AVERTISSEMENT : Je suis un assistant IA et non un professionnel de la santé. Les informations que je fournis ne constituent pas un avis médical. Veuillez consulter un médecin qualifié pour tout problème de santé ou avant de prendre toute décision médicale.";
 
-const symptomCheckerFlow = ai.defineFlow(
-  {
-    name: 'symptomCheckerFlow',
-    inputSchema: SymptomCheckerHistorySchema,
-    outputSchema: SymptomCheckerOutputSchema,
-  },
-  async ({ history }) => {
-    
-    const systemPrompt = `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
+const systemPrompt = `Vous êtes un assistant médical IA empathique et serviable. Votre rôle est d'écouter les symptômes d'un utilisateur et de lui fournir des informations générales et des suggestions sur le type de professionnel de la santé qu'il pourrait consulter.
 
 Règles importantes :
 1.  Commencez TOUJOURS votre réponse par l'avertissement suivant, mot pour mot : "${disclaimer}"
@@ -51,11 +43,30 @@ Règles importantes :
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
 
-    const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
+const symptomPrompt = ai.definePrompt({
+    name: 'symptomCheckerPrompt',
+    input: { schema: SymptomCheckerHistorySchema },
+    system: systemPrompt,
+});
+
+
+const symptomCheckerFlow = ai.defineFlow(
+  {
+    name: 'symptomCheckerFlow',
+    inputSchema: SymptomCheckerHistorySchema,
+    outputSchema: SymptomCheckerOutputSchema,
+  },
+  async ({ history }) => {
 
     const { text } = await ai.generate({
       model: 'googleai/gemini-1.5-flash',
-      prompt: fullPrompt
+      prompt: {
+        system: systemPrompt,
+        messages: history.map(m => ({
+          role: m.role,
+          content: [{ text: m.content }],
+        }))
+      }
     });
 
     let analysis = text;
