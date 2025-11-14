@@ -8,8 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
-import { Loader2, Send, Sparkles, User as UserIcon, AlertTriangle } from 'lucide-react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Send, Sparkles, User as UserIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { suggestNextSteps } from '@/ai/flows/symptom-checker-flow';
 import type { ChatHistory } from '@/ai/flows/chatbot-flow';
@@ -33,6 +32,14 @@ export default function SymptomCheckerPage() {
       scrollAreaViewport.current.scrollTop = scrollAreaViewport.current.scrollHeight;
     }
   }, [messages]);
+  
+  const speak = (text: string) => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      window.speechSynthesis.speak(utterance);
+    }
+  };
 
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -49,12 +56,15 @@ export default function SymptomCheckerPage() {
       };
       
       const result = await suggestNextSteps(history);
-
-      setMessages(prev => [...prev, { role: 'model', content: result.analysis }]);
+      const modelResponse: Message = { role: 'model', content: result.analysis };
+      setMessages(prev => [...prev, modelResponse]);
+      speak(result.analysis); // <-- Lecture de la réponse
 
     } catch (error) {
       console.error("Symptom checker error:", error);
-      setMessages(prev => [...prev, { role: 'model', content: "Désolé, une erreur est survenue. Veuillez réessayer plus tard." }]);
+      const errorMessage = "Désolé, une erreur est survenue. Veuillez réessayer plus tard.";
+      setMessages(prev => [...prev, { role: 'model', content: errorMessage }]);
+      speak(errorMessage);
       toast({
         variant: 'destructive',
         title: 'Erreur de l\'IA',
@@ -67,10 +77,12 @@ export default function SymptomCheckerPage() {
   
     // Add initial greeting from the model
   useEffect(() => {
+    const initialMessage = "Bonjour ! Je suis l'assistant IA de SanteConnect. Décrivez-moi vos symptômes en détail, et je vous aiderai à identifier les prochaines étapes. Comment puis-je vous aider aujourd'hui ?";
     setMessages([{
       role: 'model',
-      content: "Bonjour ! Je suis l'assistant IA de SanteConnect. Décrivez-moi vos symptômes en détail, et je vous aiderai à identifier les prochaines étapes. Comment puis-je vous aider aujourd'hui ?"
+      content: initialMessage
     }]);
+    // Ne pas lire le message d'accueil initial
   }, []);
 
   return (
@@ -95,7 +107,7 @@ export default function SymptomCheckerPage() {
                       <AvatarFallback><Sparkles className="w-4 h-4 text-primary" /></AvatarFallback>
                     </Avatar>
                   )}
-                  <div className={`p-3 rounded-lg max-w-md ${message.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
+                  <div className={`p-3 rounded-lg max-w-md whitespace-pre-wrap ${message.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
                      {message.content.split('\n').map((line, i) => (
                         <p key={i}>{line}</p>
                     ))}

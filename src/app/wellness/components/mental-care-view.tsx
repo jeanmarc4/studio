@@ -44,6 +44,15 @@ export function MentalCareView() {
     }
   }, [messages]);
 
+  const speak = (text: string) => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel(); // Annule la lecture précédente s'il y en a une
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'fr-FR';
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -58,10 +67,14 @@ export function MentalCareView() {
             history: [...messages, userMessage].map(m => ({ role: m.role, content: m.content })),
         };
         const result = await mentalCareChat(history);
-        setMessages(prev => [...prev, { role: 'model', content: result.response }]);
+        const modelResponse: Message = { role: 'model', content: result.response };
+        setMessages(prev => [...prev, modelResponse]);
+        speak(result.response);
     } catch (error) {
         console.error("Mental care chat error:", error);
-        setMessages(prev => [...prev, { role: 'model', content: "Désolé, une erreur est survenue. Veuillez réessayer plus tard." }]);
+        const errorMessage = "Désolé, une erreur est survenue. Veuillez réessayer plus tard.";
+        setMessages(prev => [...prev, { role: 'model', content: errorMessage }]);
+        speak(errorMessage);
         toast({
             variant: 'destructive',
             title: 'Erreur de l\'IA',
