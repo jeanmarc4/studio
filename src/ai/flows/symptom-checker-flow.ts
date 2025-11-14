@@ -51,13 +51,12 @@ const symptomCheckerFlow = ai.defineFlow(
   },
   async ({ history }) => {
     try {
+      // Construction d'un prompt textuel unique
+      const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
+
       const { text } = await ai.generate({
         model: 'googleai/gemini-1.5-flash',
-        system: systemPrompt,
-        messages: history.map(m => ({
-          role: m.role,
-          content: [{ text: m.content }],
-        }))
+        prompt: fullPrompt,
       });
 
       let analysis = text;
