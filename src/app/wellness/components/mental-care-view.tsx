@@ -35,11 +35,11 @@ export function MentalCareView() {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (scrollAreaRef.current?.lastElementChild) {
-            scrollAreaRef.current.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        if (scrollAreaViewportRef.current) {
+            scrollAreaViewportRef.current.scrollTo({ top: scrollAreaViewportRef.current.scrollHeight, behavior: 'smooth' });
         }
     }, [messages]);
     
@@ -118,7 +118,7 @@ export function MentalCareView() {
                 </CardDescription>
             </CardHeader>
              <CardContent className="flex-1 overflow-hidden p-0">
-                <ScrollArea className="h-full" viewportRef={scrollAreaRef}>
+                <ScrollArea className="h-full" viewportRef={scrollAreaViewportRef}>
                     <div className="space-y-4 p-4">
                     {messages.map((message, index) => (
                         <div
