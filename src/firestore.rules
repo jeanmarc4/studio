@@ -68,8 +68,7 @@ service cloud.firestore {
     match /roles_admin/{userId} {
       allow get: if true;
       // Only an existing admin can create or delete another admin role.
-      allow create, delete: if isAdmin();
-      allow list, update: if isAdmin();
+      allow create, delete, update, list: if isAdmin();
     }
     
     /**

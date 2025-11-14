@@ -10,7 +10,6 @@ import { UserManagement } from "./components/user-management";
 import { RoleConfiguration } from "./components/role-configuration";
 import { Dashboard } from "./components/dashboard";
 import { useFirebase, useCollection, useMemoFirebase, useDoc } from '@/firebase';
-import { Skeleton } from "@/components/ui/skeleton";
 import type { User, MedicalProfessional, HolisticContent } from '@/docs/backend-documentation';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking, setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { AddUserDialog } from "./components/add-user-dialog";
@@ -21,6 +20,7 @@ import { AddHolisticContentDialog } from "./components/add-holistic-content-dial
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminPage() {
   const { user, isUserLoading, firestore } = useFirebase();
@@ -29,6 +29,7 @@ export default function AdminPage() {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isAddProfessionalDialogOpen, setIsAddProfessionalDialogOpen] = useState(false);
   const [isAddContentDialogOpen, setIsAddContentDialogOpen] = useState(false);
+  const { toast } = useToast();
   
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
@@ -59,12 +60,21 @@ export default function AdminPage() {
     if (!firestore || !user) return;
     const adminDocRef = doc(firestore, 'roles_admin', user.uid);
     try {
-      // Use blocking setDoc for this critical action to ensure immediate effect
+      // This will fail if the user isn't already an admin, which is intended behavior
+      // for a production environment. This button serves as a way to "claim" admin
+      // status if rules are temporarily relaxed or for the very first admin.
       await setDoc(adminDocRef, { userId: user.uid, role: 'admin' });
-      // No need to set isAuthorized here, the useDoc hook will trigger a re-render
-      // which will re-evaluate authorization in the useEffect.
-    } catch (e) {
+      toast({
+        title: "Statut d'administrateur accordé",
+        description: "Vous avez maintenant les privilèges d'administrateur.",
+      });
+    } catch (e: any) {
        console.error("Failed to become admin", e);
+       toast({
+        variant: "destructive",
+        title: "Échec de l'opération",
+        description: "Vous n'avez pas les autorisations nécessaires pour devenir administrateur.",
+      });
     }
   };
 
@@ -91,6 +101,7 @@ export default function AdminPage() {
   const handleDeleteUser = (userId: string) => {
     if (!firestore) return;
     deleteDocumentNonBlocking(doc(firestore, 'users', userId));
+    // Also remove them from the admin role collection, just in case
     deleteDocumentNonBlocking(doc(firestore, 'roles_admin', userId));
   };
   
@@ -161,12 +172,12 @@ export default function AdminPage() {
            </CardHeader>
            <CardContent>
              <p className="text-sm text-muted-foreground">
-                Si vous devriez avoir accès, cliquez sur le bouton ci-dessous pour créer votre document d'administrateur. Si vous n'êtes pas un administrateur, veuillez retourner à l'accueil.
+                Si vous devriez avoir accès mais que vous ne l'avez pas, contactez un administrateur. Le bouton ci-dessous est destiné à la configuration initiale ou à des cas spécifiques et peut ne pas fonctionner si les règles de sécurité sont actives.
              </p>
            </CardContent>
            <CardFooter className="flex flex-col gap-4">
               <Button onClick={handleBecomeAdmin} className="w-full">
-                Devenir Administrateur
+                Tenter de devenir Administrateur
               </Button>
                <Button variant="outline" onClick={() => router.push('/')} className="w-full">
                 Retour à l'accueil
