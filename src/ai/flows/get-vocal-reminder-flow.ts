@@ -61,8 +61,6 @@ async function toWav(
   });
 }
 
-const reminderPrompt = `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : {{{medicationName}}}, avec un dosage de {{{dosage}}}. Prenez bien soin de vous !`;
-
 const vocalReminderFlow = ai.defineFlow(
   {
     name: 'vocalReminderFlow',
@@ -72,9 +70,8 @@ const vocalReminderFlow = ai.defineFlow(
   async (input) => {
     try {
         const { media } = await ai.generate({
-            model: googleAI.model('gemini-2.5-flash-preview-tts'),
-            prompt: reminderPrompt,
-            templateData: input,
+            model: googleAI.model('gemini-1.5-flash-tts'),
+            prompt: `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${input.medicationName}, avec un dosage de ${input.dosage}. Prenez bien soin de vous !`,
             config: {
                 responseModalities: ['AUDIO'],
                 speechConfig: {
