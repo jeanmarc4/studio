@@ -19,9 +19,7 @@ export const ai = genkit({
   plugins: [
     googleAI({
       apiKey: geminiApiKey, // Passez la clé, même si elle est undefined, pour que Genkit gère l'erreur.
-      // Le modèle doit être spécifié ici, dans le plugin.
-      model: 'gemini-1.5-flash-001',
     }),
   ],
-  // Ne pas définir le modèle ici, car il est géré par le plugin.
+  // Ne pas définir le modèle ici, car il est géré par chaque flux individuellement.
 });
