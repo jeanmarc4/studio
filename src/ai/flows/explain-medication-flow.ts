@@ -36,6 +36,14 @@ Exemple de réponse pour "Doliprane":
 
 Maintenant, fournis l'explication pour le médicament demandé.`;
 
+const prompt = ai.definePrompt({
+    name: 'explainMedicationPrompt',
+    input: { schema: MedicationExplanationInputSchema },
+    output: { schema: MedicationExplanationOutputSchema },
+    prompt: `${systemPrompt}\n\nMédicament : {{{medicationName}}}`,
+    model: 'googleai/gemini-1.5-flash',
+});
+
 
 const explainMedicationFlow = ai.defineFlow(
   {
@@ -43,8 +51,8 @@ const explainMedicationFlow = ai.defineFlow(
     inputSchema: MedicationExplanationInputSchema,
     outputSchema: MedicationExplanationOutputSchema,
   },
-  async ({ medicationName }) => {
-    const cacheKey = medicationName.trim().toLowerCase();
+  async (input) => {
+    const cacheKey = input.medicationName.trim().toLowerCase();
     
     // 1. Vérifier si l'explication est déjà dans le cache.
     if (explanationCache.has(cacheKey)) {
@@ -52,20 +60,14 @@ const explainMedicationFlow = ai.defineFlow(
     }
 
     try {
-      // 2. Construire un prompt simple sous forme de chaîne de caractères
-      const fullPrompt = `${systemPrompt}\n\nMédicament : ${medicationName}`;
+      // 2. Appeler le prompt défini
+      const { output } = await prompt(input);
 
-      const { text } = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: fullPrompt,
-      });
-
-
-      if (!text) {
+      if (!output) {
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      const explanation = text;
+      const explanation = output.explanation;
 
       // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
       explanationCache.set(cacheKey, explanation);

@@ -42,6 +42,24 @@ Règles de conversation :
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
+const prompt = ai.definePrompt(
+    {
+        name: 'mentalCareChatPrompt',
+        input: { schema: ChatHistoryInputSchema },
+        output: { schema: ChatOutputSchema },
+        model: 'googleai/gemini-1.5-flash',
+    },
+    async ({ history }) => {
+        return {
+            system: systemPrompt,
+            messages: history.map(m => ({
+                role: m.role,
+                content: [{ text: m.content }],
+            })),
+        };
+    }
+);
+
 
 const mentalCareChatFlow = ai.defineFlow(
   {
@@ -49,20 +67,15 @@ const mentalCareChatFlow = ai.defineFlow(
     inputSchema: ChatHistoryInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async ({ history }) => {
+  async (history) => {
     try {
-      const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
-
-      const { text } = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: fullPrompt,
-      });
-
-      if (!text) {
+      const { output } = await prompt(history);
+      
+      if (!output) {
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      return { response: text };
+      return output;
     } catch (e) {
       console.error("Erreur dans mentalCareChatFlow:", e);
       return { response: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };

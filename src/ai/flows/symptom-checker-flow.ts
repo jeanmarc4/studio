@@ -42,22 +42,35 @@ Règles importantes :
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
 
+const prompt = ai.definePrompt(
+    {
+        name: 'symptomCheckerPrompt',
+        input: { schema: SymptomCheckerHistorySchema },
+        output: { schema: SymptomCheckerOutputSchema },
+        model: 'googleai/gemini-1.5-flash',
+    },
+    async ({ history }) => {
+        return {
+            system: systemPrompt,
+            messages: history.map(m => ({
+                role: m.role,
+                content: [{ text: m.content }],
+            })),
+        };
+    }
+);
+
 const symptomCheckerFlow = ai.defineFlow(
   {
     name: 'symptomCheckerFlow',
     inputSchema: SymptomCheckerHistorySchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async ({ history }) => {
+  async (history) => {
     try {
-      const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
-
-      const { text } = await ai.generate({
-        model: 'googleai/gemini-1.5-flash',
-        prompt: fullPrompt,
-      });
-
-      let analysis = text;
+      const { output } = await prompt(history);
+      
+      let analysis = output?.analysis;
 
       if (!analysis) {
         throw new Error("La réponse de l'IA est vide.");

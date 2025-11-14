@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Un flux Genkit pour générer des rappels vocaux pour la prise de médicaments.
@@ -76,8 +75,8 @@ const reminderPrompt = ai.definePrompt(
             },
         },
     },
-    async ({ medicationName }) => {
-        return `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${medicationName}. Prenez bien soin de vous !`;
+    async ({ medicationName, dosage }) => {
+        return `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${medicationName}, avec un dosage de ${dosage}. Prenez bien soin de vous !`;
     }
 );
 
@@ -89,21 +88,26 @@ const vocalReminderFlow = ai.defineFlow(
     outputSchema: VocalReminderOutputSchema,
   },
   async (input) => {
-    const { media } = await reminderPrompt(input);
+    try {
+        const { media } = await reminderPrompt(input);
 
-    if (!media) {
-      throw new Error("Aucun média audio n'a été retourné par l'API.");
+        if (!media) {
+            throw new Error("Aucun média audio n'a été retourné par l'API.");
+        }
+
+        const audioBuffer = Buffer.from(
+            media.url.substring(media.url.indexOf(',') + 1),
+            'base64'
+        );
+
+        const wavBase64 = await toWav(audioBuffer);
+
+        return {
+            audioUrl: 'data:audio/wav;base64,' + wavBase64,
+        };
+    } catch(e) {
+        console.error("Erreur dans vocalReminderFlow:", e);
+        throw new Error("Erreur de communication avec le service vocal IA.");
     }
-
-    const audioBuffer = Buffer.from(
-      media.url.substring(media.url.indexOf(',') + 1),
-      'base64'
-    );
-
-    const wavBase64 = await toWav(audioBuffer);
-
-    return {
-      audioUrl: 'data:audio/wav;base64,' + wavBase64,
-    };
   }
 );
