@@ -49,6 +49,7 @@ const extractMedicationsFlow = ai.defineFlow(
   async ({ prescriptionImageUrl }) => {
     
     const { output } = await ai.generate({
+      model: 'googleai/gemini-1.5-flash-001',
       prompt: [
         { text: `Vous êtes un assistant pharmaceutique expert en reconnaissance optique de caractères sur des ordonnances médicales. Votre tâche est d'analyser l'image d'ordonnance fournie et d'extraire TOUS les médicaments listés avec leurs détails.
 
