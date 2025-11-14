@@ -54,7 +54,7 @@ Analysez la conversation suivante et fournissez une réponse utile qui suit ces 
     const { text } = await ai.generate({
       model: 'googleai/gemini-1.5-flash-001',
       system: systemPrompt,
-      history: history
+      history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] }))
     });
 
     let analysis = text;
