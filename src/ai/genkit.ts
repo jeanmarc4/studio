@@ -18,6 +18,6 @@ if (!geminiApiKey || geminiApiKey === 'YOUR_API_KEY') {
 
 export const ai = genkit({
   plugins: [
-    googleAI({ apiKey: geminiApiKey }), // Correction: passer la clé API dans un objet de configuration
+    googleAI({ apiKey: geminiApiKey }),
   ],
 });
