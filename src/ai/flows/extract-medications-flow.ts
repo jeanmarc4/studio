@@ -54,8 +54,10 @@ const extractionPrompt = ai.definePrompt({
     name: 'extractMedicationPrompt',
     input: { schema: MedicationExtractionInputSchema },
     output: { schema: MedicationExtractionOutputSchema },
-    system: systemPrompt,
-    prompt: `Image de l'ordonnance : {{media url=prescriptionImageUrl}}`,
+    prompt: [
+        { text: systemPrompt },
+        { media: { url: '{{prescriptionImageUrl}}' } },
+    ],
     model: 'googleai/gemini-1.5-flash' // Specify model here
 });
 
@@ -69,12 +71,18 @@ const extractMedicationsFlow = ai.defineFlow(
   },
   async ({ prescriptionImageUrl }) => {
     
-    const { output } = await extractionPrompt({ prescriptionImageUrl });
+    try {
+      const { output } = await extractionPrompt({ prescriptionImageUrl });
 
-    if (!output) {
-      // Si la sortie est nulle, cela signifie probablement que le modèle n'a rien pu générer.
+      if (!output) {
+        // Si la sortie est nulle, cela signifie probablement que le modèle n'a rien pu générer.
+        return { medications: [] };
+      }
+      return output;
+    } catch(e) {
+      console.error("Erreur dans extractMedicationsFlow:", e);
+      // En cas d'erreur API, retourner une liste vide pour éviter un crash
       return { medications: [] };
     }
-    return output;
   }
 );

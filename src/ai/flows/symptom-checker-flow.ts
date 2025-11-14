@@ -65,7 +65,7 @@ const symptomCheckerFlow = ai.defineFlow(
     let analysis = text;
 
     if (!analysis) {
-      analysis = "Désolé, je ne suis pas en mesure de traiter votre demande pour le moment.";
+      analysis = "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer.";
     }
 
     // Assurez-vous que l'avertissement est toujours présent.

@@ -63,7 +63,7 @@ const mentalCareChatFlow = ai.defineFlow(
     });
 
     if (!text) {
-      return { response: "Désolé, je ne suis pas en mesure de traiter votre demande pour le moment." };
+      return { response: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };
     }
     
     return { response: text };

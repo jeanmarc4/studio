@@ -55,20 +55,26 @@ const explainMedicationFlow = ai.defineFlow(
     // 2. Si ce n'est pas dans le cache, appeler l'IA.
     const fullPrompt = `${systemPrompt}\n\nMédicament : ${medicationName}`;
 
-    const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
-      prompt: fullPrompt,
-    });
-    
-    if (!text) {
-      return { explanation: "Désolé, je n'ai pas pu trouver d'informations pour ce médicament." };
-    }
-    
-    const explanation = text;
+    try {
+      const { text } = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
+        prompt: fullPrompt,
+      });
+      
+      if (!text) {
+        throw new Error("La réponse de l'IA est vide.");
+      }
+      
+      const explanation = text;
 
-    // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
-    explanationCache.set(cacheKey, explanation);
-    
-    return { explanation };
+      // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
+      explanationCache.set(cacheKey, explanation);
+      
+      return { explanation };
+
+    } catch (e) {
+      console.error("Erreur dans explainMedicationFlow:", e);
+      return { explanation: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };
+    }
   }
 );
