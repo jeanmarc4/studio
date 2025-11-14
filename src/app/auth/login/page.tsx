@@ -117,7 +117,7 @@ export default function LoginPage() {
                     <div className="flex items-center">
                       <FormLabel>Mot de passe</FormLabel>
                       <Link
-                        href="#"
+                        href="/auth/forgot-password"
                         className="ml-auto inline-block text-sm underline"
                       >
                         Mot de passe oublié ?
