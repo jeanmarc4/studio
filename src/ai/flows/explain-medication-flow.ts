@@ -43,9 +43,7 @@ const explainMedicationFlow = ai.defineFlow(
     }
 
     // 2. Si ce n'est pas dans le cache, appeler l'IA.
-    const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
-      prompt: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
+    const fullPrompt = `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
 Un patient te demande à quoi sert le médicament suivant : ${medicationName}.
 
 Ton objectif est de fournir une explication très simple, claire et rassurante en 2-3 phrases maximum. N'utilise pas de jargon médical.
@@ -54,7 +52,11 @@ Commence ta réponse directement par l'explication.
 Exemple de réponse pour "Doliprane":
 "Le Doliprane est utilisé pour soulager les douleurs légères à modérées comme les maux de tête, les douleurs dentaires ou les courbatures, et pour faire baisser la fièvre. C'est un antalgique et un antipyrétique courant qui aide votre corps à se sentir mieux lorsque vous êtes malade."
 
-Maintenant, fournis l'explication pour le médicament : ${medicationName}.`,
+Maintenant, fournis l'explication pour le médicament : ${medicationName}.`;
+
+    const { text } = await ai.generate({
+      model: 'googleai/gemini-1.5-flash',
+      prompt: fullPrompt,
     });
     
     if (!text) {

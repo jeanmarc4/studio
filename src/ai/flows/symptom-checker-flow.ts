@@ -51,14 +51,11 @@ Règles importantes :
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
 
+    const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
+
     const { text } = await ai.generate({
       model: 'googleai/gemini-1.5-flash',
-      prompt: [
-        { text: systemPrompt },
-        ...history.flatMap(m => [
-          { text: `\n${m.role}: ${m.content}` }
-        ])
-      ]
+      prompt: fullPrompt
     });
 
     let analysis = text;
