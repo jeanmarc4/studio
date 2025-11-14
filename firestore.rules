@@ -63,13 +63,14 @@ service cloud.firestore {
     }
 
     /**
-     * @description Admin role management. The existence of a document here grants admin rights.
+     * @description Admin role management.
      */
     match /roles_admin/{userId} {
-      // Any signed-in user can check if they are an admin.
       allow get: if isSignedIn();
-      // Only an existing admin can make someone else an admin or view the list.
-      allow list, create, update, delete: if isAdmin();
+      // Allow a user to create their own admin doc, or allow an existing admin to manage any.
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      // Only an existing admin can delete, update, or list roles.
+      allow update, delete, list: if isAdmin();
     }
     
     /**
@@ -108,7 +109,6 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      // A user is an admin if a document with their UID exists in the roles_admin collection.
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
   }
