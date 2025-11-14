@@ -50,29 +50,31 @@ const symptomCheckerFlow = ai.defineFlow(
     outputSchema: SymptomCheckerOutputSchema,
   },
   async ({ history }) => {
-
-    const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
-      prompt: {
+    try {
+      const { text } = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
         system: systemPrompt,
         messages: history.map(m => ({
           role: m.role,
           content: [{ text: m.content }],
         }))
+      });
+
+      let analysis = text;
+
+      if (!analysis) {
+        throw new Error("La réponse de l'IA est vide.");
       }
-    });
 
-    let analysis = text;
+      // Assurez-vous que l'avertissement est toujours présent.
+      if (!analysis.startsWith('AVERTISSEMENT')) {
+        analysis = `${disclaimer}\n\n${analysis}`;
+      }
 
-    if (!analysis) {
-      analysis = "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer.";
+      return { analysis };
+    } catch (e) {
+      console.error("Erreur dans symptomCheckerFlow:", e);
+      return { analysis: `${disclaimer}\n\nDésolé, une erreur est survenue. Veuillez réessayer plus tard.` };
     }
-
-    // Assurez-vous que l'avertissement est toujours présent.
-    if (!analysis.startsWith('AVERTISSEMENT')) {
-      analysis = `${disclaimer}\n\n${analysis}`;
-    }
-
-    return { analysis };
   }
 );

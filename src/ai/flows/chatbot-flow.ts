@@ -51,21 +51,25 @@ const mentalCareChatFlow = ai.defineFlow(
   },
   async ({ history }) => {
     
-    const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
-      prompt: {
+    try {
+      const { text } = await ai.generate({
+        model: 'googleai/gemini-1.5-flash',
         system: systemPrompt,
         messages: history.map(m => ({
           role: m.role,
           content: [{ text: m.content }],
         }))
-      }
-    });
+      });
 
-    if (!text) {
+      if (!text) {
+        throw new Error("La réponse de l'IA est vide.");
+      }
+      
+      return { response: text };
+
+    } catch (e) {
+      console.error("Erreur dans mentalCareChatFlow:", e);
       return { response: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };
     }
-    
-    return { response: text };
   }
 );
