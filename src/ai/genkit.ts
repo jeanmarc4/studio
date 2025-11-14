@@ -23,5 +23,5 @@ export const ai = genkit({
     }),
   ],
   // Utiliser un nom de modèle stable et reconnu.
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-flash',
 });
