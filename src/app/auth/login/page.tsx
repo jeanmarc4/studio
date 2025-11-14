@@ -55,7 +55,6 @@ export default function LoginPage() {
       setIsNavigating(true);
       // Let the useEffect handle the redirection to avoid race conditions.
     } catch (error: any) {
-      console.error("Login Error:", error.code);
       let description = "Une erreur est survenue lors de la connexion.";
       if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password" || error.code === 'auth/invalid-credential') {
         description = "L'adresse e-mail ou le mot de passe est incorrect.";
