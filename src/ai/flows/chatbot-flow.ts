@@ -52,7 +52,7 @@ Règles de conversation :
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
     const { text } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash-001',
+      model: 'googleai/gemini-1.5-flash-latest',
       system: systemPrompt,
       history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
     });
