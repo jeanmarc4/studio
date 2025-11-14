@@ -42,18 +42,16 @@ const explainMedicationFlow = ai.defineFlow(
   {
     name: 'explainMedicationFlow',
     inputSchema: MedicationExplanationInputSchema,
-    outputSchema: MedicationExplanationOutputSchema,
+    outputSchema: z.string(),
   },
   async (input) => {
     const cacheKey = input.medicationName.trim().toLowerCase();
     
-    // 1. Vérifier si l'explication est déjà dans le cache.
     if (explanationCache.has(cacheKey)) {
-      return { explanation: explanationCache.get(cacheKey)! };
+      return explanationCache.get(cacheKey)!;
     }
 
     try {
-      // 2. Appeler le prompt défini
       const { text } = await ai.generate({
         model: googleAI.model('gemini-1.5-flash'),
         prompt: `${systemPrompt}\n\nMédicament : ${input.medicationName}`,
@@ -63,16 +61,13 @@ const explainMedicationFlow = ai.defineFlow(
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      const explanation = text;
-
-      // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
-      explanationCache.set(cacheKey, explanation);
+      explanationCache.set(cacheKey, text);
       
-      return { explanation };
+      return text;
 
     } catch (e) {
       console.error("Erreur dans explainMedicationFlow:", e);
-      return { explanation: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };
+       throw new Error("Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer.");
     }
   }
-);
+).then(text => ({ explanation: text }));

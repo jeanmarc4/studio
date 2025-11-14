@@ -48,7 +48,7 @@ const symptomCheckerFlow = ai.defineFlow(
   {
     name: 'symptomCheckerFlow',
     inputSchema: SymptomCheckerHistorySchema,
-    outputSchema: SymptomCheckerOutputSchema,
+    outputSchema: z.string(),
   },
   async (input) => {
     try {
@@ -57,22 +57,18 @@ const symptomCheckerFlow = ai.defineFlow(
         prompt: `${systemPrompt}\n\nHistorique de la conversation:\n${input.history.map(m => `${m.role}: ${m.content}`).join('\n')}\nModel:`,
       });
       
-      let analysis = text;
-
-      if (!analysis) {
+      if (!text) {
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      // La vérification de l'avertissement est toujours une bonne sécurité,
-      // même si le prompt système le demande.
-      if (!analysis.startsWith('AVERTISSEMENT')) {
-        analysis = `${disclaimer}\n\n${analysis}`;
+      if (!text.startsWith('AVERTISSEMENT')) {
+        return `${disclaimer}\n\n${text}`;
       }
 
-      return { analysis };
+      return text;
     } catch (e) {
       console.error("Erreur dans symptomCheckerFlow:", e);
-      return { analysis: `${disclaimer}\n\nDésolé, une erreur est survenue. Veuillez réessayer plus tard.` };
+      throw new Error(`${disclaimer}\n\nDésolé, une erreur est survenue. Veuillez réessayer plus tard.`);
     }
   }
-);
+).then(text => ({ analysis: text }));

@@ -48,7 +48,7 @@ const mentalCareChatFlow = ai.defineFlow(
   {
     name: 'mentalCareChatFlow',
     inputSchema: ChatHistoryInputSchema,
-    outputSchema: ChatOutputSchema,
+    outputSchema: z.string(), // Le flow retourne une chaîne de caractères simple
   },
   async (input) => {
     try {
@@ -61,10 +61,10 @@ const mentalCareChatFlow = ai.defineFlow(
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      return { response: text };
+      return text;
     } catch (e) {
       console.error("Erreur dans mentalCareChatFlow:", e);
-      return { response: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };
+      throw new Error("Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer.");
     }
   }
-);
+).then(text => ({ response: text })); // Transforme la sortie en objet attendu
