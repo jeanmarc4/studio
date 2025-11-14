@@ -50,9 +50,7 @@ const prompt = ai.definePrompt({
   output: { schema: SymptomCheckerOutputSchema },
   model: googleAI.model('gemini-1.5-flash'),
   system: systemPrompt,
-  messages: [
-    ...('{{history}}' as any),
-  ],
+  // L'historique des messages est passé dynamiquement
 });
 
 
