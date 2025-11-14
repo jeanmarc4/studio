@@ -15,6 +15,8 @@
  * - /users/{userId}/medications/{medicationId}: Medications for a specific user, accessible only to that user.
  * - /users/{userId}/prescriptions/{prescriptionId}: Prescriptions for a specific user, accessible only to that user.
  * - /users/{userId}/vaccines/{vaccineId}: Vaccine records for a specific user, accessible only to that user.
+ * - /users/{userId}/cartesVitale/{carteId}: Carte Vitale info, accessible only by owner.
+ * - /users/{userId}/mutuelles/{mutuelleId}: Mutuelle info, accessible only by owner.
  * - /medicalProfessionals/{medicalProfessionalId}: Medical professional profiles, manageable only by admins.
  * - /holisticContent/{holisticContentId}: Holistic wellness content, manageable only by admins.
  * - /roles_admin/{userId}: This collection is now effectively deprecated by hardcoded rules, but rules are kept for safety.
@@ -87,6 +89,22 @@ service cloud.firestore {
        * @path /users/{userId}/vaccines/{vaccineId}
        */
       match /vaccines/{vaccineId} {
+          allow read, write: if isSignedIn() && isOwner(userId);
+      }
+      
+      /**
+       * @description Secure Carte Vitale records. Only the user can manage their card.
+       * @path /users/{userId}/cartesVitale/{carteId}
+       */
+      match /cartesVitale/{carteId} {
+          allow read, write: if isSignedIn() && isOwner(userId);
+      }
+
+      /**
+       * @description Secure mutuelle records. Only the user can manage their cards.
+       * @path /users/{userId}/mutuelles/{mutuelleId}
+       */
+      match /mutuelles/{mutuelleId} {
           allow read, write: if isSignedIn() && isOwner(userId);
       }
     }

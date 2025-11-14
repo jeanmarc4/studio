@@ -429,6 +429,33 @@
         "nextBooster": { "type": "string", "format": "date-time", "description": "The date for the next scheduled booster shot." }
       },
       "required": ["id", "userId", "profileId", "name", "date"]
+    },
+    "CarteVitale": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "CarteVitale",
+        "type": "object",
+        "description": "Represents a user's Carte Vitale information.",
+        "properties": {
+            "id": { "type": "string", "description": "Unique identifier for the Carte Vitale entry." },
+            "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:1 CarteVitale)" },
+            "socialSecurityNumber": { "type": "string", "description": "The user's social security number." },
+            "imageUrl": { "type": "string", "description": "URL of the uploaded Carte Vitale image.", "format": "uri" }
+        },
+        "required": ["id", "userId", "socialSecurityNumber", "imageUrl"]
+    },
+    "Mutuelle": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Mutuelle",
+        "type": "object",
+        "description": "Represents a user's complementary health insurance (mutuelle).",
+        "properties": {
+            "id": { "type": "string", "description": "Unique identifier for the mutuelle entry." },
+            "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N Mutuelle)" },
+            "insurerName": { "type": "string", "description": "The name of the insurance company." },
+            "policyNumber": { "type": "string", "description": "The user's policy or membership number." },
+            "imageUrl": { "type": "string", "description": "URL of the uploaded mutuelle card image.", "format": "uri" }
+        },
+        "required": ["id", "userId", "insurerName", "policyNumber", "imageUrl"]
     }
   },
   "auth": {
@@ -555,6 +582,30 @@
           "params": [
             { "name": "userId", "description": "The unique identifier of the user." },
             { "name": "vaccineId", "description": "The unique identifier of the vaccine record." }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/cartesVitale/{carteId}",
+        "definition": {
+          "entityName": "CarteVitale",
+          "schema": { "$ref": "#/backend/entities/CarteVitale" },
+          "description": "Stores the user's Carte Vitale information.",
+          "params": [
+            { "name": "userId", "description": "The unique identifier of the user." },
+            { "name": "carteId", "description": "The unique identifier of the Carte Vitale entry." }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/mutuelles/{mutuelleId}",
+        "definition": {
+          "entityName": "Mutuelle",
+          "schema": { "$ref": "#/backend/entities/Mutuelle" },
+          "description": "Stores the user's health insurance cards.",
+          "params": [
+            { "name": "userId", "description": "The unique identifier of the user." },
+            { "name": "mutuelleId", "description": "The unique identifier of the mutuelle entry." }
           ]
         }
       },

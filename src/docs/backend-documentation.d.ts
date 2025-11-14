@@ -419,8 +419,67 @@ export interface Backend {
         ForumPost: ForumPost;
         Vaccine: Vaccine;
         SOSAlert: SOSAlert;
+        CarteVitale: CarteVitale;
+        Mutuelle: Mutuelle;
     };
     auth: Auth;
     firestore: Firestore;
 }
 
+export interface CarteVitale {
+    "$schema": "http://json-schema.org/draft-07/schema#";
+    title: "CarteVitale";
+    type: "object";
+    description: "Represents a user's Carte Vitale information.";
+    properties: {
+        id: {
+            type: "string";
+            description: "Unique identifier for the Carte Vitale entry.";
+        };
+        userId: {
+            type: "string";
+            description: "Reference to User. (Relationship: User 1:1 CarteVitale)";
+        };
+        socialSecurityNumber: {
+            type: "string";
+            description: "The user's social security number.";
+        };
+        imageUrl: {
+            type: "string";
+            description: "URL of the uploaded Carte Vitale image.";
+            format: "uri";
+        };
+    };
+    required: ["id", "userId", "socialSecurityNumber", "imageUrl"];
+}
+
+export interface Mutuelle {
+    "$schema": "http://json-schema.org/draft-07/schema#";
+    title: "Mutuelle";
+    type: "object";
+    description: "Represents a user's complementary health insurance (mutuelle).";
+    properties: {
+        id: {
+            type: "string";
+            description: "Unique identifier for the mutuelle entry.";
+        };
+        userId: {
+            type: "string";
+            description: "Reference to User. (Relationship: User 1:N Mutuelle)";
+        };
+        insurerName: {
+            type: "string";
+            description: "The name of the insurance company.";
+        };
+        policyNumber: {
+            type: "string";
+            description: "The user's policy or membership number.";
+        };
+        imageUrl: {
+            type: "string";
+            description: "URL of the uploaded mutuelle card image.";
+            format: "uri";
+        };
+    };
+    required: ["id", "userId", "insurerName", "policyNumber", "imageUrl"];
+}

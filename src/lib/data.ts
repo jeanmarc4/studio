@@ -92,6 +92,10 @@ export const mainNav: NavItem[] = [
     title: "Espace Santé",
     href: "/my-appointments",
   },
+    {
+    title: "Mes Cartes",
+    href: "/cards",
+  },
   {
     title: "Symptômes",
     href: "/symptom-checker",
