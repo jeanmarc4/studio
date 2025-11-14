@@ -37,6 +37,16 @@ export function MentalCareView() {
     const [isLoading, setIsLoading] = useState(false);
     const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
+    // TTS Effect
+    useEffect(() => {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.role === 'model') {
+            const utterance = new SpeechSynthesisUtterance(lastMessage.content);
+            utterance.lang = 'fr-FR';
+            window.speechSynthesis.speak(utterance);
+        }
+    }, [messages]);
+
     useEffect(() => {
         if (scrollAreaViewportRef.current) {
             scrollAreaViewportRef.current.scrollTo({ top: scrollAreaViewportRef.current.scrollHeight, behavior: 'smooth' });
