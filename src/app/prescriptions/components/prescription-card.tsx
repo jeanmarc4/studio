@@ -64,6 +64,18 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
       description: `${med.name} a été ajouté à votre traitement.`,
     });
   }
+  
+  const handleAnalysis = () => {
+    if (!isPremiumOrAdmin) {
+      toast({
+        variant: "destructive",
+        title: "Fonctionnalité Premium",
+        description: "Passez à Premium pour analyser vos ordonnances."
+      });
+      return;
+    }
+    onAnalyze(prescription);
+  }
 
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-md">
@@ -94,8 +106,8 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
               <AlertTitle>Analyse requise</AlertTitle>
               <AlertDescription>
                 {isPremiumOrAdmin 
-                  ? "Les fonctionnalités d'analyse IA sont désactivées car aucune clé API n'est configurée."
-                  : "Passez à Premium pour analyser automatiquement vos ordonnances (fonctionnalité actuellement désactivée)."}
+                  ? "Cliquez sur 'Analyser avec l'IA' pour extraire automatiquement les médicaments de cette ordonnance."
+                  : "Passez à Premium pour analyser automatiquement vos ordonnances."}
               </AlertDescription>
             </Alert>
           )}
@@ -152,12 +164,12 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
       </CardContent>
        <CardFooter className="border-t pt-4">
           <Button 
-            onClick={() => onAnalyze(prescription)} 
-            disabled={true} // Désactivé car pas d'API
+            onClick={handleAnalysis}
+            disabled={prescription.status === 'processing' || !isPremiumOrAdmin}
             className="w-full md:w-auto"
           >
-            <Wand2 className="mr-2 h-4 w-4" />
-            Analyser avec l'IA (désactivé)
+            {prescription.status === 'processing' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+            {prescription.status === 'processed' ? 'Ré-analyser avec l\'IA' : 'Analyser avec l\'IA'}
           </Button>
        </CardFooter>
     </Card>

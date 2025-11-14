@@ -22,11 +22,8 @@ type Message = {
   content: string;
 };
 
-// Variable pour vérifier la présence de la clé API côté client
-const isApiKeyMissing = !process.env.NEXT_PUBLIC_GEMINI_API_KEY && process.env.NODE_ENV === 'production';
-
 export function MentalCareView() {
-  const { user, firestore } = useFirebase();
+  const { user, firestore, isUserLoading } = useFirebase();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +34,7 @@ export function MentalCareView() {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
-  const { data: userProfile } = useDoc<User>(userProfileRef);
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<User>(userProfileRef);
   const isPremiumOrAdmin = userProfile?.role === 'Premium' || userProfile?.role === 'Admin';
 
 
@@ -94,6 +91,10 @@ export function MentalCareView() {
       content: "Bonjour, je suis SanteConnect Moral, votre chatbot de soutien. Comment vous sentez-vous aujourd'hui ?"
     }]);
   }, []);
+  
+  if (isUserLoading || isProfileLoading) {
+    return <div className="flex justify-center items-center h-full"><Loader2 className="animate-spin" /></div>
+  }
 
   if (!user) {
     return (
@@ -109,27 +110,6 @@ export function MentalCareView() {
         </Alert>
     )
   }
-
-  // Affiche un message de maintenance si la clé API est manquante
-  if (isApiKeyMissing) {
-    return (
-      <Card className="w-full max-w-3xl mx-auto">
-        <CardHeader className="text-center">
-            <CardTitle>Fonctionnalité en maintenance</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Service Indisponible</AlertTitle>
-                <AlertDescription>
-                    Le chatbot de soutien moral est actuellement en maintenance car la configuration du service IA est incomplète.
-                </AlertDescription>
-            </Alert>
-        </CardContent>
-    </Card>
-    )
-  }
-
 
   if (!isPremiumOrAdmin) {
      return (

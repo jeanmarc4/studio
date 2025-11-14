@@ -9,11 +9,6 @@ import { MentalCareView } from './components/mental-care-view';
 
 export default function WellnessPage() {
     const [activeTab, setActiveTab] = useState("articles");
-    
-    // Détecter si la clé API est manquante. On utilise une astuce car les variables d'env ne sont pas
-    // toutes dispo côté client. Si GEMINI_API_KEY est là, on ne la préfixe pas avec NEXT_PUBLIC_.
-    // Donc on suppose qu'elle est manquante si NEXT_PUBLIC_GEMINI_API_KEY n'est pas définie en prod.
-    const isApiKeyMissing = !process.env.NEXT_PUBLIC_GEMINI_API_KEY && process.env.NODE_ENV === 'production';
   
     return (
       <div className="container mx-auto px-4 py-8">
@@ -27,8 +22,7 @@ export default function WellnessPage() {
                 <TabsList>
                     <TabsTrigger value="articles">Articles</TabsTrigger>
                     <TabsTrigger value="forum">Forum</TabsTrigger>
-                    {/* On affiche l'onglet Soutien Moral seulement si la clé API n'est PAS manquante */}
-                    {!isApiKeyMissing && <TabsTrigger value="mental-care">Soutien Moral</TabsTrigger>}
+                    <TabsTrigger value="mental-care">Soutien Moral</TabsTrigger>
                 </TabsList>
             </div>
             <TabsContent value="articles" className="mt-6">
@@ -37,12 +31,9 @@ export default function WellnessPage() {
             <TabsContent value="forum" className="mt-6">
                 <ForumView />
             </TabsContent>
-             {/* Le contenu de Soutien Moral est conditionnel */}
-            {!isApiKeyMissing && (
-              <TabsContent value="mental-care" className="mt-6">
-                  <MentalCareView />
-              </TabsContent>
-            )}
+            <TabsContent value="mental-care" className="mt-6">
+                <MentalCareView />
+            </TabsContent>
         </Tabs>
       </div>
     );
