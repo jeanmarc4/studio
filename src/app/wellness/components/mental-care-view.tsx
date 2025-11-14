@@ -22,6 +22,9 @@ type Message = {
   content: string;
 };
 
+// Variable pour vérifier la présence de la clé API côté client
+const isApiKeyMissing = !process.env.NEXT_PUBLIC_GEMINI_API_KEY && process.env.NODE_ENV === 'production';
+
 export function MentalCareView() {
   const { user, firestore } = useFirebase();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -106,6 +109,27 @@ export function MentalCareView() {
         </Alert>
     )
   }
+
+  // Affiche un message de maintenance si la clé API est manquante
+  if (isApiKeyMissing) {
+    return (
+      <Card className="w-full max-w-3xl mx-auto">
+        <CardHeader className="text-center">
+            <CardTitle>Fonctionnalité en maintenance</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Service Indisponible</AlertTitle>
+                <AlertDescription>
+                    Le chatbot de soutien moral est actuellement en maintenance car la configuration du service IA est incomplète.
+                </AlertDescription>
+            </Alert>
+        </CardContent>
+    </Card>
+    )
+  }
+
 
   if (!isPremiumOrAdmin) {
      return (

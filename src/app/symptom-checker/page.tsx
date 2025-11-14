@@ -25,9 +25,9 @@ export default function SymptomCheckerPage() {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Fonctionnalité Indisponible</AlertTitle>
                 <AlertDescription>
-                    Le vérificateur de symptômes par IA n'est pas disponible car la clé d'API pour le service d'intelligence artificielle n'a pas été configurée.
+                    Le vérificateur de symptômes par IA n'est pas disponible pour le moment car le service d'intelligence artificielle n'est pas configuré.
                     <p className="mt-2">
-                        Si vous êtes le développeur, veuillez ajouter votre `GEMINI_API_KEY` au fichier `.env` à la racine du projet pour activer cette fonctionnalité.
+                        Si vous êtes le développeur, veuillez ajouter votre clé d'API pour activer cette fonctionnalité.
                     </p>
                 </AlertDescription>
             </Alert>
