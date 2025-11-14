@@ -61,8 +61,8 @@ export default function SignupPage() {
         role: "Gratuit",
       };
 
-      // Special check for a specific email to grant admin role.
-      if (values.email.toLowerCase() === 'admin@jmdigitalapp.com') {
+      // Special check for a specific email to grant admin role from environment variable.
+      if (values.email.toLowerCase() === process.env.NEXT_PUBLIC_ADMIN_EMAIL?.toLowerCase()) {
           userData.role = "Admin";
           // We also create the admin role document for rules that check existence
           const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
