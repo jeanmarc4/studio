@@ -50,15 +50,20 @@ export default function SignupPage() {
       const user = userCredential.user;
 
       const userDocRef = doc(firestore, "users", user.uid);
+      
+      const isAdminEmail = values.email.toLowerCase() === 'diojm93@gmail.com';
+      const userRole = isAdminEmail ? "Admin" : "Gratuit";
+
       const userData = {
         id: user.uid,
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         phone: "",
-        role: "Gratuit",
+        role: userRole,
       };
 
+      // Set user profile document
       setDoc(userDocRef, userData).catch((serverError) => {
         const permissionError = new FirestorePermissionError({
           path: userDocRef.path,
@@ -67,6 +72,20 @@ export default function SignupPage() {
         });
         errorEmitter.emit('permission-error', permissionError);
       });
+      
+      // If it's the special admin email, also create the admin role document
+      if (isAdminEmail) {
+        const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
+        setDoc(adminRoleDocRef, { userId: user.uid, role: 'admin' }).catch((serverError) => {
+            const permissionError = new FirestorePermissionError({
+                path: adminRoleDocRef.path,
+                operation: 'create',
+                requestResourceData: { userId: user.uid, role: 'admin' },
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+      }
+
 
       toast({
         title: "Inscription réussie",
