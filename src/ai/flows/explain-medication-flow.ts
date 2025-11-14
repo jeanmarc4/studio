@@ -44,7 +44,7 @@ const explainMedicationFlow = ai.defineFlow(
 
     // 2. Si ce n'est pas dans le cache, appeler l'IA.
     const { output } = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/gemini-pro',
       prompt: [{text: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
 Un patient te demande à quoi sert le médicament suivant : ${medicationName}.
 
