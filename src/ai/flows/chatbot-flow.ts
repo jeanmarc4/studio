@@ -53,8 +53,8 @@ Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
     const { text } = await ai.generate({
       model: 'googleai/gemini-1.5-flash-001',
-      prompt: [{text: systemPrompt}, ...history.map(m => ({ text: m.content }))],
-      history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
+      system: systemPrompt,
+      history: history,
     });
 
     if (!text) {
