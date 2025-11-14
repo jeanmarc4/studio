@@ -52,9 +52,13 @@ Règles de conversation :
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
     const { text } = await ai.generate({
-      model: 'googleai/gemini-pro',
-      system: systemPrompt,
-      history: history.map(m => ({ role: m.role, parts: [{ text: m.content }] })),
+      model: 'googleai/gemini-1.5-flash',
+      prompt: [
+        { text: systemPrompt },
+        ...history.flatMap(m => [
+          { text: `\n${m.role}: ${m.content}` }
+        ])
+      ]
     });
 
     if (!text) {

@@ -43,9 +43,9 @@ const explainMedicationFlow = ai.defineFlow(
     }
 
     // 2. Si ce n'est pas dans le cache, appeler l'IA.
-    const { output } = await ai.generate({
-      model: 'googleai/gemini-pro',
-      prompt: [{text: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
+    const { text } = await ai.generate({
+      model: 'googleai/gemini-1.5-flash',
+      prompt: `Tu es un assistant médical IA, spécialisé dans la vulgarisation d'informations complexes pour les patients.
 Un patient te demande à quoi sert le médicament suivant : ${medicationName}.
 
 Ton objectif est de fournir une explication très simple, claire et rassurante en 2-3 phrases maximum. N'utilise pas de jargon médical.
@@ -54,17 +54,18 @@ Commence ta réponse directement par l'explication.
 Exemple de réponse pour "Doliprane":
 "Le Doliprane est utilisé pour soulager les douleurs légères à modérées comme les maux de tête, les douleurs dentaires ou les courbatures, et pour faire baisser la fièvre. C'est un antalgique et un antipyrétique courant qui aide votre corps à se sentir mieux lorsque vous êtes malade."
 
-Maintenant, fournis l'explication pour le médicament : ${medicationName}.`}],
-      output: { schema: MedicationExplanationOutputSchema },
+Maintenant, fournis l'explication pour le médicament : ${medicationName}.`,
     });
     
-    if (!output?.explanation) {
+    if (!text) {
       return { explanation: "Désolé, je n'ai pas pu trouver d'informations pour ce médicament." };
     }
     
+    const explanation = text;
+
     // 3. Mettre en cache la nouvelle explication avant de la renvoyer.
-    explanationCache.set(cacheKey, output.explanation);
+    explanationCache.set(cacheKey, explanation);
     
-    return output;
+    return { explanation };
   }
 );
