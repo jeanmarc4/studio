@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  experimental: {
+    // This is to fix the Cross-Origin error in the development environment
+    allowedDevOrigins: [
+      "https://6000-firebase-studio-1763003031757.cluster-ikslh4rdsnbqsvu5nw3v4dqjj2.cloudworkstations.dev",
+    ],
+  },
 };
 
 export default nextConfig;
