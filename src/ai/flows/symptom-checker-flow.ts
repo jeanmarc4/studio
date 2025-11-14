@@ -43,23 +43,6 @@ Règles importantes :
 
 Analysez la conversation suivante et fournissez une réponse utile qui suit ces règles.`;
 
-const prompt = ai.definePrompt(
-    {
-        name: 'symptomCheckerPrompt',
-        input: { schema: SymptomCheckerHistorySchema },
-        output: { schema: SymptomCheckerOutputSchema },
-        model: googleAI.model('gemini-1.5-flash'),
-    },
-    async ({ history }) => {
-        return {
-            system: systemPrompt,
-            messages: history.map(m => ({
-                role: m.role,
-                content: [{ text: m.content }],
-            })),
-        };
-    }
-);
 
 const symptomCheckerFlow = ai.defineFlow(
   {
@@ -67,9 +50,17 @@ const symptomCheckerFlow = ai.defineFlow(
     inputSchema: SymptomCheckerHistorySchema,
     outputSchema: SymptomCheckerOutputSchema,
   },
-  async (history) => {
+  async ({ history }) => {
     try {
-      const { output } = await prompt(history);
+      const { output } = await ai.generate({
+        model: googleAI.model('gemini-1.5-flash'),
+        system: systemPrompt,
+        messages: history.map(m => ({
+          role: m.role,
+          content: [{ text: m.content }],
+        })),
+        output: { schema: SymptomCheckerOutputSchema },
+      });
       
       let analysis = output?.analysis;
 
