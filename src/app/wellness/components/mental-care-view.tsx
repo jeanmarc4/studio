@@ -23,7 +23,7 @@ type Message = {
 export function MentalCareView() {
     const { user, isUserLoading } = useFirebase();
     const { activeProfile } = useProfile();
-    const isPremiumOrAdmin = activeProfile?.relationship === 'self' && (user?.role === 'Premium' || user?.role === 'Admin');
+    const isPremiumOrAdmin = activeProfile?.relationship === 'self' && (activeProfile?.role === 'Premium' || activeProfile?.role === 'Admin');
 
     const { toast } = useToast();
     const router = useRouter();
@@ -83,7 +83,7 @@ export function MentalCareView() {
             setMessages(prev => [...prev, { role: 'model', content: "Désolé, une erreur est survenue. Veuillez réessayer plus tard." }]);
             toast({
                 variant: 'destructive',
-                title: 'Erreur de l'IA',
+                title: 'Erreur de l\'IA',
                 description: 'Impossible de contacter l\'assistant pour le moment.',
             });
         } finally {
