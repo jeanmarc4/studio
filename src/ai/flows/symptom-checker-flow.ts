@@ -50,7 +50,7 @@ const prompt = ai.definePrompt({
   output: { schema: SymptomCheckerOutputSchema },
   model: googleAI.model('gemini-1.5-flash'),
   system: systemPrompt,
-  // L'historique des messages est passé dynamiquement
+  // L'historique des messages est passé dynamiquement à l'appel du prompt
 });
 
 
@@ -70,6 +70,8 @@ const symptomCheckerFlow = ai.defineFlow(
         throw new Error("La réponse de l'IA est vide.");
       }
       
+      // La vérification de l'avertissement est toujours une bonne sécurité,
+      // même si le prompt système le demande.
       if (!analysis.startsWith('AVERTISSEMENT')) {
         analysis = `${disclaimer}\n\n${analysis}`;
       }

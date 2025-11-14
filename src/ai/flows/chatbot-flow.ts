@@ -49,7 +49,7 @@ const prompt = ai.definePrompt({
   output: { schema: ChatOutputSchema },
   model: googleAI.model('gemini-1.5-flash'),
   system: systemPrompt,
-  // L'historique des messages est passé dynamiquement
+  // L'historique des messages est passé dynamiquement à l'appel du prompt
 });
 
 
