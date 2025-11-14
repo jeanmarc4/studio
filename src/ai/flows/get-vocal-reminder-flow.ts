@@ -98,7 +98,7 @@ const vocalReminderFlow = ai.defineFlow(
         };
     } catch(e) {
         console.error("Erreur dans vocalReminderFlow:", e);
-        throw new Error("Erreur de communication avec le service vocal IA.");
+        throw new Error("Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer.");
     }
   }
 );

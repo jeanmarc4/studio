@@ -52,17 +52,12 @@ const symptomCheckerFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      const { output } = await ai.generate({
+      const { text } = await ai.generate({
         model: googleAI.model('gemini-1.5-flash'),
-        system: systemPrompt,
-        messages: input.history.map(m => ({
-          role: m.role,
-          content: [{text: m.content}]
-        })),
-        output: { schema: SymptomCheckerOutputSchema },
+        prompt: `${systemPrompt}\n\nHistorique de la conversation:\n${input.history.map(m => `${m.role}: ${m.content}`).join('\n')}\nModel:`,
       });
       
-      let analysis = output?.analysis;
+      let analysis = text;
 
       if (!analysis) {
         throw new Error("La réponse de l'IA est vide.");
