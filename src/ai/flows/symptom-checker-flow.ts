@@ -68,7 +68,6 @@ const symptomCheckerFlow = ai.defineFlow(
         throw new Error("La réponse de l'IA est vide.");
       }
       
-      // We are asking the model to always start with the disclaimer, but let's be safe.
       if (!analysis.startsWith('AVERTISSEMENT')) {
         analysis = `${disclaimer}\n\n${analysis}`;
       }
