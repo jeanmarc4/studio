@@ -41,6 +41,12 @@ service cloud.firestore {
       match /vaccines/{vaccineId} {
         allow read, write: if isSignedIn() && isOwner(userId);
       }
+      match /cartesVitale/{carteId} {
+          allow read, write: if isSignedIn() && isOwner(userId);
+      }
+      match /mutuelles/{mutuelleId} {
+          allow read, write: if isSignedIn() && isOwner(userId);
+      }
     }
 
 
@@ -62,8 +68,8 @@ service cloud.firestore {
     match /roles_admin/{userId} {
       allow get: if true;
       // Only an existing admin can create a new admin role.
-      allow create: if isAdmin();
-      allow list, update, delete: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow list, update: if isAdmin();
     }
     
     /**
@@ -73,7 +79,7 @@ service cloud.firestore {
         allow get, list: if true;
         allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
         allow update: if false; 
-        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid || isAdmin();
+        allow delete: if isSignedIn() && (resource.data.authorId == request.auth.uid || isAdmin());
 
         match /posts/{postId} {
             allow read: if true;
@@ -102,7 +108,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
   }
 }
