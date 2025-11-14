@@ -68,6 +68,11 @@ export default function PrescriptionsPage() {
     } catch (error) {
       console.error("Erreur lors de l'analyse de l'ordonnance:", error);
       updateDocumentNonBlocking(prescriptionRef, { status: 'error' });
+       toast({
+        variant: "destructive",
+        title: "Erreur d'analyse IA",
+        description: "Le service d'IA n'a pas pu analyser l'ordonnance. Veuillez réessayer."
+      });
     }
   };
 

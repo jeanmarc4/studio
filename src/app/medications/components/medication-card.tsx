@@ -86,7 +86,7 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
         toast({
             variant: "destructive",
             title: "Erreur de l'IA",
-            description: "Impossible d'obtenir une explication pour le moment. La clé API est probablement manquante."
+            description: "Impossible de contacter le service d'IA pour le moment. Veuillez réessayer."
         })
     } finally {
         setIsExplaining(false);
