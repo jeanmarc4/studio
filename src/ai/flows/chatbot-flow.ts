@@ -43,15 +43,6 @@ Règles de conversation :
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
-const prompt = ai.definePrompt({
-  name: 'mentalCarePrompt',
-  input: { schema: ChatHistoryInputSchema },
-  output: { schema: ChatOutputSchema },
-  model: googleAI.model('gemini-1.5-flash'),
-  system: systemPrompt,
-  // L'historique des messages est passé dynamiquement à l'appel du prompt
-});
-
 
 const mentalCareChatFlow = ai.defineFlow(
   {
@@ -61,7 +52,15 @@ const mentalCareChatFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      const { output } = await prompt(input);
+      const { output } = await ai.generate({
+        model: googleAI.model('gemini-1.5-flash'),
+        system: systemPrompt,
+        messages: input.history.map(m => ({
+          role: m.role,
+          content: [{text: m.content}]
+        })),
+        output: { schema: ChatOutputSchema },
+      });
       
       if (!output) {
         throw new Error("La réponse de l'IA est vide.");

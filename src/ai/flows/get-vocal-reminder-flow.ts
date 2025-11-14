@@ -61,25 +61,7 @@ async function toWav(
   });
 }
 
-const reminderPrompt = ai.definePrompt(
-    {
-        name: 'vocalReminderPrompt',
-        input: { schema: VocalReminderInputSchema },
-        model: googleAI.model('gemini-2.5-flash-preview-tts'),
-        config: {
-            responseModalities: ['AUDIO'],
-            speechConfig: {
-                voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: 'Algenib' },
-                },
-            },
-        },
-    },
-    async ({ medicationName, dosage }) => {
-        return `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : ${medicationName}, avec un dosage de ${dosage}. Prenez bien soin de vous !`;
-    }
-);
-
+const reminderPrompt = `C'est un petit rappel amical pour vous. Il est maintenant l'heure de prendre votre médicament : {{{medicationName}}}, avec un dosage de {{{dosage}}}. Prenez bien soin de vous !`;
 
 const vocalReminderFlow = ai.defineFlow(
   {
@@ -89,7 +71,19 @@ const vocalReminderFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-        const { media } = await reminderPrompt(input);
+        const { media } = await ai.generate({
+            model: googleAI.model('gemini-2.5-flash-preview-tts'),
+            prompt: reminderPrompt,
+            templateData: input,
+            config: {
+                responseModalities: ['AUDIO'],
+                speechConfig: {
+                    voiceConfig: {
+                        prebuiltVoiceConfig: { voiceName: 'Algenib' },
+                    },
+                },
+            },
+        });
 
         if (!media) {
             throw new Error("Aucun média audio n'a été retourné par l'API.");
