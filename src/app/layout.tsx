@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Poppins, PT_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
@@ -7,6 +8,21 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { GlobalReminderProvider } from '@/components/reminders/global-reminder-provider';
 import { Footer } from '@/components/layout/footer';
 import { PwaInstaller } from '@/components/pwa-installer';
+
+const fontHeadline = Poppins({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-headline',
+  weight: ['400', '500', '600', '700'],
+});
+
+const fontBody = PT_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+  weight: ['400', '700'],
+});
+
 
 export const metadata: Metadata = {
   title: 'SanteConnect',
@@ -27,15 +43,13 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
         <meta name="theme-color" content="#16a34a" />
       </head>
       <body
         className={cn(
-          "min-h-screen bg-background text-foreground font-body antialiased"
+          "min-h-screen bg-background text-foreground font-body antialiased",
+          fontHeadline.variable,
+          fontBody.variable
         )}
       >
         <FirebaseClientProvider>

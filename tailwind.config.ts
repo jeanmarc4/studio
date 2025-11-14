@@ -9,20 +9,9 @@ export default {
   ],
   theme: {
     extend: {
-      fontSize: {
-        'base': '1.0625rem', // 17px
-        'lg': '1.1875rem',  // 19px
-        'xl': '1.3125rem',  // 21px
-        '2xl': '1.625rem',  // 26px
-        '3xl': '2rem',    // 32px
-        '4xl': '2.5rem',   // 40px
-        '5xl': '3.25rem',  // 52px
-        '6xl': '4.25rem',  // 68px
-      },
       fontFamily: {
-        body: ['"PT Sans"', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
-        code: ['monospace'],
+        body: ['var(--font-body)', 'sans-serif'],
+        headline: ['var(--font-headline)', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -64,16 +53,6 @@ export default {
           '3': 'hsl(var(--chart-3))',
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
-        },
-        sidebar: {
-          DEFAULT: 'hsl(var(--sidebar-background))',
-          foreground: 'hsl(var(--sidebar-foreground))',
-          primary: 'hsl(var(--sidebar-primary))',
-          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-          accent: 'hsl(var(--sidebar-accent))',
-          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-          border: 'hsl(var(--sidebar-border))',
-          ring: 'hsl(var(--sidebar-ring))',
         },
       },
       borderRadius: {
