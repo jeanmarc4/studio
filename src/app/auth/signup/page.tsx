@@ -63,7 +63,7 @@ export default function SignupPage() {
 
       // Special check for a specific email to grant admin role.
       // This is a "backdoor" to bootstrap the first admin when permissions are problematic.
-      if (values.email.toLowerCase() === 'diojm93@gmail.com') {
+      if (values.email.toLowerCase() === 'admin@jmdigitalapp.com') {
           userData.role = "Admin";
           const adminRoleDocRef = doc(firestore, 'roles_admin', user.uid);
           // Set the admin role document.
