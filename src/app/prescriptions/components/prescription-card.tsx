@@ -94,8 +94,8 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
               <AlertTitle>Analyse requise</AlertTitle>
               <AlertDescription>
                 {isPremiumOrAdmin 
-                  ? "Cliquez sur 'Analyser' pour que l'IA lise votre ordonnance."
-                  : "Passez à Premium pour analyser automatiquement vos ordonnances."}
+                  ? "Les fonctionnalités d'analyse IA sont désactivées car aucune clé API n'est configurée."
+                  : "Passez à Premium pour analyser automatiquement vos ordonnances (fonctionnalité actuellement désactivée)."}
               </AlertDescription>
             </Alert>
           )}
@@ -153,15 +153,13 @@ export function PrescriptionCard({ prescription, onAnalyze, onAddMedication }: P
        <CardFooter className="border-t pt-4">
           <Button 
             onClick={() => onAnalyze(prescription)} 
-            disabled={!isPremiumOrAdmin || prescription.status === 'processing'}
+            disabled={true} // Désactivé car pas d'API
             className="w-full md:w-auto"
           >
-            {prescription.status === 'processing' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-            {prescription.status === 'processed' || prescription.status === 'error' ? 'Analyser à nouveau' : "Analyser avec l'IA"}
+            <Wand2 className="mr-2 h-4 w-4" />
+            Analyser avec l'IA (désactivé)
           </Button>
        </CardFooter>
     </Card>
   );
 }
-
-    

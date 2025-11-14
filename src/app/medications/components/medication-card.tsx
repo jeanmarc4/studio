@@ -86,7 +86,7 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
         toast({
             variant: "destructive",
             title: "Erreur de l'IA",
-            description: "Impossible d'obtenir une explication pour le moment."
+            description: "Impossible d'obtenir une explication pour le moment. La clé API est probablement manquante."
         })
     } finally {
         setIsExplaining(false);
@@ -118,8 +118,8 @@ export function MedicationCard({ medication, onEdit }: MedicationCardProps) {
       </CardContent>
       <CardFooter className="grid grid-cols-2 gap-2 border-t pt-4">
         <div className="flex flex-col gap-2">
-             <Button size="sm" variant="outline" onClick={handleExplainMedication} disabled={isExplaining || !isPremiumOrAdmin}>
-                {isExplaining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+             <Button size="sm" variant="outline" onClick={handleExplainMedication} disabled={true}>
+                <Sparkles className="mr-2 h-4 w-4" />
                 Expliquer (IA)
             </Button>
             <Button size="sm" variant={"default"} onClick={handleStandardReminder}>

@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArticleView } from './components/article-view';
 import { ForumView } from './components/forum-view';
-import { MentalCareView } from './components/mental-care-view';
+// La vue de soin mental est retirée car elle dépend de l'API
+// import { MentalCareView } from './components/mental-care-view';
 
 export default function WellnessPage() {
     const [activeTab, setActiveTab] = useState("articles");
@@ -22,7 +23,8 @@ export default function WellnessPage() {
                 <TabsList>
                     <TabsTrigger value="articles">Articles</TabsTrigger>
                     <TabsTrigger value="forum">Forum</TabsTrigger>
-                    <TabsTrigger value="mental-care">Soutien Moral</TabsTrigger>
+                    {/* L'onglet Soutien Moral est retiré car il dépend de l'API */}
+                    {/* <TabsTrigger value="mental-care">Soutien Moral</TabsTrigger> */}
                 </TabsList>
             </div>
             <TabsContent value="articles" className="mt-6">
@@ -31,9 +33,12 @@ export default function WellnessPage() {
             <TabsContent value="forum" className="mt-6">
                 <ForumView />
             </TabsContent>
+            {/* Le contenu de Soutien Moral est retiré */}
+            {/*
             <TabsContent value="mental-care" className="mt-6">
                 <MentalCareView />
             </TabsContent>
+            */}
         </Tabs>
       </div>
     );
