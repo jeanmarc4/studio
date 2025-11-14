@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Flux Genkit pour un chatbot de soutien émotionnel.
@@ -43,6 +42,31 @@ Règles de conversation :
 
 Analyse la conversation suivante et fournis une réponse qui suit ces règles.`;
 
+const chatPrompt = ai.definePrompt(
+  {
+    name: 'mentalCarePrompt',
+    input: { schema: ChatHistoryInputSchema },
+    output: { schema: ChatOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
+    prompt: (input) => {
+        const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${input.history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
+        return [{ text: fullPrompt }];
+    },
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      prompt: input,
+      model: 'googleai/gemini-1.5-flash',
+      output: {
+          schema: ChatOutputSchema,
+          format: 'json'
+      }
+    });
+    return { response: output?.response || '' };
+  }
+);
+
+
 const mentalCareChatFlow = ai.defineFlow(
   {
     name: 'mentalCareChatFlow',
@@ -50,9 +74,7 @@ const mentalCareChatFlow = ai.defineFlow(
     outputSchema: ChatOutputSchema,
   },
   async ({ history }) => {
-    
     try {
-      // Construction d'un prompt textuel unique
       const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
 
       const { text } = await ai.generate({
@@ -65,7 +87,6 @@ const mentalCareChatFlow = ai.defineFlow(
       }
       
       return { response: text };
-
     } catch (e) {
       console.error("Erreur dans mentalCareChatFlow:", e);
       return { response: "Désolé, une erreur est survenue lors de la communication avec le service IA. Veuillez réessayer." };

@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Flux Genkit pour un vérificateur de symptômes intelligent.
@@ -51,7 +50,6 @@ const symptomCheckerFlow = ai.defineFlow(
   },
   async ({ history }) => {
     try {
-      // Construction d'un prompt textuel unique
       const fullPrompt = `${systemPrompt}\n\nHistorique de la conversation:\n${history.map(m => `${m.role}: ${m.content}`).join('\n')}\nmodel:`;
 
       const { text } = await ai.generate({
@@ -64,8 +62,8 @@ const symptomCheckerFlow = ai.defineFlow(
       if (!analysis) {
         throw new Error("La réponse de l'IA est vide.");
       }
-
-      // Assurez-vous que l'avertissement est toujours présent.
+      
+      // We are asking the model to always start with the disclaimer, but let's be safe.
       if (!analysis.startsWith('AVERTISSEMENT')) {
         analysis = `${disclaimer}\n\n${analysis}`;
       }
