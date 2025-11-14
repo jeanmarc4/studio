@@ -22,7 +22,7 @@ export const ai = genkit({
       apiVersion: 'v1beta', // Utiliser la v1beta pour accéder aux derniers modèles
     }),
   ],
-  // Utiliser un nom de modèle stable et reconnu.
+  // Le modèle par défaut est maintenant défini dans le plugin,
+  // mais nous gardons une référence globale pour la clarté.
   model: 'googleai/gemini-1.5-flash-001',
 });
-
