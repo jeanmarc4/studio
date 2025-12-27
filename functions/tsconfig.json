@@ -1,17 +1,16 @@
-{
-  "compilerOptions": {
-    "module": "NodeNext",
-    "esModuleInterop": true,
-    "moduleResolution": "nodenext",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "outDir": "lib",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017"
-  },
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ]
-}
+ {
+          "compilerOptions": {
+            "module": "commonjs",
+            "noImplicitReturns": true,
+            "noUnusedLocals": true,
+            "outDir": "lib",
+            "sourceMap": true,
+            "strict": true,
+            "target": "es2020", // <-- ASSUREZ-VOUS QUE C'EST AU MOINS es2017 ou es2020
+            "esModuleInterop": true // <-- ASSUREZ-VOUS QUE C'EST TRUE
+          },
+          "compileOnSave": true,
+          "include": [
+            "src"
+          ]
+        }
