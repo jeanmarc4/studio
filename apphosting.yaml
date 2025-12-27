@@ -1,0 +1,7 @@
+  # Settings to manage and configure a Firebase App Hosting backend.
+        # https://firebase.google.com/docs/app-hosting/configure
+
+        sourceDirectory: . # <-- Pointe toujours vers la racine
+
+        # Pour une simple app Node.js servant des fichiers statiques
+        # Nous allons laisser App Hosting détecter le Node.js via package.json
