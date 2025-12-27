@@ -1,0 +1,21 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+    # https://firebase.google.com/docs/app-hosting/configure
+
+    # Specifies the directory that contains your app's source code.
+    # The path is relative to the root of your repository.
+    sourceDirectory: . # <-- Assure que le code source est à la racine du dépôt
+
+    # runConfig:  # <-- Nous pouvons commenter ou supprimer le runConfig pour l'instant
+    #   maxInstances: 1
+
+    # scheduledJobs: # <-- Nous pouvons commenter ou supprimer les scheduledJobs pour l'instant
+    #   - schedule: "every 5 minutes"
+    #     httpTarget:
+    #       uri: "/api/flows/sendAppointmentRemindersFlow"
+    #     retryConfig:
+    #       retryCount: 3
+    #   - schedule: "every 1 hours"
+    #     httpTarget:
+    #       uri: "/api/flows/sendMedicationRemindersFlow"
+    #     retryConfig:
+    #       retryCount: 3
