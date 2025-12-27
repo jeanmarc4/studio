@@ -1,0 +1,24 @@
+ {
+      "hosting": {
+        "public": "public",
+        "ignore": [
+          "firebase.json",
+          "**/.*",
+          "**/node_modules/**"
+        ]
+      },
+      "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
+      },
+      "functions": {
+        // La section "predeploy" est maintenant vide ou absente,
+        // ou ne contient plus les commandes de lint/build.
+        // Exemple :
+        // "predeploy": [
+        //   "npm --prefix \"$RESOURCE_DIR\" run lint",
+        //   "npm --prefix \"$RESOURCE_DIR\" run build"
+        // ]
+        // Ces lignes doivent être supprimées.
+      }
+    }

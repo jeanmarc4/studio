@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application de Rappels Vocaux Firebase</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2 { color: #2c3e50; text-align: center; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input[type="text"], input[type="datetime-local"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 12px 20px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button:hover { background-color: #45a049; }
+        #messages {
+            margin-top: 25px;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #messages p { margin: 5px 0; border-bottom: 1px dotted #eee; padding-bottom: 5px; }
+        #messages p:last-child { border-bottom: none; }
+        .status-info { color: #555; margin-top: 10px; text-align: center; }
+        .error-message { color: red; }
+        .success-message { color: green; }
+        .info-message { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Application de Rappels Vocaux Firebase</h1>
+
+        <h2>Créez un Nouveau Rappel</h2>
+
+        <label for="rappelMessage">Message du rappel :</label>
+        <input type="text" id="rappelMessage" value="N'oubliez pas d'appeler Jean-Michel !">
+
+        <label for="rappelTime">Date et heure du rappel :</label>
+        <input type="datetime-local" id="rappelTime">
+
+        <button onclick="ajouterRappelDepuisInterface()">Ajouter Rappel</button>
+
+        <hr style="margin-top: 40px; margin-bottom: 30px;">
+
+        <h2>Gérer les Notifications</h2>
+        <button onclick="demanderPermissionNotifications()">Activer les notifications vocales</button>
+        <p id="tokenStatus" class="status-info">Jeton FCM : Non obtenu</p>
+
+        <h2 style="margin-top: 30px;">Journal des Événements :</h2>
+        <div id="messages"></div>
+    </div>
+
+    <!-- Script NON-MODULE pour les fonctions globales comme logMessage et lireMessageVocal -->
+    <script>
+        // --- Fonctions utilitaires pour afficher des messages ---
+        function logMessage(msg, type = '') {
+            const messagesDiv = document.getElementById('messages');
+            if (!messagesDiv) return; // S'assurer que le div existe avant d'essayer de l'utiliser
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            if (type === 'error') p.classList.add('error-message');
+            if (type === 'success') p.classList.add('success-message');
+            if (type === 'info') p.classList.add('info-message');
+            messagesDiv.prepend(p); // Ajoute les nouveaux messages en haut
+            if (messagesDiv.children.length > 50) { // Limite le nombre de messages
+                messagesDiv.removeChild(messagesDiv.lastChild);
+            }
+        }
+
+        // 3. Fonction pour lire le message vocal (maintenant exposée globalement)
+        function lireMessageVocal(message) { // <-- Fonction définie globalement
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.lang = 'fr-FR'; // Langue française pour une meilleure prononciation
+                window.speechSynthesis.speak(utterance);
+                logMessage(`Lecture vocale: "${message}"`, 'info');
+            } else {
+                logMessage("L'API Text-to-Speech n'est pas supportée par ce navigateur.", 'error');
+            }
+        }
+
+        // Mettre la date/heure courante par défaut dans le champ datetime-local
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 5); // Programme 5 minutes dans le futur par défaut
+            now.setSeconds(0);
+            now.setMilliseconds(0);
+            const isoString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            (document.getElementById('rappelTime')).value = isoString; // Enlève le 'as HTMLInputElement' pour JS pur
+        });
+    </script>
+
+
+    <!-- Script MODULE pour le code Firebase qui utilise les imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js";
+
+
+        // Votre configuration Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyCFivVW-ObOgM2EI-WPCLHw9ni32kdC6vE",
+          authDomain: "studio-9090208553-5057b.firebaseapp.com",
+          projectId: "studio-9090208553-5057b",
+          storageBucket: "studio-9090208553-5057b.firebasestorage.app",
+          messagingSenderId: "520182578386",
+          appId: "1:520182578386:web:de4467cfa3106eddd2c10b",
+          measurementId: "G-D47MZ64L6J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const messaging = getMessaging(app);
+
+        let currentUserId = null;
+        let fcmRegistrationToken = null;
+
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUserId = user.uid;
+            logMessage(`Connecté en tant que: ${currentUserId.substring(0, 8)}...`, 'success');
+          } else {
+            logMessage("Tentative de connexion anonyme...", 'info');
+            signInAnonymously(auth)
+              .then(() => {
+                logMessage("Connexion anonyme réussie.", 'success');
+              })
+              .catch((error) => {
+                logMessage(`Erreur de connexion anonyme: ${error.message}`, 'error');
+                console.error("Erreur de connexion anonyme:", error);
+              });
+          }
+        });
+
+        window.ajouterRappelDepuisInterface = async function() {
+          const rappelMessage = (document.getElementById('rappelMessage') as HTMLInputElement).value;
+          const rappelTimeStr = (document.getElementById('rappelTime') as HTMLInputElement).value;
+
+          if (!rappelMessage || !rappelTimeStr) {
+            alert("Veuillez remplir le message et la date/heure du rappel.");
+            return;
+          }
+
+          const dateDuRappel = new Date(rappelTimeStr);
+          if (isNaN(dateDuRappel.getTime())) {
+            alert("Date et heure du rappel invalides.");
+            return;
+          }
+
+          if (!currentUserId) {
+            logMessage("Veuillez patienter pendant la connexion de l'utilisateur.", 'info');
+            return;
+          }
+          if (!fcmRegistrationToken) {
+            logMessage("Veuillez activer les notifications pour recevoir les rappels (bouton 'Activer les notifications vocales').", 'info');
+            return;
+          }
+
+          try {
+            const docRef = await addDoc(collection(db, "medicaments"), {
+              userId: currentUserId,
+              message: rappelMessage,
+              scheduledTime: Timestamp.fromDate(dateDuRappel),
+              sent: false,
+              fcmToken: fcmRegistrationToken,
+              createdAt: Timestamp.now()
+            });
+            logMessage(`Rappel ajouté avec l'ID: ${docRef.id}`, 'success');
+          } catch (e: any) {
+            logMessage(`Erreur lors de l'ajout du rappel: ${e.message}`, 'error');
+            console.error("Erreur lors de l'ajout du rappel : ", e);
+          }
+        }
+
+        window.demanderPermissionNotifications = async function() {
+            const tokenStatusElement = document.getElementById('tokenStatus');
+            if (tokenStatusElement) tokenStatusElement.textContent = "Jeton FCM : Demande de permission...";
+            logMessage("Demande de permission de notification...", 'info');
+
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    logMessage("Permission de notification accordée.", 'success');
+                    const currentToken = await getToken(messaging, { vapidKey: 'BHkuveCx4iaDCcw1aSZmIym-77m1bQoZeqUstxq71BAxsOHGl63nqLPHcTJLJ6QCiZSMUV6X1JDqvk9Le6C13Dg' }); // Votre VAPID Key
+                    if (currentToken) {
+                        fcmRegistrationToken = currentToken;
+                        const msg = `Jeton FCM obtenu : ${currentToken.substring(0, 20)}...`;
+                        logMessage(msg, 'success');
+                        if (tokenStatusElement) tokenStatusElement.textContent = msg;
+                        console.log(currentToken);
+                    } else {
+                        logMessage('Aucun jeton d\'enregistrement de notification disponible.', 'info');
+                        if (tokenStatusElement) tokenStatusElement.textContent = "Jeton FCM : Non disponible";
+                    }
+                } else {
+                    logMessage("Permission de notification refusée.", 'error');
+                    if (tokenStatusElement) tokenStatusElement.textContent = "Jeton FCM : Notifications bloquées";
+                }
+            } catch (error: any) {
+                logMessage(`Erreur lors de la demande de permission ou de l'obtention du jeton: ${error.message}`, 'error');
+                if (tokenStatusElement) tokenStatusElement.textContent = `Jeton FCM : Erreur (${error.message})`;
+                console.error('Erreur FCM:', error);
+            }
+        }
+
+        onMessage(messaging, (payload) => {
+            logMessage(`Message FCM reçu (en premier plan): ${payload.notification?.title || 'Sans titre'} - ${payload.notification?.body || 'Pas de corps'}`, 'info');
+            if (payload.notification?.body) {
+                // Appel direct à la fonction globale lireMessageVocal
+                lireMessageVocal(payload.notification.body);
+            }
+        });
+    </script>
+
+    <!-- Firebase Messaging Service Worker -->
+    <script type="module">
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                logMessage('Service Worker de FCM enregistré avec succès.', 'success');
+            })
+            .catch((error) => {
+                logMessage(`Échec de l'enregistrement du Service Worker de FCM: ${error.message}`, 'error');
+                console.error('Échec de l\'enregistrement du Service Worker de FCM:', error);
+            });
+        }
+    </script>
+</body>
+</html>
